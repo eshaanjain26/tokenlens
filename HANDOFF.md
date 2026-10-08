@@ -46,3 +46,15 @@ Initialized git and made two commits reflecting the state before/after this sess
 - Real API streaming (SSE/EventSource) for `APP.send()` — still a placeholder.
 - Publishing/distribution (GitHub Pages, Vercel, etc.) — no decision made.
 - A live browser smoke test (actually clicking through the UI) wasn't run — this session's verification was static/code-level (Node syntax parsing + manual trace of the render/filter logic for GREEN, LIVEBENCH, ESG, shareURL). If you want a true rendered-DOM check, that needs a real browser session against the file.
+
+---
+
+## Session 3 (2026-10-07): usage panel, caching model, deploy package
+
+- New `CACHE` module (on/off, assumed hit rate, persisted as `tl_cache_v1`) and `CALC.cacheTerms / costDetailed / effectiveIn`. Cache-read and write multipliers come from OpenRouter `input_cache_read/write` when present, else provider defaults (Anthropic 0.10x/1.25x, OpenAI 0.25-0.50x, Google 0.25x, DeepSeek 0.10x, xAI 0.25x). Models without caching get no discount.
+- Each turn now stores `cachedTokens`, `cacheWriteTokens`, `costNoCache`, `co2NoCache`, `waterNoCache`, `powerNoCache`. `STATE.globalTotals()` returns `tokensIn, tokensOut, cached, cacheWrite, costNoCache, co2NoCache, waterNoCache, powerNoCache`.
+- Assumption to cite carefully: a cache-read token uses 10% of a fresh token's energy (`CALC.CACHE_ENERGY_FACTOR`). Not a published figure.
+- New `USAGE` module and `#usage-overlay` modal (header pill, Tools menu, sidebar button): limit bars (budget, context, cache hit), session stats, token/cost breakdown, caching impact with toggle and hit-rate slider, footprint tiles with equivalents, per-model ranking by metric, dynamic tip, copy summary.
+- Turn cards show cached tokens and per-turn savings; column totals show % cached.
+- Verified with Node syntax parse and a jsdom run (4 simulated turns, 3 models): savings positive, cached <= input, cache-off adds 0 cached tokens, no console errors. Not visually checked in a real browser.
+- `site/` holds the GitHub Pages package (index.html, .nojekyll, README, Actions workflow). `deploy.sh` creates the repo and enables Pages from a Mac with `gh` logged in. Not pushed yet: the sandbox has no GitHub network access and the GitHub connector is unauthorized.
