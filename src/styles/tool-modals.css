@@ -1,0 +1,137 @@
+/* ── Feature 1: Smart Route ──────────────────────── */
+#router-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:99900;display:none;align-items:center;justify-content:center; }
+#router-overlay.open { display:flex; }
+#router-modal { background:var(--surface);border-radius:16px;width:min(700px,95vw);max-height:88vh;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,0.28);display:flex;flex-direction:column; }
+.router-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
+.router-head h2 { flex:1;font-size:16px;font-weight:800;color:var(--text);margin:0; }
+.router-body { padding:18px 20px; }
+#router-input { width:100%;min-height:80px;resize:vertical;padding:10px 12px;border:1.5px solid var(--tl-border);border-radius:8px;font-size:13px;line-height:1.5;font-family:inherit;background:var(--tl-bg);color:var(--text);outline:none;box-sizing:border-box; }
+#router-input:focus { border-color:var(--tl); }
+.router-analyze-btn { margin-top:10px;padding:8px 20px;background:linear-gradient(135deg,var(--tl),var(--tl-dark));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer; }
+#router-results { margin-top:18px; }
+.router-complexity { display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:14px; }
+.router-complexity.simple { background:#E3F9EE;color:#0A7A48; }
+.router-complexity.moderate { background:#FFF3E8;color:#B85C00; }
+.router-complexity.complex { background:#FFEAEA;color:#C82020; }
+.router-rec-card { border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;transition:border-color 0.15s; }
+.router-rec-card:first-of-type { border-color:var(--tl);background:var(--tl-bg); }
+.router-rank { font-size:22px;flex-shrink:0;line-height:1; }
+.router-rec-info { flex:1; }
+.router-rec-name { font-size:14px;font-weight:800;color:var(--text); }
+.router-rec-reason { font-size:11px;color:var(--text-2);margin-top:3px;line-height:1.4; }
+.router-rec-meta { display:flex;gap:8px;margin-top:6px;flex-wrap:wrap; }
+.router-meta-chip { font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--surface-2);color:var(--text-2); }
+.router-conf { text-align:right;flex-shrink:0; }
+.router-conf-pct { font-size:18px;font-weight:900;color:var(--tl); }
+.router-reasoning { margin-top:16px;padding:12px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border); }
+.router-reasoning h4 { font-size:12px;font-weight:800;color:var(--text);margin:0 0 8px; }
+.router-reasoning p { font-size:11px;color:var(--text-2);margin:0;line-height:1.6; }
+
+/* ── Feature 2: Context Compression ─────────────── */
+#compress-panel { display:none;margin-top:8px;border:1.5px solid var(--tl-border);border-radius:10px;background:var(--tl-bg);padding:12px 14px; }
+#compress-panel.open { display:block; }
+.compress-btn { padding:6px 12px;background:#fff;border:1.5px solid var(--tl-border);border-radius:7px;font-size:12px;font-weight:700;color:var(--tl);cursor:pointer;transition:background 0.12s; }
+.compress-btn:hover { background:var(--tl-bg); }
+.compress-diff { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px; }
+.compress-side { border-radius:8px;padding:10px;font-size:11px;background:var(--surface); }
+.compress-side-head { font-weight:800;font-size:11px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center; }
+.compress-side textarea { width:100%;resize:vertical;border:none;background:transparent;font-size:11px;font-family:inherit;color:var(--text);outline:none;min-height:60px;box-sizing:border-box; }
+.compress-savings { font-size:18px;font-weight:900;color:var(--tl); }
+.compress-apply-btn { margin-top:8px;padding:6px 14px;background:var(--tl);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer; }
+.compress-cache-hit { margin-top:10px;padding:8px 12px;border-radius:8px;background:#FFFBE6;border:1.5px solid #FFD166;font-size:11px;color:#8A6800;display:none; }
+.compress-cache-hit.visible { display:block; }
+
+/* ── Feature 3: Fine-Tune ROI ────────────────────── */
+#finecalc-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:99900;display:none;align-items:center;justify-content:center; }
+#finecalc-overlay.open { display:flex; }
+#finecalc-modal { background:var(--surface);border-radius:16px;width:min(680px,95vw);max-height:90vh;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,0.28); }
+.fc-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
+.fc-head h2 { flex:1;font-size:16px;font-weight:800;color:var(--text);margin:0; }
+.fc-body { padding:18px 20px; }
+.fc-inputs { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px; }
+.fc-field label { display:block;font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:4px; }
+.fc-field input, .fc-field select { width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;background:var(--surface-2);color:var(--text);outline:none;box-sizing:border-box; }
+.fc-field input:focus, .fc-field select:focus { border-color:var(--tl); }
+.fc-calc-btn { padding:8px 20px;background:linear-gradient(135deg,var(--tl),var(--tl-dark));color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer; }
+#fc-results { margin-top:18px; }
+.fc-kpis { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px; }
+.fc-kpi { border:1.5px solid var(--border);border-radius:10px;padding:12px;text-align:center; }
+.fc-kpi-val { font-size:22px;font-weight:900;color:var(--tl); }
+.fc-kpi-lbl { font-size:10px;font-weight:700;color:var(--text-2);margin-top:2px; }
+#fc-chart { width:100%;overflow:hidden;border-radius:8px;border:1px solid var(--border); }
+.fc-assumptions { margin-top:14px;font-size:11px;color:var(--text-2);border-top:1px solid var(--border);padding-top:12px; }
+.fc-assumptions table { width:100%;border-collapse:collapse; }
+.fc-assumptions td { padding:4px 8px;border-bottom:1px solid var(--border); }
+.fc-assumptions td:first-child { font-weight:700;color:var(--text); }
+
+/* ── Feature 4: ESG Report ───────────────────────── */
+#esg-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:99900;display:none;align-items:center;justify-content:center; }
+#esg-overlay.open { display:flex; }
+#esg-modal { background:var(--surface);border-radius:16px;width:min(720px,95vw);max-height:90vh;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,0.28); }
+.esg-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
+.esg-head h2 { flex:1;font-size:16px;font-weight:800;color:var(--text);margin:0; }
+.esg-body { padding:18px 20px; }
+.esg-section { margin-bottom:20px; }
+.esg-section h3 { font-size:13px;font-weight:800;color:var(--tl);margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--tl-border); }
+.esg-kpi-row { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px; }
+.esg-kpi { border:1.5px solid var(--border);border-radius:8px;padding:10px 8px;text-align:center; }
+.esg-kpi-val { font-size:18px;font-weight:900;color:var(--tl); }
+.esg-kpi-lbl { font-size:10px;font-weight:700;color:var(--text-2);margin-top:2px; }
+.esg-table { width:100%;border-collapse:collapse;font-size:11px; }
+.esg-table th { text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;padding:5px 8px;border-bottom:2px solid var(--border);color:var(--text-2); }
+.esg-table td { padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text); }
+.esg-framework { display:flex;flex-wrap:wrap;gap:8px; }
+.esg-fw-chip { padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;background:var(--tl-bg);color:var(--tl);border:1.5px solid var(--tl-border); }
+.esg-export-row { display:flex;gap:10px;margin-top:16px; }
+.esg-export-btn { flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--tl-border);background:var(--tl-bg);color:var(--tl);transition:background 0.12s; }
+.esg-export-btn:hover { background:var(--tl);color:#fff; }
+.esg-methodology { font-size:11px;color:var(--text-2);line-height:1.6;background:var(--surface-2);padding:10px 12px;border-radius:8px; }
+
+/* ── Feature 5: Green Routing ────────────────────── */
+.green-section { border-top:1px solid var(--tl-border);padding-top:10px;margin-top:6px; }
+.green-toggle-row { display:flex;align-items:center;gap:8px;margin-bottom:8px; }
+.green-toggle-row label { font-size:12px;font-weight:700;color:var(--text);flex:1;cursor:pointer; }
+.green-toggle { appearance:none;width:32px;height:18px;background:var(--border);border-radius:9px;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0; }
+.green-toggle:checked { background:var(--tl); }
+.green-toggle::after { content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left 0.2s; }
+.green-toggle:checked::after { left:16px; }
+.green-region-row { display:flex;align-items:center;gap:6px;margin-bottom:8px; }
+.green-region-row label { font-size:11px;color:var(--text-2);white-space:nowrap; }
+.green-region-row select { flex:1;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--text);outline:none; }
+.green-prov-list { display:flex;flex-direction:column;gap:3px; }
+.green-prov-row { display:flex;align-items:center;gap:6px;font-size:11px; }
+.green-prov-name { flex:1;color:var(--text-2); }
+.green-prov-bar { flex:2;height:5px;background:var(--border);border-radius:3px;overflow:hidden; }
+.green-prov-fill { height:100%;border-radius:3px;background:var(--tl-light); }
+.green-prov-pct { font-size:10px;font-weight:800;color:var(--tl);width:28px;text-align:right; }
+.model-item .green-badge { font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;margin-left:4px;vertical-align:middle; }
+.model-item .green-badge.high { background:#E3F9EE;color:#0A7A48; }
+.model-item .green-badge.mid { background:#FFF3E8;color:#B85C00; }
+.model-item .green-badge.low { background:#FFEAEA;color:#C82020; }
+
+/* ── Feature 6: Live Benchmarking ───────────────── */
+#livebench-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:99900;display:none;align-items:center;justify-content:center; }
+#livebench-overlay.open { display:flex; }
+#livebench-modal { background:var(--surface);border-radius:16px;width:min(800px,95vw);max-height:90vh;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,0.28); }
+.lb-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
+.lb-head h2 { flex:1;font-size:16px;font-weight:800;color:var(--text);margin:0; }
+.lb-updated { font-size:10px;color:var(--text-3);margin-left:6px; }
+.lb-body { padding:18px 20px; }
+.lb-provider-row { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px; }
+.lb-prov-chip { display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1.5px solid var(--border);font-size:11px;font-weight:700;color:var(--text); }
+.lb-status-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+.lb-status-dot.green { background:#22C55E; }
+.lb-status-dot.amber { background:#F59E0B; }
+.lb-status-dot.red { background:#EF4444; }
+.lb-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px; }
+.lb-card { border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--surface-2); }
+.lb-card-name { font-size:12px;font-weight:800;color:var(--text);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.lb-metrics { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px; }
+.lb-metric { text-align:center; }
+.lb-metric-val { font-size:14px;font-weight:900;color:var(--tl); }
+.lb-metric-lbl { font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase; }
+.lb-sparkline { width:100%;overflow:hidden; }
+.lb-avail { display:flex;align-items:center;gap:4px;margin-top:6px;font-size:10px;color:var(--text-2); }
+.lb-avail-bar { flex:1;height:4px;background:var(--border);border-radius:2px; }
+.lb-avail-fill { height:100%;border-radius:2px;background:#22C55E; }
+
