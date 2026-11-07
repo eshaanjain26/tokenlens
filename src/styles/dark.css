@@ -1,0 +1,36 @@
+/* ─── Dark Mode ───────────────────────────────────── */
+body.dark {
+  --bg: #0F0F0F; --surface: #1A1A1A; --border: #2A2A2A;
+  --text: #E8E8E8; --text-2: #AAAAAA; --text-3: #666666;
+  --green-bg: #0A2018; --blue-bg: #0A1A28; --amber-bg: #1E1200;
+  --red-bg: #1E0000; --tl-bg: #021A0C; --tl-border: #0A3A1F;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+body.dark .turn-response-text { background: #111; }
+body.dark .turn-stat { background: #222; }
+body.dark .op-card { background: #1A1A1A; }
+body.dark .op-card-body { color: #D0D0D0; }
+body.dark .template-btn { background: #1A1A1A; color: #E0E0E0; border-color: #333; }
+body.dark .template-btn:hover { background: #0A2C18; border-color: var(--tl); }
+body.dark .tip { background: #021A0C; color: #C8DDD4; }
+body.dark .stat-card { background: #222; }
+body.dark .bench-table tr:nth-child(even) td { background: #111; }
+body.dark .bench-table tr:hover td { background: #0A2C18; }
+body.dark .export-btn { background: #1A1A1A; color: #E0E0E0; }
+body.dark .export-btn:hover { background: #0A2C18; }
+body.dark #prompt-input { background: #1A1A1A; color: #E8E8E8; border-color: #333; }
+body.dark .api-key-wrap input { background: #1A1A1A; color: #E8E8E8; border-color: #333; }
+body.dark .model-search { background: #1A1A1A; color: #E8E8E8; border-color: #333; }
+body.dark .ctx-calc-field input, body.dark .ctx-calc-field select { background: #1A1A1A; color: #E8E8E8; border-color: #333; }
+body.dark .model-item:hover { background: #0A2C18; }
+body.dark .pm-body, body.dark .hm-body { background: #1A1A1A; }
+body.dark .pm-table tr:nth-child(even) td { background: #111; }
+body.dark .hm-session { background: #1A1A1A; border-color: #333; }
+body.dark .hm-session:hover { background: #0A2C18; border-color: var(--tl); }
+body.dark .be-field select, body.dark .be-field input { background: #1A1A1A; color: #E8E8E8; border-color: #333; }
+body.dark .be-result-card { background: #222; }
+body.dark #tpl-dropdown { background: #1A1A1A; border-color: #333; }
+body.dark .tpl-item { color: #E0E0E0; }
+body.dark .tpl-item:hover { background: #0A2C18; color: var(--tl); }
+body.dark #tpl-btn, body.dark #proj-btn { background: #1A1A1A; color: #E0E0E0; border-color: #333; }
+

@@ -1,0 +1,101 @@
+/* ─── History Overlay ─────────────────────────────── */
+#history-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.55); z-index: 999; align-items: flex-start;
+  justify-content: center; padding-top: 80px;
+}
+#history-overlay.open { display: flex; }
+#history-modal {
+  background: var(--surface); border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  width: 560px; max-height: 70vh; display: flex; flex-direction: column; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.hm-head { padding: 15px 18px; background: var(--tl); color: white; display: flex; align-items: center; gap: 10px; }
+.hm-head h3 { font-size: 15px; font-weight: 900; flex: 1; }
+.hm-close { background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.4);
+  color: white; border-radius: 6px; padding: 4px 11px; cursor: pointer; font-size: 11px; font-weight: 700; }
+.hm-close:hover { background: rgba(255,255,255,0.35); }
+.hm-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
+.hm-empty { text-align: center; padding: 30px; color: var(--text-3); font-size: 13px; }
+.hm-session { padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius);
+  margin-bottom: 8px; cursor: pointer; transition: all 0.12s; }
+.hm-session:hover { border-color: var(--tl); background: var(--tl-bg); }
+.hm-session .hs-title { font-size: 12px; font-weight: 700; color: var(--text); }
+.hm-session .hs-meta { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+.hm-session .hs-models { font-size: 10px; color: var(--text-2); margin-top: 4px; }
+.hm-actions { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.hm-clear-btn { flex: 1; padding: 7px; border: 1.5px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); cursor: pointer; font-size: 11px; font-weight: 700;
+  color: var(--red); transition: all 0.12s; }
+.hm-clear-btn:hover { border-color: var(--red); background: var(--red-bg); }
+
+/* ─── Cost Projection Modal ───────────────────────── */
+#projection-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.55); z-index: 999; align-items: flex-start;
+  justify-content: center; padding-top: 70px;
+}
+#projection-overlay.open { display: flex; }
+#projection-modal {
+  background: var(--surface); border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  width: 680px; max-height: 78vh; display: flex; flex-direction: column; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.pm-head { padding: 15px 18px; background: var(--tl); color: white; display: flex; align-items: center; gap: 10px; }
+.pm-head h3 { font-size: 15px; font-weight: 900; flex: 1; }
+.pm-body { padding: 16px 18px; overflow-y: auto; flex: 1; }
+.pm-input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.pm-input-row label { font-size: 12px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+.pm-input-row input { width: 120px; padding: 7px 10px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); font-size: 13px; font-weight: 700; outline: none;
+  transition: border-color 0.2s; background: var(--surface); color: var(--text); }
+.pm-input-row input:focus { border-color: var(--tl); }
+.pm-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.pm-table th { padding: 8px 10px; background: var(--tl); color: white; font-size: 10px; font-weight: 800; text-align: left; }
+.pm-table th:first-child { border-radius: 6px 0 0 0; } .pm-table th:last-child { border-radius: 0 6px 0 0; }
+.pm-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.pm-table tr:nth-child(even) td { background: var(--bg); }
+.pm-table .best { color: var(--green); font-weight: 800; }
+.pm-table .worst { color: var(--red); font-weight: 700; }
+
+/* ─── Provider Chips ──────────────────────────────── */
+.provider-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 7px; }
+.pchip { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700;
+  border: 1.5px solid var(--border); background: var(--bg); cursor: pointer;
+  transition: all 0.12s; color: var(--text-2); }
+.pchip:hover { border-color: var(--tl); color: var(--tl); }
+.pchip.active { background: var(--tl); color: white; border-color: var(--tl); }
+
+/* ─── Templates & Projection buttons in prompt bar ── */
+.prompt-extras { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+.tpl-wrap { position: relative; }
+#tpl-btn {
+  padding: 6px 13px; background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer;
+  color: var(--text); transition: all 0.2s;
+}
+#tpl-btn:hover { border-color: var(--tl); color: var(--tl); }
+#tpl-dropdown {
+  display: none; position: absolute; bottom: calc(100% + 5px); left: 0;
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 500;
+  min-width: 360px; padding: 6px; overflow: hidden;
+}
+#tpl-dropdown.open { display: block; }
+.tpl-item { padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; color: var(--text); transition: background 0.1s; }
+.tpl-item:hover { background: var(--tl-bg); color: var(--tl); }
+.tpl-item strong { display: block; font-size: 12px; margin-bottom: 1px; }
+.tpl-item span { color: var(--text-3); font-size: 10px; }
+#proj-btn {
+  padding: 6px 13px; background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer;
+  color: var(--text); transition: all 0.2s;
+}
+#proj-btn:hover { border-color: var(--tl); color: var(--tl); }
+
+/* ─── Radar chart ─────────────────────────────────── */
+.radar-wrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.radar-legend { display: flex; flex-direction: column; gap: 8px; font-size: 11px; min-width: 120px; }
+.radar-legend-item { display: flex; align-items: center; gap: 7px; }
+.radar-legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+

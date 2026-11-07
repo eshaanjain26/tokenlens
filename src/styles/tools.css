@@ -1,0 +1,26 @@
+/* ─── Tools dropdown in header ──────────────────── */
+.tools-wrap { position: relative; }
+#tools-btn {
+  background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.3);
+  color: white; border-radius: 6px; padding: 5px 12px; cursor: pointer;
+  font-size: 12px; font-weight: 700; transition: all 0.2s; white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+}
+#tools-btn:hover { background: rgba(255,255,255,0.25); }
+#tools-dropdown {
+  position: absolute; top: calc(100% + 8px); right: 0; background: white;
+  border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); padding: 6px;
+  display: none; flex-direction: column; gap: 2px; min-width: 190px; z-index: 5000;
+}
+#tools-dropdown.open { display: flex; }
+.tools-item {
+  padding: 9px 12px; border-radius: 7px; cursor: pointer; font-size: 12px;
+  font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px;
+  transition: background 0.12s; border: none; background: none; text-align: left; width: 100%;
+}
+.tools-item:hover { background: var(--tl-bg); color: var(--tl); }
+.tools-divider { height: 1px; background: var(--border); margin: 3px 4px; }
+
+/* ─── Data freshness banner ─────────────────────── */
+#freshness-bar { padding: 5px 16px; background: linear-gradient(90deg, var(--tl-bg), #FFFFFF); border-top: 1.5px solid var(--tl-border); font-size: 10px; color: var(--tl); display: flex; align-items: center; gap: 6px; flex-shrink: 0; font-weight: 600; }
+

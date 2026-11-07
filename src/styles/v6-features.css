@@ -1,0 +1,194 @@
+/* ─── v6 Feature Modals (shared base) ────────────── */
+.v6-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.58); z-index: 1000; align-items: flex-start;
+  justify-content: center; padding-top: 60px; overflow-y: auto;
+}
+.v6-overlay.open { display: flex; }
+.v6-modal {
+  background: var(--surface); border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.28);
+  width: 720px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+  border: 1px solid var(--border); flex-shrink: 0;
+}
+.v6-modal.wide { width: 860px; }
+.v6-head { padding: 15px 18px; background: var(--tl); color: white; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.v6-head h3 { font-size: 15px; font-weight: 900; flex: 1; }
+.v6-close { background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.4);
+  color: white; border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 700; }
+.v6-close:hover { background: rgba(255,255,255,0.35); }
+.v6-body { padding: 18px; overflow-y: auto; flex: 1; }
+
+/* ─── Model Recommender ────────────────────────────── */
+.rec-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+.rec-field { display: flex; flex-direction: column; gap: 5px; }
+.rec-field label { font-size: 11px; font-weight: 700; color: var(--text-2); }
+.rec-field select, .rec-field input {
+  padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: 12px; outline: none; transition: border-color 0.2s; background: var(--surface); color: var(--text);
+}
+.rec-field select:focus, .rec-field input:focus { border-color: var(--tl); }
+.rec-run-btn {
+  grid-column: 1 / -1; padding: 10px; background: var(--tl); color: white;
+  border: none; border-radius: var(--radius); font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: background 0.2s;
+}
+.rec-run-btn:hover { background: var(--tl-dark); }
+.rec-card {
+  border: 2px solid var(--border); border-radius: 10px; padding: 14px 16px;
+  margin-bottom: 11px; transition: border-color 0.15s;
+}
+.rec-card.top { border-color: var(--tl); background: var(--tl-bg); }
+.rec-card.second { border-color: var(--blue); background: var(--blue-bg); }
+.rec-card.third { border-color: var(--green); background: var(--green-bg); }
+.rec-rank { font-size: 20px; margin-right: 6px; }
+.rec-model-name { font-size: 14px; font-weight: 900; }
+.rec-score-bar-wrap { margin: 8px 0 6px; }
+.rec-score-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.rec-score-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+.rec-dims { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.rec-dim { padding: 3px 9px; border-radius: 12px; font-size: 10px; font-weight: 700; background: rgba(0,0,0,0.07); }
+.rec-reason { font-size: 11px; color: var(--text-2); margin-top: 6px; line-height: 1.55; }
+
+/* ─── Token Efficiency Score ──────────────────────── */
+.eff-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700;
+}
+.eff-badge.A { background: #d4edda; color: #155724; }
+.eff-badge.B { background: var(--blue-bg); color: var(--blue); }
+.eff-badge.C { background: var(--amber-bg); color: var(--amber); }
+.eff-badge.D { background: var(--red-bg); color: var(--red); }
+.eff-score-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; }
+.eff-score-card { background: var(--bg); border-radius: var(--radius); padding: 10px; text-align: center; }
+.eff-score-card .esv { font-size: 16px; font-weight: 900; color: var(--tl); }
+.eff-score-card .esl { font-size: 9px; color: var(--text-3); margin-top: 2px; }
+
+/* ─── Prompt Optimizer ─────────────────────────────── */
+.opt-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.opt-pane { display: flex; flex-direction: column; gap: 8px; }
+.opt-pane label { font-size: 11px; font-weight: 700; color: var(--text-2); }
+.opt-textarea {
+  flex: 1; min-height: 160px; padding: 10px 12px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: 12px; font-family: inherit; resize: vertical; outline: none;
+  transition: border-color 0.2s; background: var(--surface); color: var(--text);
+}
+.opt-textarea:focus { border-color: var(--tl); }
+.opt-run-btn {
+  padding: 9px 18px; background: var(--tl); color: white; border: none;
+  border-radius: var(--radius); font-size: 12px; font-weight: 800; cursor: pointer;
+  align-self: flex-start; transition: background 0.2s;
+}
+.opt-run-btn:hover { background: var(--tl-dark); }
+.opt-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.opt-stat-chip { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+
+/* ─── Multi-turn Scenario Builder ──────────────────── */
+.scenario-layout { display: grid; grid-template-columns: 1fr 1.6fr; gap: 18px; }
+.scenario-turns-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; }
+.scenario-turn-item {
+  padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--radius);
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.scenario-turn-num { font-size: 11px; font-weight: 800; color: var(--tl); flex-shrink: 0; padding-top: 2px; }
+.scenario-turn-input {
+  flex: 1; border: none; background: transparent; font-size: 11px; resize: none;
+  outline: none; font-family: inherit; color: var(--text); min-height: 36px;
+}
+.scenario-turn-del { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 13px; padding: 0 3px; }
+.scenario-turn-del:hover { color: var(--red); }
+.scenario-add-btn {
+  padding: 6px 12px; border: 1.5px dashed var(--tl); border-radius: var(--radius);
+  background: var(--tl-bg); color: var(--tl); font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; width: 100%;
+}
+.scenario-add-btn:hover { background: var(--tl); color: white; }
+.scenario-model-sel { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.scenario-model-sel label { font-size: 11px; font-weight: 700; color: var(--text-2); }
+.scenario-model-sel select {
+  padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: 12px; outline: none; background: var(--surface); color: var(--text);
+}
+.scenario-run-btn {
+  width: 100%; padding: 10px; background: var(--tl); color: white; border: none;
+  border-radius: var(--radius); font-size: 13px; font-weight: 800; cursor: pointer;
+  margin-top: 10px; transition: background 0.2s;
+}
+.scenario-run-btn:hover { background: var(--tl-dark); }
+.scenario-results { margin-top: 12px; }
+.scenario-result-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.scenario-result-table th { padding: 6px 8px; background: var(--tl); color: white; font-size: 10px; font-weight: 800; text-align: left; }
+.scenario-result-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.scenario-result-table tr:nth-child(even) td { background: var(--bg); }
+
+/* ─── A/B Test Mode ─────────────────────────────────── */
+.ab-config { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.ab-field { display: flex; flex-direction: column; gap: 5px; }
+.ab-field label { font-size: 11px; font-weight: 700; color: var(--text-2); }
+.ab-field select, .ab-field input, .ab-field textarea {
+  padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: 12px; outline: none; transition: border-color 0.2s; background: var(--surface); color: var(--text);
+  font-family: inherit;
+}
+.ab-field textarea { min-height: 80px; resize: vertical; }
+.ab-field select:focus, .ab-field input:focus, .ab-field textarea:focus { border-color: var(--tl); }
+.ab-run-btn {
+  grid-column: 1 / -1; padding: 10px; background: var(--tl); color: white;
+  border: none; border-radius: var(--radius); font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: background 0.2s;
+}
+.ab-run-btn:hover { background: var(--tl-dark); }
+.ab-results-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 12px; margin-top: 4px; }
+.ab-run-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 11px; }
+.ab-run-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.ab-run-card-title { font-weight: 800; font-size: 12px; }
+.ab-run-body { color: var(--text-2); line-height: 1.55; white-space: pre-wrap; max-height: 120px; overflow-y: auto; }
+.ab-summary { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
+.ab-sum-card { background: var(--bg); border-radius: var(--radius); padding: 10px; text-align: center; }
+.ab-sum-card .asv { font-size: 15px; font-weight: 900; color: var(--tl); }
+.ab-sum-card .asl { font-size: 9px; color: var(--text-3); margin-top: 2px; }
+
+/* ─── Efficiency score in col header ──────────────── */
+.eff-header-row { display: flex; align-items: center; gap: 6px; padding: 5px 14px; background: rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.15); }
+.eff-header-row .ehl { font-size: 9px; opacity: 0.8; }
+.eff-header-row .ehv { font-size: 11px; font-weight: 800; }
+
+/* ─── Header utility buttons ───────────────────────── */
+#history-btn, #share-btn, #about-btn {
+  background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.3);
+  color: white; border-radius: 6px; padding: 5px 10px; cursor: pointer;
+  font-size: 11px; font-weight: 700; transition: all 0.2s; white-space: nowrap;
+}
+#history-btn:hover, #share-btn:hover, #about-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* dark mode for v6 */
+body.dark .rec-card { background: #1A1A1A; border-color: #2A2A2A; }
+body.dark .rec-card.top { background: #021A0C; border-color: var(--tl); }
+body.dark .rec-card.second { background: #0A1528; border-color: var(--blue); }
+body.dark .rec-card.third { background: #0A2018; border-color: var(--green); }
+body.dark .ab-run-card { background: #1A1A1A; border-color: #333; }
+body.dark .scenario-turn-item { background: #1A1A1A; border-color: #333; }
+body.dark .scenario-turn-input { color: #E8E8E8; }
+body.dark #tools-dropdown { background: #1A1A1A; border: 1px solid #333; }
+body.dark .tools-item { color: #E8E8E8; }
+body.dark .tools-item:hover { background: rgba(10,107,60,0.20); color: var(--tl-light); }
+body.dark .tools-divider { background: #333; }
+body.dark #about-modal { background: #111; color: #E8E8E8; }
+body.dark .onboard-modal { background: #1A1A1A; color: #E8E8E8; }
+body.dark .onboard-step { background: #222; }
+body.dark #freshness-bar { background: #021A0C; border-color: #0A3A1F; color: #29B76A; }
+
+/* ─── Break-even calculator ───────────────────────── */
+.be-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+.be-field { display: flex; flex-direction: column; gap: 5px; }
+.be-field label { font-size: 11px; font-weight: 700; color: var(--text-2); }
+.be-field select, .be-field input { padding: 7px 10px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); font-size: 12px; outline: none; transition: border-color 0.2s;
+  background: var(--surface); color: var(--text); }
+.be-field select:focus, .be-field input:focus { border-color: var(--tl); }
+.be-results { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 8px; }
+.be-result-card { background: var(--bg); border-radius: var(--radius); padding: 12px; text-align: center; }
+.be-result-card .brv { font-size: 18px; font-weight: 900; color: var(--tl); }
+.be-result-card .brl { font-size: 10px; color: var(--text-2); margin-top: 3px; }
+.be-chart-wrap { grid-column: 1 / -1; margin-top: 6px; overflow-x: auto; }
+
