@@ -1,16 +1,7 @@
 /* Page-specific dark overrides still using literal colours. Superseded when the content restyle lands. */
-body.dark .bench-table tr:nth-child(even) td { background: #111;}
-
-body.dark .bench-table tr:hover td { background: #0A2C18;}
-
-body.dark .ctx-calc-field input, body.dark .ctx-calc-field select { background: #1A1A1A; color: #E8E8E8; border-color: #333;}
 
 body.dark .pm-table tr:nth-child(even) td { background: #111;}
 
 body.dark .hm-session { background: #1A1A1A; border-color: #333;}
 
 body.dark .hm-session:hover { background: #0A2C18; border-color: var(--tl);}
-
-body.dark .be-field select, body.dark .be-field input { background: #1A1A1A; color: #E8E8E8; border-color: #333;}
-
-body.dark .be-result-card { background: #222;}

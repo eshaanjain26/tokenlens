@@ -146,17 +146,3 @@ body.dark .ab-run-card { background: #1A1A1A; border-color: #333; }
 body.dark .scenario-turn-item { background: #1A1A1A; border-color: #333; }
 body.dark .scenario-turn-input { color: #E8E8E8; }
 
-/* ─── Break-even calculator ───────────────────────── */
-.be-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
-.be-field { display: flex; flex-direction: column; gap: 5px; }
-.be-field label { font-size: 0.7857rem; font-weight: 700; color: var(--text-2); }
-.be-field select, .be-field input { padding: 7px 10px; border: 1.5px solid var(--border);
-  border-radius: var(--radius); font-size: 0.8571rem; outline: none; transition: border-color 0.2s;
-  background: var(--surface); color: var(--text); }
-.be-field select:focus, .be-field input:focus { border-color: var(--tl); }
-.be-results { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 8px; }
-.be-result-card { background: var(--bg); border-radius: var(--radius); padding: 12px; text-align: center; }
-.be-result-card .brv { font-size: 1.2857rem; font-weight: 900; color: var(--tl); }
-.be-result-card .brl { font-size: 0.7857rem; color: var(--text-2); margin-top: 3px; }
-.be-chart-wrap { grid-column: 1 / -1; margin-top: 6px; overflow-x: auto; }
-

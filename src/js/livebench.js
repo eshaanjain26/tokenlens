@@ -66,19 +66,8 @@ window.LIVEBENCH = (function() {
     return provs;
   }
 
-  function _sparklineSVG(points) {
-    var W=80, H=24;
-    var minV = Math.min.apply(null, points);
-    var maxV = Math.max.apply(null, points);
-    var range = maxV - minV || 1;
-    var pts = points.map(function(v,i) {
-      var x = (i/(points.length-1)) * W;
-      var y = H - ((v-minV)/range) * (H-4) - 2;
-      return x.toFixed(1)+','+y.toFixed(1);
-    }).join(' ');
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:80px;height:24px;overflow:visible">'
-      + '<polyline points="' + pts + '" fill="none" stroke="var(--tl-light)" stroke-width="1.5" stroke-linejoin="round"/>'
-      + '</svg>';
+  function _esc(v) {
+    return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   function _render() {
@@ -87,46 +76,45 @@ window.LIVEBENCH = (function() {
     if (!bodyEl || !_isOpen) return;
 
     var provs = _providerStatus(models);
-    var provHtml = '<div class="lb-provider-row">';
+    var provHtml = '<div class="lb-provider-row" role="list" aria-label="Provider status">';
     Object.keys(provs).forEach(function(prov) {
       var r = Math.random();
       var dotCls = r > 0.97 ? 'red' : r > 0.92 ? 'amber' : 'green';
-      provHtml += '<div class="lb-prov-chip"><div class="lb-status-dot ' + dotCls + '"></div>' + prov + '</div>';
+      var word = dotCls === 'red' ? 'degraded' : dotCls === 'amber' ? 'slow' : 'operational';
+      provHtml += '<span class="lb-prov-chip" role="listitem"><span class="lb-status-dot ' + dotCls + '" aria-hidden="true"></span>' + _esc(prov) + '<span class="sr-only">, ' + word + '</span></span>';
     });
     provHtml += '</div>';
 
     var updEl = document.getElementById('lb-updated');
     if (updEl) updEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
 
-    var cardsHtml = '<div class="lb-grid">';
+    var tableHtml;
     if (!models.length) {
-      cardsHtml += '<p style="color:var(--text-2);font-size:12px;grid-column:span 3">Select models in the sidebar to see live benchmarks.</p>';
+      tableHtml = '<div class="lb-empty">Select models in the model panel, then open this panel.</div>';
+    } else {
+      var rowsHtml = '';
+      models.forEach(function(m) {
+        var ttft = Math.round(_variance(_baseTTFT(m)));
+        var p50 = Math.round(ttft * 1.8);
+        var p95 = Math.round(ttft * 3.5);
+        var avail = _availability();
+        var drift = _drift();
+        var driftCls = drift >= 95 ? 'lb-good' : drift >= 90 ? 'lb-warn' : 'lb-bad';
+        var availCls = avail >= 99.5 ? 'lb-good' : avail >= 98 ? 'lb-warn' : 'lb-bad';
+        rowsHtml += '<tr><td data-first="1" title="' + _esc(m.name || m.id) + '">' + _esc((m.name || m.id).slice(0, 28)) + '</td>'
+          + '<td class="is-num">' + ttft + ' ms</td><td class="is-num">' + p50 + ' ms</td><td class="is-num">' + p95 + ' ms</td>'
+          + '<td class="is-num ' + driftCls + '">' + drift.toFixed(1) + '%</td>'
+          + '<td class="is-num ' + availCls + '">' + avail.toFixed(2) + '%</td></tr>';
+      });
+      tableHtml = '<div class="lb-scroll"><table class="bench-table lt-table lb-table"><thead><tr>'
+        + '<th scope="col">Model</th><th scope="col" class="is-num">TTFT</th><th scope="col" class="is-num">P50</th><th scope="col" class="is-num">P95</th><th scope="col" class="is-num">Drift</th><th scope="col" class="is-num">Uptime</th>'
+        + '</tr></thead><tbody>' + rowsHtml + '</tbody></table></div>'
+        + '<p class="lb-note">Illustrative figures drawn around a stable baseline per model. They refresh every 30 seconds and are not live measurements.</p>';
     }
-    models.forEach(function(m) {
-      var ttft = Math.round(_variance(_baseTTFT(m)));
-      var p50 = Math.round(ttft * 1.8);
-      var p95 = Math.round(ttft * 3.5);
-      var avail = _availability();
-      var drift = _drift();
-      // sparkline history (10 fake data points)
-      var history = [];
-      for (var i=0; i<10; i++) history.push(Math.round(_variance(_baseTTFT(m))));
 
-      cardsHtml += '<div class="lb-card">'
-        + '<div class="lb-card-name" title="' + (m.name||m.id) + '">' + (m.name||m.id).slice(0,28) + '</div>'
-        + '<div class="lb-metrics">'
-        +   '<div class="lb-metric"><div class="lb-metric-val">' + ttft + 'ms</div><div class="lb-metric-lbl">TTFT</div></div>'
-        +   '<div class="lb-metric"><div class="lb-metric-val">' + p50 + 'ms</div><div class="lb-metric-lbl">P50</div></div>'
-        +   '<div class="lb-metric"><div class="lb-metric-val">' + p95 + 'ms</div><div class="lb-metric-lbl">P95</div></div>'
-        +   '<div class="lb-metric"><div class="lb-metric-val" style="color:' + (drift>=95?'var(--tl)':drift>=90?'var(--amber)':'#C82020') + '">' + drift.toFixed(1) + '%</div><div class="lb-metric-lbl">Drift</div></div>'
-        + '</div>'
-        + '<div class="lb-sparkline">' + _sparklineSVG(history) + '</div>'
-        + '<div class="lb-avail"><div class="lb-avail-bar"><div class="lb-avail-fill" style="width:' + avail.toFixed(1) + '%;background:' + (avail>=99.5?'#22C55E':avail>=98?'#F59E0B':'#EF4444') + '"></div></div><span>' + avail.toFixed(2) + '% uptime</span></div>'
-        + '</div>';
-    });
-    cardsHtml += '</div>';
-
-    bodyEl.innerHTML = provHtml + cardsHtml;
+    bodyEl.innerHTML = '<div class="lb-bar">' + provHtml
+      + '<button type="button" class="lb-refresh" onclick="LIVEBENCH.refresh()"><span class="ic">' + (window.TL_ICON ? window.TL_ICON('clock') : '') + '</span>Refresh now</button></div>'
+      + tableHtml;
   }
 
   function open() {
@@ -151,6 +139,6 @@ window.LIVEBENCH = (function() {
     }
   });
 
-  return { open: open, close: close };
+  return { open: open, close: close, refresh: _render };
 })();
 
