@@ -61,5 +61,7 @@ import './js/compare-ux.js';
 import './js/webhooks.js';
 import './js/cache.js';
 import './js/usage.js';
+import './js/shortcuts.js';
+import './js/palette.js';
 import './js/shell.js';
 import './js/boot.js';

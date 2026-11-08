@@ -96,5 +96,4 @@
   .hiw-pipeline { flex-direction: column; align-items: stretch; gap: 8px; }
   .hiw-arrow { display: none; }
   .bench-table { display: block; overflow-x: auto; max-width: 100%; }
-  .onboard-steps { grid-template-columns: 1fr; }
 }
