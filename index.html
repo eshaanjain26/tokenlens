@@ -569,176 +569,252 @@
 
       <!-- How It Works Tab -->
       <div id="howitworks-panel" class="tab-panel">
-        <!-- Hero -->
-        <div class="hiw-hero">
-          <div style="font-size:40px;margin-bottom:8px">🔬</div>
-          <h1>How Every Number Is Calculated</h1>
-          <p>TokenLens derives every cost, CO₂, water and power figure from peer-reviewed research and live pricing APIs. This page shows the exact formula pipeline so you can validate every metric independently.</p>
-        </div>
+        <div class="hiw">
+          <header class="hiw-head">
+            <div class="hiw-head-text">
+              <h1>How every number is calculated</h1>
+              <p>TokenLens derives each cost, CO₂, water and power figure from published research and live pricing. This page shows the formula pipeline, the assumptions behind it and the sources, so you can check any metric yourself.</p>
+            </div>
+            <button type="button" class="bn-copy hiw-cite-btn" data-hiw-cite aria-label="Copy citation for this methodology page"><span class="ic" data-icon="copy"></span><span class="bn-copy-label">Copy citation</span></button>
+          </header>
 
-        <!-- Pipeline overview -->
-        <div class="hiw-pipeline">
-          <div class="hiw-step"><div class="hiw-step-icon">📝</div><div class="hiw-step-title">Tokens counted</div><div class="hiw-step-sub">tiktoken-style BPE</div></div>
-          <div class="hiw-arrow">→</div>
-          <div class="hiw-step"><div class="hiw-step-icon">💰</div><div class="hiw-step-title">Cost computed</div><div class="hiw-step-sub">OpenRouter live pricing</div></div>
-          <div class="hiw-arrow">→</div>
-          <div class="hiw-step"><div class="hiw-step-icon">⚡</div><div class="hiw-step-title">Power derived</div><div class="hiw-step-sub">Luccioni et al. 2023</div></div>
-          <div class="hiw-arrow">→</div>
-          <div class="hiw-step"><div class="hiw-step-icon">🌱</div><div class="hiw-step-title">CO₂ computed</div><div class="hiw-step-sub">Provider grid intensity</div></div>
-          <div class="hiw-arrow">→</div>
-          <div class="hiw-step"><div class="hiw-step-icon">💧</div><div class="hiw-step-title">Water computed</div><div class="hiw-step-sub">WUE × energy</div></div>
-        </div>
+          <div class="hiw-layout">
+            <nav class="hiw-toc" aria-label="On this page">
+              <p class="hiw-toc-t">On this page</p>
+              <ul class="hiw-toc-list">
+                <li><a href="#hiw-overview" data-hiw-link>Overview</a></li>
+                <li><a href="#hiw-tokens" data-hiw-link>Token counting</a></li>
+                <li><a href="#hiw-cost" data-hiw-link>Cost</a></li>
+                <li><a href="#hiw-power" data-hiw-link>Power</a></li>
+                <li><a href="#hiw-co2" data-hiw-link>CO₂ emissions</a></li>
+                <li><a href="#hiw-water" data-hiw-link>Water</a></li>
+                <li><a href="#hiw-equiv" data-hiw-link>Equivalents</a></li>
+                <li><a href="#hiw-live" data-hiw-link>Try the formulas</a></li>
+                <li><a href="#hiw-method" data-hiw-link>Methodology and sources</a></li>
+                <li><a href="#hiw-limits" data-hiw-link>Limitations</a></li>
+              </ul>
+            </nav>
 
-        <!-- 1. Token Counting -->
-        <div class="hiw-section">
-          <h2>1️⃣ Token Counting</h2>
-          <div class="hiw-sec-sub">Tokens are the atomic unit of LLM billing. TokenLens uses a BPE (Byte-Pair Encoding) approximation calibrated to OpenAI's cl100k_base tokenizer. English text averages ~0.75 words per token (4 chars/token). Code is denser (~3 chars/token). Multilingual text varies.</div>
-          <div class="hiw-source-pills">
-            <a class="hiw-pill" href="https://platform.openai.com/tokenizer" target="_blank" rel="noopener">🔗 OpenAI Tokenizer</a>
-            <a class="hiw-pill" href="https://huggingface.co/docs/tokenizers/index" target="_blank" rel="noopener">🔗 HuggingFace Tokenizers</a>
-          </div>
-          <div class="hiw-formula-card"><pre style="white-space:pre-wrap;font-family:monospace;font-size:12px;line-height:1.9">
+            <article class="hiw-body">
+              <section class="hiw-sec" id="hiw-overview" aria-labelledby="hiw-overview-h">
+                <h2 id="hiw-overview-h">Overview</h2>
+                <p class="hiw-lead">Every figure follows the same five steps, in this order. Each step feeds the next.</p>
+                <ol class="hiw-steps">
+                  <li><span class="hiw-step-t">Tokens counted</span><span class="hiw-step-s">BPE approximation of the prompt and the reply</span></li>
+                  <li><span class="hiw-step-t">Cost computed</span><span class="hiw-step-s">Tokens times live OpenRouter pricing</span></li>
+                  <li><span class="hiw-step-t">Power derived</span><span class="hiw-step-s">Tokens times a Wh-per-token rate anchored to Luccioni et al. 2023</span></li>
+                  <li><span class="hiw-step-t">CO₂ computed</span><span class="hiw-step-s">Power times the provider grid intensity</span></li>
+                  <li><span class="hiw-step-t">Water computed</span><span class="hiw-step-s">Power times the provider water usage effectiveness</span></li>
+                </ol>
+              </section>
+
+              <section class="hiw-sec hiw-num" id="hiw-tokens" aria-labelledby="hiw-tokens-h">
+                <h2 id="hiw-tokens-h">Token counting</h2>
+                <p class="hiw-lead">Tokens are the unit of LLM billing. TokenLens uses a byte-pair-encoding approximation calibrated to OpenAI's cl100k_base tokenizer. English text averages about 0.75 words per token (4 characters). Code is denser at about 3 characters per token. Multilingual text varies.</p>
+                <div class="hiw-code">
+                  <button type="button" class="bn-copy" data-hiw-copy aria-label="Copy formula"><span class="ic" data-icon="copy"></span><span class="bn-copy-label">Copy</span></button>
+                  <pre class="hiw-formula">
 <span class="hf-comment">// Token count approximation (BPE-calibrated)</span>
 <span class="hf-var">inputTokens</span>  = <span class="hf-num">ceil</span>(charCount / <span class="hf-num">3.8</span>)          <span class="hf-src">// ≈ cl100k_base average</span>
 <span class="hf-var">outputTokens</span> = <span class="hf-num">ceil</span>(inputTokens × <span class="hf-num">1.8</span>)         <span class="hf-src">// typical generation ratio</span>
 
 <span class="hf-comment">// Context window accumulation (quadratic growth)</span>
 <span class="hf-var">contextTokens_turn_k</span> = P + (k-1) × (P + O)   <span class="hf-src">// P=prompt tokens, O=output tokens</span>
-</pre></div>
-        </div>
+</pre>
+                </div>
+                <p class="hiw-src"><span>Sources</span>
+                  <a href="https://platform.openai.com/tokenizer" target="_blank" rel="noopener">OpenAI Tokenizer</a>
+                  <a href="https://huggingface.co/docs/tokenizers/index" target="_blank" rel="noopener">HuggingFace Tokenizers</a></p>
+              </section>
 
-        <!-- 2. Cost -->
-        <div class="hiw-section">
-          <h2>2️⃣ Cost Calculation</h2>
-          <div class="hiw-sec-sub">Pricing is fetched live from the OpenRouter public API (no auth required). Prices are expressed in USD per million tokens. Input and output are billed separately.</div>
-          <div class="hiw-source-pills">
-            <a class="hiw-pill" href="https://openrouter.ai/api/v1/models" target="_blank" rel="noopener">🔗 OpenRouter API</a>
-            <a class="hiw-pill" href="https://openai.com/pricing" target="_blank" rel="noopener">🔗 OpenAI Pricing</a>
-            <a class="hiw-pill" href="https://www.anthropic.com/pricing" target="_blank" rel="noopener">🔗 Anthropic Pricing</a>
-          </div>
-          <div class="hiw-formula-card"><pre style="white-space:pre-wrap;font-family:monospace;font-size:12px;line-height:1.9">
+              <section class="hiw-sec hiw-num" id="hiw-cost" aria-labelledby="hiw-cost-h">
+                <h2 id="hiw-cost-h">Cost</h2>
+                <p class="hiw-lead">Pricing comes from the public OpenRouter API (no key needed) in USD per million tokens. Input and output tokens are billed separately.</p>
+                <div class="hiw-code">
+                  <button type="button" class="bn-copy" data-hiw-copy aria-label="Copy formula"><span class="ic" data-icon="copy"></span><span class="bn-copy-label">Copy</span></button>
+                  <pre class="hiw-formula">
 <span class="hf-comment">// Per-turn cost</span>
 <span class="hf-var">cost</span> = (inputTokens  / <span class="hf-num">1,000,000</span>) × <span class="hf-var">pricePerMInput</span>
      + (outputTokens / <span class="hf-num">1,000,000</span>) × <span class="hf-var">pricePerMOutput</span>
 
 <span class="hf-comment">// Context accumulation multiplier (turns 2+)</span>
 <span class="hf-var">contextBilling_k</span> = inputTokens_k + (k-1) × (prevPrompt + prevOutput)
-</pre></div>
-        </div>
+</pre>
+                </div>
+                <p class="hiw-src"><span>Sources</span>
+                  <a href="https://openrouter.ai/api/v1/models" target="_blank" rel="noopener">OpenRouter API</a>
+                  <a href="https://openai.com/pricing" target="_blank" rel="noopener">OpenAI pricing</a>
+                  <a href="https://www.anthropic.com/pricing" target="_blank" rel="noopener">Anthropic pricing</a></p>
+              </section>
 
-        <!-- 3. Power -->
-        <div class="hiw-section">
-          <h2>3️⃣ Power Consumption</h2>
-          <div class="hiw-sec-sub">Power rates (Wh per million tokens) are anchored to Luccioni et al. 2023 "Power Hungry Processing", which measured 88 NLP tasks across 10 model families on identical hardware. A 6B-parameter model consumes ~540 Wh/1M tokens. Rates scale approximately with parameter count (sub-linear due to quantisation and hardware efficiency improvements).</div>
-          <div class="hiw-source-pills">
-            <a class="hiw-pill" href="https://arxiv.org/abs/2311.16863" target="_blank" rel="noopener">📄 Luccioni et al. 2023 (arXiv:2311.16863)</a>
-            <a class="hiw-pill" href="https://arxiv.org/abs/2104.10350" target="_blank" rel="noopener">📄 Patterson et al. 2021 (arXiv:2104.10350)</a>
-            <a class="hiw-pill" href="https://epochai.org/data/notable-ai-models" target="_blank" rel="noopener">📊 Epoch AI Model Database</a>
-          </div>
-          <div class="hiw-formula-card"><pre style="white-space:pre-wrap;font-family:monospace;font-size:12px;line-height:1.9">
+              <section class="hiw-sec hiw-num" id="hiw-power" aria-labelledby="hiw-power-h">
+                <h2 id="hiw-power-h">Power</h2>
+                <p class="hiw-lead">Power rates (Wh per million tokens) are anchored to Luccioni et al. 2023, "Power Hungry Processing", which measured 88 NLP tasks across 10 model families on identical hardware. A 6B-parameter model draws about 540 Wh per million tokens. Other rates scale with parameter count, sub-linearly because of quantisation and hardware gains.</p>
+                <div class="hiw-code">
+                  <button type="button" class="bn-copy" data-hiw-copy aria-label="Copy formula"><span class="ic" data-icon="copy"></span><span class="bn-copy-label">Copy</span></button>
+                  <pre class="hiw-formula">
 <span class="hf-comment">// Anchor: 6B model ≈ 540 Wh/1M tokens (Luccioni 2023, Table 3)</span>
 <span class="hf-comment">// Per-model rates are research-calibrated; see POWER_RATES in source</span>
 
 <span class="hf-var">power_Wh</span> = (inputTokens + outputTokens) / <span class="hf-num">1,000,000</span> × <span class="hf-var">powerRate_Wh_per_M</span>
+</pre>
+                </div>
+                <div class="fold">
+                  <button type="button" class="fold-btn" aria-expanded="false" aria-controls="hiw-power-rates"><span>Example rates by model</span><span class="ic" data-icon="chevronDown"></span></button>
+                  <div class="fold-body" id="hiw-power-rates" inert>
+                    <div class="fold-inner">
+                      <table class="bench-table hiw-rates">
+                        <thead><tr><th scope="col">Model</th><th scope="col" class="is-num">Wh per 1M tokens</th><th scope="col">Basis</th></tr></thead>
+                        <tbody>
+                          <tr><td>GPT-4o</td><td class="is-num">3,500</td><td>Large MoE, ~280B parameter-equivalent</td></tr>
+                          <tr><td>Claude 3.5 Sonnet</td><td class="is-num">2,800</td><td>Anthropic Constitutional AI cluster</td></tr>
+                          <tr><td>Gemini 2.0 Flash</td><td class="is-num">510</td><td>Efficient distilled model</td></tr>
+                          <tr><td>Llama 3.2 1B</td><td class="is-num">90</td><td>Tiny, on-device class</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <p class="hiw-src"><span>Sources</span>
+                  <a href="https://arxiv.org/abs/2311.16863" target="_blank" rel="noopener">Luccioni et al. 2023 (arXiv:2311.16863)</a>
+                  <a href="https://arxiv.org/abs/2104.10350" target="_blank" rel="noopener">Patterson et al. 2021 (arXiv:2104.10350)</a>
+                  <a href="https://epochai.org/data/notable-ai-models" target="_blank" rel="noopener">Epoch AI model database</a></p>
+              </section>
 
-<span class="hf-comment">// Example rates (Wh / 1M tokens):</span>
-<span class="hf-src">  GPT-4o            ≈ 3,500  (large MoE, ~280B param-equivalent)</span>
-<span class="hf-src">  Claude 3.5 Sonnet ≈ 2,800  (Anthropic Constitutional AI cluster)</span>
-<span class="hf-src">  Gemini 2.0 Flash  ≈   510  (efficient distilled model)</span>
-<span class="hf-src">  Llama 3.2 1B      ≈    90  (tiny, on-device class)</span>
-</pre></div>
-        </div>
-
-        <!-- 4. CO2 -->
-        <div class="hiw-section">
-          <h2>4️⃣ CO₂ Emissions</h2>
-          <div class="hiw-sec-sub">Carbon intensity (gCO₂ per kWh) varies by provider data center location and grid. Values are sourced from provider sustainability reports and EPA/EEA grid factors. TokenLens uses per-provider profiles so that, e.g., a Google model running on a renewable-heavy GCP grid shows lower CO₂ than the same workload on a coal-heavy Chinese grid.</div>
-          <div class="hiw-source-pills">
-            <a class="hiw-pill" href="https://sustainability.google/reports/" target="_blank" rel="noopener">🌍 Google Sustainability Report</a>
-            <a class="hiw-pill" href="https://aws.amazon.com/sustainability/" target="_blank" rel="noopener">🌍 AWS Sustainability</a>
-            <a class="hiw-pill" href="https://www.anthropic.com/claude" target="_blank" rel="noopener">🌍 Anthropic (AWS US)</a>
-            <a class="hiw-pill" href="https://www.epa.gov/egrid" target="_blank" rel="noopener">📊 EPA eGRID</a>
-          </div>
-          <div class="hiw-formula-card"><pre style="white-space:pre-wrap;font-family:monospace;font-size:12px;line-height:1.9">
-<span class="hf-comment">// Provider grid carbon intensities (gCO₂/kWh):</span>
-<span class="hf-src">  Google (GCP)      ≈  90  gCO₂/kWh  (near-zero renewable contracts)</span>
-<span class="hf-src">  Anthropic (AWS)   ≈ 180  gCO₂/kWh  (US-East mixed grid)</span>
-<span class="hf-src">  OpenAI (Azure US) ≈ 250  gCO₂/kWh  (US average)</span>
-<span class="hf-src">  xAI (Tennessee)   ≈ 280  gCO₂/kWh  (TVA mixed)</span>
-<span class="hf-src">  DeepSeek (China)  ≈ 600  gCO₂/kWh  (China national grid 2023)</span>
-
+              <section class="hiw-sec hiw-num" id="hiw-co2" aria-labelledby="hiw-co2-h">
+                <h2 id="hiw-co2-h">CO₂ emissions</h2>
+                <p class="hiw-lead">Carbon intensity (gCO₂ per kWh) depends on where the provider runs its data centers. Values come from provider sustainability reports and EPA/EEA grid factors. A Google model on a renewable-heavy GCP grid therefore shows lower CO₂ than the same workload on a coal-heavy grid.</p>
+                <div class="hiw-code">
+                  <button type="button" class="bn-copy" data-hiw-copy aria-label="Copy formula"><span class="ic" data-icon="copy"></span><span class="bn-copy-label">Copy</span></button>
+                  <pre class="hiw-formula">
 <span class="hf-var">co2_grams</span> = <span class="hf-var">power_Wh</span> / <span class="hf-num">1000</span> × <span class="hf-var">provider.co2_gCO2_per_kWh</span>
-</pre></div>
-        </div>
+</pre>
+                </div>
+                <div class="fold">
+                  <button type="button" class="fold-btn" aria-expanded="false" aria-controls="hiw-co2-rates"><span>Provider grid intensities</span><span class="ic" data-icon="chevronDown"></span></button>
+                  <div class="fold-body" id="hiw-co2-rates" inert>
+                    <div class="fold-inner">
+                      <table class="bench-table hiw-rates">
+                        <thead><tr><th scope="col">Provider</th><th scope="col" class="is-num">gCO₂ per kWh</th><th scope="col">Basis</th></tr></thead>
+                        <tbody>
+                          <tr><td>Google (GCP)</td><td class="is-num">90</td><td>Near-zero renewable contracts</td></tr>
+                          <tr><td>Anthropic (AWS)</td><td class="is-num">180</td><td>US-East mixed grid</td></tr>
+                          <tr><td>OpenAI (Azure US)</td><td class="is-num">250</td><td>US average</td></tr>
+                          <tr><td>xAI (Tennessee)</td><td class="is-num">280</td><td>TVA mixed</td></tr>
+                          <tr><td>DeepSeek (China)</td><td class="is-num">600</td><td>China national grid 2023</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <p class="hiw-src"><span>Sources</span>
+                  <a href="https://sustainability.google/reports/" target="_blank" rel="noopener">Google Sustainability Report</a>
+                  <a href="https://aws.amazon.com/sustainability/" target="_blank" rel="noopener">AWS Sustainability</a>
+                  <a href="https://www.anthropic.com/claude" target="_blank" rel="noopener">Anthropic (AWS US)</a>
+                  <a href="https://www.epa.gov/egrid" target="_blank" rel="noopener">EPA eGRID</a></p>
+              </section>
 
-        <!-- 5. Water -->
-        <div class="hiw-section">
-          <h2>5️⃣ Water Consumption</h2>
-          <div class="hiw-sec-sub">Data center water usage is reported as Water Usage Effectiveness (WUE = litres of water per kWh of IT load). It covers both cooling tower evaporation and mechanical cooling. Li et al. 2023 "Making AI Less Thirsty" quantified that training GPT-3 required ~700,000 L of fresh water. TokenLens uses inference-scaled WUE from the same framework.</div>
-          <div class="hiw-source-pills">
-            <a class="hiw-pill" href="https://arxiv.org/abs/2304.03271" target="_blank" rel="noopener">📄 Li et al. 2023 (arXiv:2304.03271) — "Making AI Less Thirsty"</a>
-            <a class="hiw-pill" href="https://www.google.com/about/datacenters/efficiency/" target="_blank" rel="noopener">🌍 Google DC Efficiency</a>
-            <a class="hiw-pill" href="https://aws.amazon.com/about-aws/sustainability/" target="_blank" rel="noopener">🌍 AWS Water Stewardship</a>
-          </div>
-          <div class="hiw-formula-card"><pre style="white-space:pre-wrap;font-family:monospace;font-size:12px;line-height:1.9">
-<span class="hf-comment">// Provider WUE values (litres of water per kWh):</span>
-<span class="hf-src">  Anthropic (AWS)   ≈  3.8 L/kWh  (AWS 2023 WUE report)</span>
-<span class="hf-src">  Google (GCP)      ≈  5.4 L/kWh  (Google 2023 sustainability)</span>
-<span class="hf-src">  OpenAI (Azure)    ≈ 11.5 L/kWh  (Microsoft 2022 WUE)</span>
-<span class="hf-src">  DeepSeek (China)  ≈ 19.0 L/kWh  (Li 2023, estimated China DC)</span>
-
+              <section class="hiw-sec hiw-num" id="hiw-water" aria-labelledby="hiw-water-h">
+                <h2 id="hiw-water-h">Water</h2>
+                <p class="hiw-lead">Data center water use is reported as Water Usage Effectiveness (WUE): litres of water per kWh of IT load, covering cooling tower evaporation and mechanical cooling. Li et al. 2023, "Making AI Less Thirsty", estimated that training GPT-3 needed about 700,000 L of fresh water. TokenLens applies inference-scaled WUE from the same framework.</p>
+                <div class="hiw-code">
+                  <button type="button" class="bn-copy" data-hiw-copy aria-label="Copy formula"><span class="ic" data-icon="copy"></span><span class="bn-copy-label">Copy</span></button>
+                  <pre class="hiw-formula">
 <span class="hf-var">water_mL</span> = <span class="hf-var">power_Wh</span> / <span class="hf-num">1000</span> × <span class="hf-var">provider.wue_L_per_kWh</span> × <span class="hf-num">1000</span>
-           <span class="hf-src">// × 1000 converts litres → millilitres for human-scale display</span>
-</pre></div>
-        </div>
+           <span class="hf-src">// × 1000 converts litres to millilitres for human-scale display</span>
+</pre>
+                </div>
+                <div class="fold">
+                  <button type="button" class="fold-btn" aria-expanded="false" aria-controls="hiw-water-rates"><span>Provider WUE values</span><span class="ic" data-icon="chevronDown"></span></button>
+                  <div class="fold-body" id="hiw-water-rates" inert>
+                    <div class="fold-inner">
+                      <table class="bench-table hiw-rates">
+                        <thead><tr><th scope="col">Provider</th><th scope="col" class="is-num">L per kWh</th><th scope="col">Basis</th></tr></thead>
+                        <tbody>
+                          <tr><td>Anthropic (AWS)</td><td class="is-num">3.8</td><td>AWS 2023 WUE report</td></tr>
+                          <tr><td>Google (GCP)</td><td class="is-num">5.4</td><td>Google 2023 sustainability</td></tr>
+                          <tr><td>OpenAI (Azure)</td><td class="is-num">11.5</td><td>Microsoft 2022 WUE</td></tr>
+                          <tr><td>DeepSeek (China)</td><td class="is-num">19.0</td><td>Li 2023, estimated China data center</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <p class="hiw-src"><span>Sources</span>
+                  <a href="https://arxiv.org/abs/2304.03271" target="_blank" rel="noopener">Li et al. 2023 (arXiv:2304.03271)</a>
+                  <a href="https://www.google.com/about/datacenters/efficiency/" target="_blank" rel="noopener">Google data center efficiency</a>
+                  <a href="https://aws.amazon.com/about-aws/sustainability/" target="_blank" rel="noopener">AWS water stewardship</a></p>
+              </section>
 
-        <!-- Real-world equivalents -->
-        <div class="hiw-section">
-          <h2>🌍 Real-World Equivalents</h2>
-          <div class="hiw-sec-sub">Equivalents help contextualise abstract numbers. All conversions use EPA and IEA standard factors.</div>
-          <div class="hiw-equiv-grid">
-            <div class="hiw-equiv-card"><div class="hiw-equiv-card-icon">🚗</div><div class="hiw-equiv-card-val">404 gCO₂/km</div><div class="hiw-equiv-card-desc">Average petrol car (UK Dept. for Transport, 2023)</div></div>
-            <div class="hiw-equiv-card"><div class="hiw-equiv-card-icon">✈️</div><div class="hiw-equiv-card-val">255 gCO₂/km</div><div class="hiw-equiv-card-desc">Economy flight per passenger (ICAO, 2022)</div></div>
-            <div class="hiw-equiv-card"><div class="hiw-equiv-card-icon">📱</div><div class="hiw-equiv-card-val">70 kgCO₂ per phone</div><div class="hiw-equiv-card-desc">Manufacturing + 2yr use (Apple, Samsung LCAs)</div></div>
-            <div class="hiw-equiv-card"><div class="hiw-equiv-card-icon">🥩</div><div class="hiw-equiv-card-val">27 kgCO₂/kg beef</div><div class="hiw-equiv-card-desc">Beef supply chain (Poore & Nemecek, Science 2018)</div></div>
-            <div class="hiw-equiv-card"><div class="hiw-equiv-card-icon">💧</div><div class="hiw-equiv-card-val">250 mL = 1 glass</div><div class="hiw-equiv-card-desc">Standard drinking glass (for water comparison)</div></div>
-            <div class="hiw-equiv-card"><div class="hiw-equiv-card-icon">🏠</div><div class="hiw-equiv-card-val">10.8 kWh/day</div><div class="hiw-equiv-card-desc">Average US household (EIA, 2023)</div></div>
+              <section class="hiw-sec" id="hiw-equiv" aria-labelledby="hiw-equiv-h">
+                <h2 id="hiw-equiv-h">Real-world equivalents</h2>
+                <p class="hiw-lead">Equivalents put abstract numbers in context. Conversions use EPA and IEA standard factors.</p>
+                <dl class="bn-eqv">
+                  <div class="bn-eqv-row"><dt>404 gCO₂/km</dt><dd>Average petrol car (UK Dept. for Transport, 2023)</dd></div>
+                  <div class="bn-eqv-row"><dt>255 gCO₂/km</dt><dd>Economy flight per passenger (ICAO, 2022)</dd></div>
+                  <div class="bn-eqv-row"><dt>70 kgCO₂ per phone</dt><dd>Manufacturing and 2 years of use (Apple, Samsung LCAs)</dd></div>
+                  <div class="bn-eqv-row"><dt>27 kgCO₂/kg beef</dt><dd>Beef supply chain (Poore &amp; Nemecek, Science 2018)</dd></div>
+                  <div class="bn-eqv-row"><dt>250 mL = 1 glass</dt><dd>Standard drinking glass, for water comparisons</dd></div>
+                  <div class="bn-eqv-row"><dt>10.8 kWh/day</dt><dd>Average US household (EIA, 2023)</dd></div>
+                </dl>
+              </section>
+
+              <section class="hiw-sec" id="hiw-live" aria-labelledby="hiw-live-h">
+                <h2 id="hiw-live-h">Try the formulas</h2>
+                <p class="hiw-lead">Enter any prompt and pick a provider. Each metric is computed with the exact values plugged in, using the formulas above.</p>
+                <div class="hiw-live">
+                  <div class="bn-fld"><label for="hiw-prompt">Prompt text</label>
+                    <textarea id="hiw-prompt" rows="4" placeholder="Summarize this 500-word article about climate change..."></textarea></div>
+                  <div class="hiw-live-side">
+                    <div class="bn-fld"><label for="hiw-provider">Provider</label>
+                      <select id="hiw-provider">
+                        <option value="anthropic">Anthropic (AWS US): 180 gCO₂/kWh, WUE 3.8</option>
+                        <option value="openai">OpenAI (Azure US): 250 gCO₂/kWh, WUE 11.5</option>
+                        <option value="google">Google (GCP): 90 gCO₂/kWh, WUE 5.4</option>
+                        <option value="meta-llama">Meta (Meta DC): 200 gCO₂/kWh, WUE 2.3</option>
+                        <option value="deepseek">DeepSeek (China): 600 gCO₂/kWh, WUE 19.0</option>
+                        <option value="x-ai">xAI (Tennessee): 280 gCO₂/kWh, WUE 8.0</option>
+                      </select></div>
+                    <div class="bn-fld"><label for="hiw-power-rate">Power rate (Wh per 1M tokens)</label>
+                      <input id="hiw-power-rate" type="number" value="2800" placeholder="2800 for Claude Sonnet"></div>
+                  </div>
+                </div>
+                <button type="button" class="hiw-run" onclick="EXPLAIN.runLiveCalc()">Calculate</button>
+                <div id="hiw-result" class="hiw-result" aria-live="polite"></div>
+              </section>
+
+              <section class="hiw-sec" id="hiw-method" aria-labelledby="hiw-method-h">
+                <h2 id="hiw-method-h">Methodology and sources</h2>
+                <p class="hiw-lead">Four assumptions carry most of the weight in these numbers. Each is stated here so you can judge it.</p>
+                <div class="hiw-prose">
+                  <h3>Luccioni et al. 2023 power anchor</h3>
+                  <p>Every power rate hangs off one measured point: a 6B-parameter model draws about 540 to 640 Wh per million tokens on an A100 GPU. Larger models scale as parameters^0.65, which is sub-linear because inference is limited by memory bandwidth. Reasoning models add a further 4 to 20 times for extended chain-of-thought compute. Only the anchor is a direct measurement. Every other model rate is a scaled estimate from that point or from a provider report.</p>
+                  <h3>Cache-read energy factor</h3>
+                  <p>When prompt caching is on, a cache-read token is assumed to use <span data-calc="cache-factor">10%</span> of the energy of a fresh input token. This factor is a TokenLens assumption, not a published figure. Cached tokens are still billed at the provider's discounted cache-read price, so the cost saving and the energy saving are calculated separately.</p>
+                  <h3>Token estimate</h3>
+                  <p>Prompts are converted to tokens at 3.8 characters per token, and replies are assumed to be 1.8 times the input length. Real tokenizers differ by model and language, so treat estimated token counts as approximate.</p>
+                  <h3>Provider profiles</h3>
+                  <p>Grid carbon intensity and water usage effectiveness are applied per provider, not per data center. A model hosted by a third party can run on a different grid than the profile assumes.</p>
+                </div>
+                <ol class="bn-cites hiw-refs">
+                  <li class="bn-cite"><div class="bn-cite-body"><span class="bn-cite-author">Luccioni, A.S., Viguier, S., &amp; Ligozat, A. (2023).</span> "Power Hungry Processing: Watts Driving the Cost of AI Deployment?"<span class="bn-cite-key">arXiv:2311.16863</span></div>
+                    <button type="button" class="bn-copy" data-hiw-copy-ref aria-label="Copy citation"><span class="ic" data-icon="copy"></span><span class="bn-copy-label">Copy</span></button></li>
+                  <li class="bn-cite"><div class="bn-cite-body"><span class="bn-cite-author">Li, P., Yang, J., Islam, M.A., &amp; Ren, S. (2023).</span> "Making AI Less Thirsty: Uncovering and Addressing the Secret Water Footprint of AI Models."<span class="bn-cite-key">arXiv:2304.03271</span></div>
+                    <button type="button" class="bn-copy" data-hiw-copy-ref aria-label="Copy citation"><span class="ic" data-icon="copy"></span><span class="bn-copy-label">Copy</span></button></li>
+                  <li class="bn-cite"><div class="bn-cite-body"><span class="bn-cite-author">Patterson, D. et al. (2021).</span> "Carbon Emissions and Large Neural Network Training."<span class="bn-cite-key">arXiv:2104.10350</span></div>
+                    <button type="button" class="bn-copy" data-hiw-copy-ref aria-label="Copy citation"><span class="ic" data-icon="copy"></span><span class="bn-copy-label">Copy</span></button></li>
+                </ol>
+              </section>
+
+              <section class="hiw-sec" id="hiw-limits" aria-labelledby="hiw-limits-h">
+                <h2 id="hiw-limits-h">Limitations</h2>
+                <div class="hiw-prose">
+                  <p>All environmental figures are research-derived estimates, not audited measurements. Real inference power depends on batch size, hardware utilisation, cooling efficiency and model quantisation, and providers do not publish any of these. TokenLens uses the best published values as conservative anchors.</p>
+                  <p>Treat every CO₂, water and power figure as an order-of-magnitude benchmark.</p>
+                </div>
+              </section>
+            </article>
           </div>
-        </div>
-
-        <!-- Live interactive calculator -->
-        <div class="hiw-section">
-          <div class="hiw-live-calc">
-            <h3>🧮 Live Formula Walkthrough</h3>
-            <p style="font-size:12px;color:var(--text-2);margin-bottom:14px">Enter any prompt text and select a provider — see every metric computed step by step with the exact values plugged in.</p>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-              <div>
-                <label style="font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:4px">Prompt text (or describe your use case)</label>
-                <textarea id="hiw-prompt" rows="3" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;resize:vertical" placeholder="e.g. Summarize this 500-word article about climate change..."></textarea>
-              </div>
-              <div>
-                <label style="font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:4px">Provider</label>
-                <select id="hiw-provider" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;margin-bottom:8px">
-                  <option value="anthropic">Anthropic (AWS US) — 180 gCO₂/kWh, WUE 3.8</option>
-                  <option value="openai">OpenAI (Azure US) — 250 gCO₂/kWh, WUE 11.5</option>
-                  <option value="google">Google (GCP) — 90 gCO₂/kWh, WUE 5.4</option>
-                  <option value="meta-llama">Meta (Meta DC) — 200 gCO₂/kWh, WUE 2.3</option>
-                  <option value="deepseek">DeepSeek (China) — 600 gCO₂/kWh, WUE 19.0</option>
-                  <option value="x-ai">xAI (Tennessee) — 280 gCO₂/kWh, WUE 8.0</option>
-                </select>
-                <label style="font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:4px">Power rate (Wh/1M tokens)</label>
-                <input id="hiw-power-rate" type="number" value="2800" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px" placeholder="e.g. 2800 for Claude Sonnet">
-              </div>
-            </div>
-            <button onclick="EXPLAIN.runLiveCalc()" style="background:var(--tl);color:white;border:none;border-radius:6px;padding:9px 20px;font-size:12px;font-weight:800;cursor:pointer">▶ Calculate</button>
-            <div id="hiw-result" style="margin-top:16px"></div>
-          </div>
-        </div>
-
-        <!-- Limitations -->
-        <div class="hiw-section">
-          <h2>⚠️ Limitations &amp; Caveats</h2>
-          <div class="hiw-sec-sub">All environmental figures are research-derived estimates, not audited measurements. Actual inference power consumption depends on batch size, hardware utilisation, cooling efficiency, and model quantisation — none of which are publicly disclosed by providers. TokenLens uses the best available published values as conservative anchors. Treat all CO₂, water and power figures as <strong>order-of-magnitude directional benchmarks</strong>.</div>
         </div>
       </div><!-- end #howitworks-panel -->
 
@@ -789,9 +865,9 @@
   <div id="explain-overlay" class="tl-overlay" role="dialog" aria-modal="true" aria-labelledby="explain-modal-title">
     <div id="explain-modal" class="tl-dialog">
       <div class="expl-head">
-        <div>
-          <div id="explain-modal-title" style="font-size:15px;font-weight:900"></div>
-          <div id="explain-modal-sub" style="font-size:11px;opacity:0.8;margin-top:2px"></div>
+        <div class="expl-head-text">
+          <h2 id="explain-modal-title"></h2>
+          <p id="explain-modal-sub"></p>
         </div>
         <button class="tl-close expl-close" onclick="EXPLAIN.close()" aria-label="Close explainer"><span class="ic" data-icon="x"></span></button>
       </div>
@@ -922,7 +998,7 @@
       <button class="tl-close" onclick="LIVEBENCH.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="lb-body" id="lb-body">
-      <p style="color:var(--text-2);font-size:12px">Select models in the sidebar, then open this panel.</p>
+      <div class="lb-empty">Select models in the model panel, then open this panel.</div>
     </div>
   </div>
 </div>
