@@ -1,35 +1,174 @@
-/* ─── Design Tokens ─────────────────────────────── */
 :root {
-  /* ── Brand: Canopy — deep forest emerald ── */
-  --tl: #0A6B3C;
-  --tl-dark: #054D29;
-  --tl-light: #29B76A;
-  --tl-bg: #ECFAF4;
-  --tl-border: #9EDFC0;
-  --white: #FFFFFF;
-  --bg: #F4F8F6;
-  --surface: #FFFFFF;
-  --border: #DCE8E2;
-  --text: #0F1F18;
-  --text-2: #4A6358;
-  --text-3: #8AA89A;
-  /* ── Semantic metrics ── */
-  --green: #0A7A48;
-  --green-bg: #E3F9EE;
-  --blue: #0072A3;
-  --blue-bg: #E3F3FB;
-  --amber: #B85C00;
-  --amber-bg: #FFF3E8;
-  --red: #C82020;
-  --red-bg: #FFECEC;
-  --gold: #A16B00;
-  --gold-bg: #FFF8E3;
-  --sidebar-w: 270px;
-  --header-h: 58px;
-  --radius: 8px;
-  --shadow: 0 2px 12px rgba(10,107,60,0.10);
+  color-scheme: light;
+
+  --ground: #f8f8f8;
+  --surface: #ffffff;
+  --raised: #eeeeee;
+  --border: #e6e6e6;
+  --rule: #f0f0f0;
+  --control: #d4d4d4;
+  --text: #0a0a0a;
+  --muted: #6b6b6b;
+  --faint: #767676;
+  --accent: #141414;
+  --accent-ink: #ffffff;
+  --data: #0a6b3c;
+  --positive: #2e7d32;
+  --negative: #c4242a;
+  --warning: #92400e;
+  --info: #1d5fa8;
+
+  --pill-positive-bg: #dcfae5;
+  --pill-positive-ink: #04250e;
+  --pill-negative-bg: #ffedea;
+  --pill-negative-ink: #831c1e;
+  --pill-warning-bg: #fffbeb;
+  --pill-warning-ink: #92400e;
+  --pill-neutral-bg: #eeeeee;
+  --pill-neutral-ink: #3d3d3d;
+  --pill-info-bg: #e8f1fb;
+  --pill-info-ink: #163f70;
+
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --row-height: 44px;
+  --gap: 12px;
+  --pad: 24px;
+  --control-height: 36px;
+
+  --header-h: 52px;
+  --bottom-nav-h: 56px;
+  --rail-w: 280px;
+  --rail-w-icon: 64px;
+  --frame-max: 1960px;
+  --content-max: 1680px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --font: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --fs-body: clamp(14px, 13.33px + 0.139vw, 16px);
+  --fs-title: clamp(24px, 21.33px + 0.556vw, 32px);
+  --fs-kpi: clamp(30px, 26.67px + 0.694vw, 40px);
+  --fs-small: 0.857rem;
+
+  --shadow-float: 0 12px 32px rgba(10, 10, 10, 0.14), 0 2px 8px rgba(10, 10, 10, 0.08);
+  --scrim: rgba(10, 10, 10, 0.5);
+
+  --z-header: 100;
+  --z-bottom-nav: 150;
+  --z-rail: 160;
+  --z-fab: 170;
+  --z-menu: 300;
+  --z-sheet-scrim: 400;
+  --z-sheet: 410;
+  --z-modal: 1000;
+  --z-toast: 1100;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --duration: 160ms;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+html:has(body.dark),
+body.dark {
+  color-scheme: dark;
 
+  --ground: #0b0b0b;
+  --surface: #141414;
+  --raised: #1f1f1f;
+  --border: #2a2a2a;
+  --rule: #1c1c1c;
+  --control: #3a3a3a;
+  --text: #ededed;
+  --muted: #a0a0a0;
+  --faint: #8a8a8a;
+  --accent: #f2f2f2;
+  --accent-ink: #0a0a0a;
+  --data: #34b36d;
+  --positive: #5ec26a;
+  --negative: #f26d6d;
+  --warning: #e0a35a;
+  --info: #6aaee8;
+
+  --pill-positive-bg: #0f2e1a;
+  --pill-positive-ink: #a7f0bb;
+  --pill-negative-bg: #3a1416;
+  --pill-negative-ink: #ffb4b0;
+  --pill-warning-bg: #3a2a0c;
+  --pill-warning-ink: #f5c97a;
+  --pill-neutral-bg: #232323;
+  --pill-neutral-ink: #cfcfcf;
+  --pill-info-bg: #12263b;
+  --pill-info-ink: #b4d6f5;
+
+  --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --scrim: rgba(0, 0, 0, 0.62);
+}
+
+/* Legacy names used by page-specific stylesheets and JS-generated markup.
+   Declared on both scopes so they re-resolve against the dark base tokens. */
+:root,
+body.dark {
+  --tl: var(--data);
+  --tl-dark: var(--data);
+  --tl-light: var(--data);
+  --tl-bg: var(--raised);
+  --tl-border: var(--border);
+  --white: var(--surface);
+  --bg: var(--ground);
+  --surface-2: var(--raised);
+  --text-2: var(--muted);
+  --text-3: var(--faint);
+  --green: var(--positive);
+  --green-bg: var(--pill-positive-bg);
+  --blue: var(--info);
+  --blue-bg: var(--pill-info-bg);
+  --amber: var(--warning);
+  --amber-bg: var(--pill-warning-bg);
+  --red: var(--negative);
+  --red-bg: var(--pill-negative-bg);
+  --gold: var(--warning);
+  --gold-bg: var(--pill-warning-bg);
+  --radius: var(--radius-card);
+  --shadow: none;
+  --sidebar-w: var(--rail-w);
+
+  --ink: var(--text);
+  --ink-2: var(--muted);
+  --ink-3: var(--faint);
+  --ink-4: var(--control);
+  --s0: var(--surface);
+  --s1: var(--ground);
+  --s2: var(--raised);
+  --s3: var(--border);
+  --brand: var(--data);
+  --brand-dark: var(--accent);
+  --brand-mid: var(--data);
+  --brand-light: var(--data);
+  --brand-soft: var(--raised);
+  --brand-border: var(--control);
+  --ok: var(--positive);
+  --ok-bg: var(--pill-positive-bg);
+  --ok-border: var(--pill-positive-bg);
+  --warn: var(--warning);
+  --warn-bg: var(--pill-warning-bg);
+  --warn-border: var(--pill-warning-bg);
+  --danger: var(--negative);
+  --danger-bg: var(--pill-negative-bg);
+  --danger-border: var(--pill-negative-bg);
+  --info-bg: var(--pill-info-bg);
+  --info-border: var(--pill-info-bg);
+  --elev-1: none;
+  --elev-2: none;
+  --elev-3: var(--shadow-float);
+  --elev-modal: var(--shadow-float);
+  --r-sm: var(--radius-control);
+  --r: var(--radius-card);
+  --r-lg: var(--radius-card);
+  --r-xl: var(--radius-card);
+  --r-pill: 999px;
+}
+
+@media (max-width: 768px) {
+  :root { --pad: 16px; }
+}

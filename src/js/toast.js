@@ -3,7 +3,7 @@
    Replaces all native alert() / confirm() dialogs
    ══════════════════════════════════════════════════════════ */
 window.TOAST = (function() {
-  var ICONS = { info:'ℹ️', success:'✅', warning:'⚠️', error:'❌' };
+  var ICONS = { info:'info', success:'checkCircle', warning:'alert', error:'xCircle' };
   var _toolsOpen = false;
 
   function show(msg, type, duration) {
@@ -13,9 +13,9 @@ window.TOAST = (function() {
     var t = document.createElement('div');
     t.className = 'toast ' + type;
     t.setAttribute('role', 'alert');
-    t.innerHTML = '<span class="toast-icon">'+ICONS[type]+'</span>'
+    t.innerHTML = '<span class="toast-icon">'+window.TL_ICON(ICONS[type])+'</span>'
       +'<span class="toast-msg">'+msg+'</span>'
-      +'<button class="toast-close" onclick="this.parentNode.remove()" aria-label="Dismiss notification">✕</button>';
+      +'<button class="toast-close" onclick="this.parentNode.remove()" aria-label="Dismiss notification">'+window.TL_ICON('x')+'</button>';
     container.appendChild(t);
     setTimeout(function(){ if (t.parentNode) t.remove(); }, duration);
   }

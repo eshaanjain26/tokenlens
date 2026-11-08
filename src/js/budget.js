@@ -18,7 +18,7 @@ window.BUDGET = (function() {
     if (isSimMode) {
       fill.style.width = '0%';
       fill.className = 'budget-bar-fill';
-      if (usedLbl) usedLbl.textContent = '🔒 Simulated — $' + spent.toFixed(4);
+      if (usedLbl) usedLbl.textContent = 'Simulated · $' + spent.toFixed(4);
       if (capLbl) capLbl.textContent = 'no real spend';
       return;
     }

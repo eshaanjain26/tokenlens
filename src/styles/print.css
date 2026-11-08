@@ -1,12 +1,13 @@
 /* ─── Print styles ──────────────────────────────── */
 @media print {
-  #header, #sidebar, #prompt-bar, #freshness-bar, #onboarding-overlay, #about-overlay,
+  #header, #sidebar, #sidebar-overlay, #bottom-nav, #notes-fab, #prompt-bar, #freshness-bar, #onboarding-overlay, #about-overlay,
   #toast-container, .header-tabs, .currency-toggle, .tools-wrap, #dark-toggle,
-  #history-btn, #share-btn, #about-btn, #proj-btn, .op-toggle, .bench-page-sub { display: none !important; }
+  #proj-btn, .op-toggle, .bench-page-sub { display: none !important; }
   body, html { background: white !important; font-size: 11pt; }
-  #app { height: auto !important; }
-  #main { height: auto !important; display: block !important; overflow: visible !important; }
-  #content { overflow: visible !important; height: auto !important; }
+  body { padding: 0 !important; }
+  #app { min-height: 0 !important; }
+  #main { max-width: none !important; display: block !important; }
+  #content { padding: 0 !important; min-height: 0 !important; max-width: none !important; }
   .tab-panel { display: block !important; overflow: visible !important; height: auto !important; }
   #columns-area { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); overflow: visible !important; }
   .col-turns { max-height: none !important; overflow: visible !important; }
