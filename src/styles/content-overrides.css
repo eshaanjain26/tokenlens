@@ -335,5 +335,4 @@
   .hiw-arrow { display: none; }
   .bench-table { display: block; overflow-x: auto; max-width: 100%; }
   .op-card { min-width: min(330px, 85%); }
-  .onboard-steps { grid-template-columns: 1fr; }
 }
