@@ -3,7 +3,6 @@
    One control style (36px, 6px radius, ink focus ring, labels above),
    KPI rows, ledger tables, meters, pills, notes, charts.
    Feature-specific rules for Router, Fine-tune ROI, ESG, Green routing
-   and Live bench sit at the end of this file.
    ══════════════════════════════════════════════════════════ */
 
 :root {
@@ -363,10 +362,3 @@
 .green-prov-fill.top { background: var(--data); }
 .green-prov-fill.low { background: var(--warning); }
 .green-prov-pct { text-align: right; font-variant-numeric: tabular-nums; }
-.model-item .green-badge { display: inline-flex; align-items: center; height: 18px; margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 0.75rem; font-weight: 500; vertical-align: middle; background: var(--pill-neutral-bg); color: var(--pill-neutral-ink); }
-.model-item .green-badge.high { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
-.model-item .green-badge.low { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
-
-/* ══ Live bench ═══════════════════════════════ */
-.lb-status { display: flex; flex-wrap: wrap; gap: 6px; }
-.lb-updated { color: var(--muted); }

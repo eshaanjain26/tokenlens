@@ -43,7 +43,7 @@ window.NOTES = (function() {
   function copyAll() {
     _save();
     if (navigator.clipboard) navigator.clipboard.writeText(_content);
-    if (typeof TOAST !== 'undefined') TOAST.show('Notes copied to clipboard.', 'success');
+    if (typeof TOAST !== 'undefined') TOAST.show('Notes copied to clipboard', 'success');
   }
 
   // Inject FAB after init

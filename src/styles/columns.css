@@ -1,4 +1,4 @@
-/* ─── Comparison columns ────────────────────────── */
+/* Comparison columns */
 #columns-area {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
@@ -12,42 +12,72 @@
 
 .model-col {
   min-width: 0;
-  max-width: none;
   display: flex;
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
-  box-shadow: none;
   overflow: hidden;
 }
-.col-turns { max-height: min(62dvh, 640px); min-height: 120px; }
+.model-col { --col-pad: 16px; }
+.model-col.is-pinned { order: -1; }
 
-.no-models-msg {
-  grid-column: 1 / -1;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 8px;
-  padding: 56px 16px;
-  text-align: center;
-  border: 1px dashed var(--control);
-  border-radius: var(--radius-card);
-  color: var(--muted);
+.col-header { position: relative; z-index: 2; flex: none; padding: 16px var(--col-pad); background: var(--surface); }
+.col-title-row { display: flex; align-items: center; gap: 8px; }
+.col-name { flex: 1; min-width: 0; text-align: left; font-size: 1.1428rem; font-weight: 500; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col-actions { display: flex; flex: none; gap: 2px; margin-right: -6px; }
+.col-icon-btn[aria-pressed="true"] { color: var(--text); }
+.col-icon-btn[aria-pressed="true"] svg { fill: currentColor; }
+.model-meta { margin-top: 4px; color: var(--muted); font-size: var(--fs-small); }
+.col-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.col-facts > div { min-width: 0; cursor: help; }
+.col-facts dt { color: var(--muted); font-size: var(--fs-small); }
+.col-facts dd { font-weight: 400; overflow-wrap: anywhere; }
+
+.ctx-bar-wrap, .sparkline-wrap { flex: none; padding: 12px var(--col-pad); border-top: 1px solid var(--rule); }
+.ctx-bar-label { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; color: var(--muted); font-size: var(--fs-small); }
+.ctx-bar { height: 6px; border-radius: 999px; background: var(--raised); overflow: hidden; }
+.ctx-bar-fill { height: 100%; border-radius: 999px; background: var(--data); }
+.ctx-bar-fill.warn { background: var(--warning); }
+.ctx-bar-fill.crit { background: var(--negative); }
+
+.sparkline-head { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: var(--fs-small); }
+.sparkline-read { color: var(--text); white-space: nowrap; }
+.spark { position: relative; height: 40px; margin-top: 6px; border-radius: 4px; }
+.spark-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.spark-line { fill: none; stroke: var(--text); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.spark-base { stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.spark-dot { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--data); pointer-events: none; }
+.spark-cursor { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -0.5px; background: var(--muted); pointer-events: none; }
+.spark-empty { display: flex; align-items: center; height: 100%; color: var(--faint); font-size: var(--fs-small); }
+
+.col-turns { flex: 1; min-height: 120px; max-height: min(78dvh, 780px); padding: 0 var(--col-pad); overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid var(--rule); }
+.col-turns:empty::before {
+  content: 'No turns yet. Send a prompt to fill this column.';
+  display: block; margin: 16px 0; padding: 28px 16px; text-align: center;
+  color: var(--muted); border: 1px dashed var(--control); border-radius: var(--radius-card);
 }
-.no-models-msg .big { color: var(--muted); font-size: 2rem; line-height: 1; }
-.no-models-msg .big .ic { width: 1em; height: 1em; }
-.no-models-msg h3 { font-size: 1.125rem; font-weight: 500; color: var(--text); }
-.no-models-msg p { font-size: 1rem; color: var(--muted); }
+.col-turns:focus-visible { outline-offset: -2px; }
 
-#matrix-area { overflow: auto; padding: 0; max-width: 100%; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); }
-#matrix-area:not(.visible) { display: none; }
+@keyframes tl-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.model-col.is-loading .col-turns::after {
+  content: ''; display: block; height: 96px; margin: 12px 0;
+  background: var(--raised); border-radius: var(--radius-card);
+  animation: tl-pulse 1.1s ease-in-out infinite;
+}
 
-#output-panel { min-width: 0; border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; }
+.col-totals { flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 8px; padding: 12px var(--col-pad); border-top: 1px solid var(--rule); }
+.col-totals-label { grid-column: 1 / -1; color: var(--muted); font-size: var(--fs-small); }
+.total-item { min-width: 0; text-align: left; }
+.total-item .tl { color: var(--muted); font-size: var(--fs-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.total-item .tv { font-weight: 400; overflow-wrap: anywhere; }
+.total-item:nth-child(2) .tv { font-weight: 700; }
 
 @media (max-width: 768px) {
   #columns-area {
     grid-template-columns: none;
     grid-auto-flow: column;
-    grid-auto-columns: calc(100% - 28px);
+    grid-auto-columns: calc(100% - 16px);
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
@@ -57,10 +87,14 @@
     padding-bottom: 4px;
   }
   #columns-area:has(.no-models-msg) { grid-auto-flow: row; grid-auto-columns: auto; overflow: visible; }
-  .model-col { scroll-snap-align: start; }
-  .col-turns { max-height: min(56dvh, 520px); padding: 8px !important; }
+  .model-col { --col-pad: 12px; scroll-snap-align: start; }
+  .col-turns { max-height: min(56dvh, 520px); }
 }
 
 @media (max-height: 700px) {
   .col-turns { max-height: 60dvh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .model-col.is-loading .col-turns::after { animation: none; }
 }

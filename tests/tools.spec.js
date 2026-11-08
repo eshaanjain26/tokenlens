@@ -392,7 +392,7 @@ test('usage, history and forecast: switch, sort and scenario controls work', asy
   await open(page, 'FORECAST.open()', '#forecast-overlay');
   await page.locator('.fc2-scenario-btn[data-scenario="aggressive"]').click();
   await expect(page.locator('.fc2-scenario-btn[data-scenario="aggressive"]')).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('#forecast-chart svg .g')).toHaveCount(5);
+  await expect(page.locator('#fc2-chart svg .ch-line')).toHaveCount(1);
   await page.keyboard.press('Escape');
 
   await open(page, 'APP.openHistory()', '#history-overlay');

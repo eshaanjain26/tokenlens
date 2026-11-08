@@ -1,6 +1,5 @@
 // ── Feature 6: Live Benchmarking ─────────────────
 window.LIVEBENCH = (function() {
-  var esc = TLUI.esc;
   var _interval = null;
   var _isOpen = false;
   var _baseCache = {};
@@ -67,51 +66,55 @@ window.LIVEBENCH = (function() {
     return provs;
   }
 
+  function _esc(v) {
+    return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   function _render() {
     var models = STATE.getActiveModels ? STATE.getActiveModels() : [];
     var bodyEl = document.getElementById('lb-body');
     if (!bodyEl || !_isOpen) return;
 
     var provs = _providerStatus(models);
-    var provHtml = '';
+    var provHtml = '<div class="lb-provider-row" role="list" aria-label="Provider status">';
     Object.keys(provs).forEach(function(prov) {
       var r = Math.random();
-      var tone = r > 0.97 ? 'negative' : r > 0.92 ? 'warning' : 'positive';
-      var word = r > 0.97 ? 'Outage' : r > 0.92 ? 'Degraded' : 'Operational';
-      provHtml += TLUI.pill(prov + ': ' + word, tone);
+      var dotCls = r > 0.97 ? 'red' : r > 0.92 ? 'amber' : 'green';
+      var word = dotCls === 'red' ? 'degraded' : dotCls === 'amber' ? 'slow' : 'operational';
+      provHtml += '<span class="lb-prov-chip" role="listitem"><span class="lb-status-dot ' + dotCls + '" aria-hidden="true"></span>' + _esc(prov) + '<span class="sr-only">, ' + word + '</span></span>';
     });
+    provHtml += '</div>';
 
     var updEl = document.getElementById('lb-updated');
-    if (updEl) updEl.textContent = 'Updated ' + new Date().toLocaleTimeString() + '.';
+    if (updEl) updEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
 
+    var tableHtml;
     if (!models.length) {
-      bodyEl.innerHTML = TLUI.empty('Select models in the sidebar to see live benchmarks.');
-      return;
+      tableHtml = '<div class="lb-empty">Select models in the model panel, then open this panel.</div>';
+    } else {
+      var rowsHtml = '';
+      models.forEach(function(m) {
+        var ttft = Math.round(_variance(_baseTTFT(m)));
+        var p50 = Math.round(ttft * 1.8);
+        var p95 = Math.round(ttft * 3.5);
+        var avail = _availability();
+        var drift = _drift();
+        var driftCls = drift >= 95 ? 'lb-good' : drift >= 90 ? 'lb-warn' : 'lb-bad';
+        var availCls = avail >= 99.5 ? 'lb-good' : avail >= 98 ? 'lb-warn' : 'lb-bad';
+        rowsHtml += '<tr><td data-first="1" title="' + _esc(m.name || m.id) + '">' + _esc((m.name || m.id).slice(0, 28)) + '</td>'
+          + '<td class="is-num">' + ttft + ' ms</td><td class="is-num">' + p50 + ' ms</td><td class="is-num">' + p95 + ' ms</td>'
+          + '<td class="is-num ' + driftCls + '">' + drift.toFixed(1) + '%</td>'
+          + '<td class="is-num ' + availCls + '">' + avail.toFixed(2) + '%</td></tr>';
+      });
+      tableHtml = '<div class="lb-scroll"><table class="bench-table lt-table lb-table"><thead><tr>'
+        + '<th scope="col">Model</th><th scope="col" class="is-num">TTFT</th><th scope="col" class="is-num">P50</th><th scope="col" class="is-num">P95</th><th scope="col" class="is-num">Drift</th><th scope="col" class="is-num">Uptime</th>'
+        + '</tr></thead><tbody>' + rowsHtml + '</tbody></table></div>'
+        + '<p class="lb-note">Illustrative figures drawn around a stable baseline per model. They refresh every 30 seconds and are not live measurements.</p>';
     }
-    var data = models.map(function(m) {
-      var ttft = Math.round(_variance(_baseTTFT(m)));
-      return { m: m, ttft: ttft, p50: Math.round(ttft * 1.8), p95: Math.round(ttft * 3.5), avail: _availability(), drift: _drift() };
-    });
-    var maxP95 = Math.max.apply(null, data.map(function(d){ return d.p95; }));
-    var best = Math.min.apply(null, data.map(function(d){ return d.ttft; }));
-    var rows = data.map(function(d) {
-      var name = d.m.name || d.m.id;
-      return {
-        w: d.p95 / maxP95, cls: d.ttft === best && data.length > 1 ? 'best' : '',
-        sort: [name, d.ttft, d.p50, d.p95, d.drift, d.avail],
-        cells: [
-          '<span class="tl-name" title="' + esc(name) + '">' + esc(name) + '</span>',
-          '<span class="hl">' + d.ttft + ' ms</span>', d.p50 + ' ms', d.p95 + ' ms',
-          d.drift.toFixed(1) + '%', d.avail.toFixed(2) + '%'
-        ]
-      };
-    });
-    bodyEl.innerHTML = '<div class="lb-status tl-chips">' + provHtml + '</div>'
-      + '<div class="tl-block">' + TLUI.ledger({
-        label: 'Live benchmarks', cols: 'minmax(0,1.4fr) 80px 80px 80px 64px 72px', colsSm: 'minmax(0,1fr) 72px 72px', min: 0,
-        head: [{label:'Model', sort:true}, {label:'TTFT', num:true, sort:true}, {label:'P50', num:true, sort:true, cls:'hide-sm'}, {label:'P95', num:true, sort:true}, {label:'Drift', num:true, sort:true, cls:'hide-sm'}, {label:'Uptime', num:true, sort:true, cls:'hide-sm'}],
-        rows: rows
-      }) + '<p class="tl-hint" style="margin-top:8px">The bar behind each row is its P95 as a share of the slowest model. The fastest TTFT is highlighted.</p></div>';
+
+    bodyEl.innerHTML = '<div class="lb-bar">' + provHtml
+      + '<button type="button" class="lb-refresh" onclick="LIVEBENCH.refresh()"><span class="ic">' + (window.TL_ICON ? window.TL_ICON('clock') : '') + '</span>Refresh now</button></div>'
+      + tableHtml;
   }
 
   function open() {

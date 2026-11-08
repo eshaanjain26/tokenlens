@@ -72,7 +72,7 @@ window.GREEN = (function() {
   function getBadgeHtml(m) {
     var pct = getModelRenewable(m);
     var cls = pct >= 70 ? 'high' : pct >= 55 ? 'mid' : 'low';
-    return '<span class="green-badge ' + cls + '" title="Renewable energy share">' + pct + '% green</span>';
+    return '<span class="green-badge ' + cls + '" title="' + pct + '% renewable energy in this provider\'s grid mix">' + TL_ICON('leaf') + pct + '%</span>';
   }
 
   // init
