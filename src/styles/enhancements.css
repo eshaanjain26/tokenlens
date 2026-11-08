@@ -4,19 +4,6 @@
 /* ── Enhancement 2: Turn Annotations ─────────────── */
 
 
-/* ── Enhancement 3: Cost Forecast ────────────────── */
-
-.fc2-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
-.fc2-head h2 { flex:1;font-size:1.1429rem;font-weight:800;margin:0; }
-.fc2-body { padding:18px 20px; }
-.fc2-kpis { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px; }
-.fc2-kpi { border:1.5px solid var(--border);border-radius:9px;padding:10px 8px;text-align:center; }
-.fc2-kpi-val { font-size:1.4286rem;font-weight:900;color:var(--tl); }
-.fc2-kpi-lbl { font-size:0.7857rem;font-weight:700;color:var(--text-2);margin-top:2px; }
-.fc2-scenario-row { display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap; }
-.fc2-scenario-btn { padding:5px 12px;border-radius:16px;font-size:0.7857rem;font-weight:700;border:1.5px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer; }
-.fc2-scenario-btn.active { background:var(--tl);color:#fff;border-color:var(--tl); }
-
 /* ── Enhancement 4: Response Rating ──────────────── */
 
 /* ── Enhancement 5: Session Notes ────────────────── */

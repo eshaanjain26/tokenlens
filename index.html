@@ -890,28 +890,34 @@
 
       <!-- Analytics Tab -->
       <div id="analytics-panel" class="tab-panel">
-        <!-- Hero bar -->
-        <div class="an-hero">
-          <div style="font-size:38px;line-height:1">📈</div>
-          <div class="an-hero-text">
-            <h2>Session Analytics &amp; Impact Modelling</h2>
-            <p>Live charts from your current session · Token volumes · Cost trajectories · Carbon &amp; water footprint · Scale projections</p>
+        <div class="an-page-head">
+          <div>
+            <h2 class="an-title">Session analytics</h2>
+            <p class="an-sub">Cost, tokens and footprint for every turn you have run in this session.</p>
           </div>
-          <div style="margin-left:auto">
-            <button onclick="UI_ANALYTICS.render()" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">↺ Refresh</button>
+          <div class="an-tools">
+            <div class="an-seg" id="an-range" role="group" aria-label="Time range">
+              <button type="button" data-range="all" aria-pressed="true" onclick="UI_ANALYTICS.setRange('all')">All turns</button>
+              <button type="button" data-range="10" aria-pressed="false" onclick="UI_ANALYTICS.setRange('10')">Last 10</button>
+              <button type="button" data-range="5" aria-pressed="false" onclick="UI_ANALYTICS.setRange('5')">Last 5</button>
+            </div>
+            <button type="button" class="an-btn" id="an-export" onclick="UI_ANALYTICS.exportCSV()"><span class="ic" data-icon="download"></span>Export CSV</button>
+            <button type="button" class="an-btn" onclick="UI_ANALYTICS.render()">Refresh</button>
           </div>
         </div>
-        <!-- KPI row (filled by JS) -->
-        <div class="an-kpi-row" id="an-kpi-row">
-          <div class="an-kpi"><div class="an-kpi-val" id="an-kpi-turns">—</div><div class="an-kpi-lbl">Total Turns</div><div class="an-kpi-sub">across all models</div></div>
-          <div class="an-kpi"><div class="an-kpi-val" id="an-kpi-tokens" style="color:var(--tl)">—</div><div class="an-kpi-lbl">Total Tokens</div><div class="an-kpi-sub">in + out</div></div>
-          <div class="an-kpi"><div class="an-kpi-val" id="an-kpi-cost" style="color:var(--amber)">—</div><div class="an-kpi-lbl">Total Cost</div><div class="an-kpi-sub">session spend</div></div>
-          <div class="an-kpi"><div class="an-kpi-val" id="an-kpi-co2" style="color:var(--green)">—</div><div class="an-kpi-lbl">CO₂ Emitted</div><div class="an-kpi-sub">grams equivalent</div></div>
-          <div class="an-kpi"><div class="an-kpi-val" id="an-kpi-water" style="color:#0072A3">—</div><div class="an-kpi-lbl">Water Used</div><div class="an-kpi-sub">millilitres</div></div>
+        <div class="an-kpis" id="an-kpi-row">
+          <div class="an-kpi"><div class="an-kpi-lbl">Turns</div><div class="an-kpi-val" id="an-kpi-turns"><span class="an-kv">0</span></div></div>
+          <div class="an-kpi"><div class="an-kpi-lbl">Tokens</div><div class="an-kpi-val" id="an-kpi-tokens"><span class="an-kv">0</span></div></div>
+          <div class="an-kpi"><div class="an-kpi-lbl">Cost</div><div class="an-kpi-val" id="an-kpi-cost"><span class="an-kv">—</span></div></div>
+          <div class="an-kpi"><div class="an-kpi-lbl">CO₂ emitted</div><div class="an-kpi-val" id="an-kpi-co2"><span class="an-kv">—</span></div></div>
+          <div class="an-kpi"><div class="an-kpi-lbl">Water used</div><div class="an-kpi-val" id="an-kpi-water"><span class="an-kv">—</span></div></div>
+          <div class="an-kpi"><div class="an-kpi-lbl">Power</div><div class="an-kpi-val" id="an-kpi-power"><span class="an-kv">—</span></div></div>
         </div>
-        <!-- Charts body -->
         <div class="an-body" id="an-body">
-          <div class="an-no-data"><div class="an-nd-icon">🌱</div><p>Run some prompts in the Compare tab, then return here to see your session analytics.</p></div>
+          <div class="an-root" aria-busy="true" aria-label="Loading analytics">
+            <div class="an-skel an-skel-chart"></div>
+            <div class="an-shares"><div class="an-skel an-skel-block"></div><div class="an-skel an-skel-block"></div><div class="an-skel an-skel-block"></div><div class="an-skel an-skel-block"></div></div>
+          </div>
         </div>
       </div><!-- end #analytics-panel -->
 
