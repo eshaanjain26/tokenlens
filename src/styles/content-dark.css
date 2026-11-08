@@ -1,19 +1,7 @@
 /* Page-specific dark overrides still using literal colours. Superseded when the content restyle lands. */
-body.dark .turn-response-text { background: #111;}
-
-body.dark .turn-stat { background: #222;}
-
-body.dark .op-card { background: #1A1A1A;}
-
-body.dark .op-card-body { color: #D0D0D0;}
-
 body.dark .bench-table tr:nth-child(even) td { background: #111;}
 
 body.dark .bench-table tr:hover td { background: #0A2C18;}
-
-body.dark .export-btn { background: #1A1A1A; color: #E0E0E0;}
-
-body.dark .export-btn:hover { background: #0A2C18;}
 
 body.dark .ctx-calc-field input, body.dark .ctx-calc-field select { background: #1A1A1A; color: #E8E8E8; border-color: #333;}
 

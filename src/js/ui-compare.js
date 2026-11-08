@@ -10,11 +10,18 @@ window.UI_COMPARE = (function() {
   function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function setEl(id, v) { var e=document.getElementById(id); if(e) e.textContent=v; }
 
+  function emptyStateHtml() {
+    return '<div class="no-models-msg" id="no-models-msg">'
+      +'<p>Select models from the sidebar to see them side by side.</p>'
+      +'<button type="button" class="empty-action" onclick="UI_COMPARE.pickPopular()">Pick 3 popular models</button>'
+      +'</div>';
+  }
+
   function renderAll() {
     var area   = document.getElementById('columns-area');
     var models = STATE.getActiveModels();
     if (!models.length) {
-      area.innerHTML='<div class="no-models-msg"><div class="big">'+TL_ICON('layers')+'</div><h3>Select models to compare</h3><p>Choose up to 10 models from the model panel to compare side by side.</p></div>';
+      area.innerHTML = emptyStateHtml();
       _colEls = {};
       return;
     }
@@ -36,6 +43,53 @@ window.UI_COMPARE = (function() {
     });
   }
 
+  var POPULAR = [
+    /^openai\/gpt-4o$/, /^anthropic\/claude-(sonnet-4|3\.5-sonnet)/, /^google\/gemini-2\.5-pro/,
+    /^anthropic\/claude/, /^openai\/gpt/, /^google\/gemini/, /^meta-llama\//
+  ];
+
+  function pickPopular() {
+    var all = STATE.getModels();
+    if (!all.length) { TOAST.warning('Models are still loading. Try again in a moment.'); return; }
+    var picked = [];
+    POPULAR.forEach(function(re) {
+      if (picked.length >= 3) return;
+      var hit = all.find(function(m) { return re.test(m.id) && picked.indexOf(m.id) < 0; });
+      if (hit) picked.push(hit.id);
+    });
+    all.forEach(function(m) { if (picked.length < 3 && picked.indexOf(m.id) < 0) picked.push(m.id); });
+    picked.forEach(function(id) { if (!STATE.isActive(id)) APP.toggleModel(id); });
+  }
+
+  function gradeTip(gr) {
+    var tips = {
+      A: 'Grade A: cheapest tier, under $0.30 per 1M tokens on average.',
+      B: 'Grade B: economy tier, $0.30 to $1 per 1M tokens on average.',
+      C: 'Grade C: mid-range, $1 to $5 per 1M tokens on average.',
+      D: 'Grade D: premium, $5 to $15 per 1M tokens on average.',
+      F: 'Grade F: ultra-premium, over $15 per 1M tokens on average. Grades compare against every model listed, not only this session.'
+    };
+    return tips[gr] || 'Grade against the global model pricing landscape.';
+  }
+
+  function sparkHtml(values) {
+    var n = values.length;
+    if (n < 2) {
+      return '<span class="spark-empty">' + (n ? 'One more turn draws the trend.' : 'No turns yet.') + '</span>';
+    }
+    var max = Math.max.apply(null, values) || 1;
+    var pts = values.map(function(v, i) {
+      return (i / (n - 1) * 100).toFixed(2) + ',' + (36 - (v / max) * 32).toFixed(2);
+    });
+    var last = pts[n - 1].split(',');
+    return '<svg class="spark-svg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">'
+      +'<line class="spark-base" x1="0" y1="39.5" x2="100" y2="39.5"/>'
+      +'<polyline class="spark-line" points="' + pts.join(' ') + '"/>'
+      +'</svg>'
+      +'<span class="spark-dot" style="left:' + last[0] + '%;top:' + (parseFloat(last[1]) / 40 * 100).toFixed(2) + '%"></span>'
+      +'<span class="spark-cursor" hidden></span>';
+  }
+
   function buildColumn(model) {
     var g   = CALC.grade(model);
     var ip  = (parseFloat(model.pricing&&model.pricing.prompt||0)*1e6).toFixed(3);
@@ -44,74 +98,53 @@ window.UI_COMPARE = (function() {
     var ctxK= (model.context_length/1000).toFixed(0);
     var col = document.createElement('div');
     col.className='model-col'; col.id=id;
-    // Token efficiency score: output tokens per dollar (normalized to 1M out tokens per $1 cost)
+    col.setAttribute('data-model', model.id);
     var outPerDollar = (parseFloat(model.pricing&&model.pricing.completion||0) > 0)
       ? (1 / (parseFloat(model.pricing.completion) * 1e6)).toFixed(0) : '∞';
     var tps = CHARTS.getTPS(model.id);
-    var gradeIcon = {A:'🟢',B:'🔵',C:'🟡',D:'🟠',F:'🔴'}[g] || '⚪';
-    function _gradeTooltip(gr) {
-      var tips = {
-        A: 'A: Cheapest tier (<$0.30/1M avg) — budget/flash models',
-        B: 'B: Economy tier ($0.30–$1/1M avg) — mid-range models',
-        C: 'C: Mid-range ($1–$5/1M avg) — capable mid-tier models',
-        D: 'D: Premium ($5–$15/1M avg) — frontier-class models',
-        F: 'F: Ultra-premium (>$15/1M avg) — top frontier models. Grades compare vs ALL 500+ models globally, not just your session.'
-      };
-      return tips[gr] || 'Grade vs global model pricing landscape';
-    }
-    // Provider color dot
-    var provColors = { anthropic:'#D4A0FF', openai:'#74AA9C', google:'#4285F4', mistral:'#FF7000', meta:'#0668E1', cohere:'#39594D' };
-    var provKey = (model.id||'').toLowerCase().match(/claude|anthropic/) ? 'anthropic' :
-                  (model.id||'').toLowerCase().match(/gpt|openai/) ? 'openai' :
-                  (model.id||'').toLowerCase().match(/gemini|google/) ? 'google' :
-                  (model.id||'').toLowerCase().match(/mistral/) ? 'mistral' :
-                  (model.id||'').toLowerCase().match(/llama|meta/) ? 'meta' :
-                  (model.id||'').toLowerCase().match(/command|cohere/) ? 'cohere' : 'other';
-    var provDotColor = provColors[provKey] || '#9CA3AF';
+    var name = esc(model.name||model.id);
+    var mid  = esc(model.id);
+    var tip  = gradeTip(g);
 
     col.innerHTML=
       '<div class="col-header">'
-        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
-          +'<div style="flex:1;min-width:0">'
-            +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'
-              +'<span style="width:8px;height:8px;border-radius:50%;background:'+provDotColor+';flex-shrink:0;display:inline-block"></span>'
-              +'<div class="model-id" style="font-size:13px">'+esc(model.name||model.id)+'</div>'
-            +'</div>'
-            +'<div class="model-meta" style="font-size:10px;padding-left:15px">'+ctxK+'K ctx · $'+ip+' in · $'+op+' out /1M</div>'
+        +'<div class="col-title-row">'
+          +'<button type="button" class="model-id col-name js-model" data-hl="'+mid+'" aria-pressed="false" title="Highlight '+name+' across the page">'+name+'</button>'
+          +'<span class="grade-badge '+g+'" tabindex="0" role="img" aria-label="'+esc(tip)+'">'+g+'<span class="grade-tip" role="tooltip">'+esc(tip)+'</span></span>'
+          +'<div class="col-actions">'
+            +'<button type="button" class="col-icon-btn js-pin" data-model-id="'+mid+'" aria-pressed="false" aria-label="Pin '+name+' to the first column" title="Pin to the first column">'+TL_ICON('pin')+'</button>'
+            +'<button type="button" class="col-icon-btn js-remove" data-model-id="'+mid+'" aria-label="Remove '+name+' from the comparison" title="Remove from the comparison">'+TL_ICON('x')+'</button>'
           +'</div>'
-          +'<span class="grade-badge '+g+'">'
-            +gradeIcon+' '+g
-            +'<span class="grade-tip">'+_gradeTooltip(g)+'</span>'
-          +'</span>'
         +'</div>'
-        +'<div style="display:flex;gap:5px;margin-top:8px;padding-left:15px;flex-wrap:wrap">'
-          +'<span style="font-size:10px;font-weight:600;color:var(--ink-3,var(--text-2));background:var(--s2,var(--tl-bg));padding:2px 7px;border-radius:4px">⚡ ~'+tps+'tk/s</span>'
-          +'<span style="font-size:10px;font-weight:600;color:var(--ink-3,var(--text-2));background:var(--s2,var(--tl-bg));padding:2px 7px;border-radius:4px">🌱 '+DATA.getCO2Rate(model.id).toFixed(0)+'g/1M</span>'
-          +'<span style="font-size:10px;font-weight:600;color:var(--ink-3,var(--text-2));background:var(--s2,var(--tl-bg));padding:2px 7px;border-radius:4px">💎 '+outPerDollar+'K tok/$</span>'
-        +'</div>'
+        +'<div class="model-meta">'+ctxK+'K context · $'+ip+' in · $'+op+' out per 1M tokens</div>'
+        +'<dl class="col-facts">'
+          +'<div title="Typical generation speed for this class of model. Estimated, not measured."><dt>Speed</dt><dd>~'+tps+' tk/s</dd></div>'
+          +'<div title="Grams of CO₂ per 1M tokens, from the provider energy profile."><dt>CO₂ per 1M</dt><dd>'+DATA.getCO2Rate(model.id).toFixed(0)+' g</dd></div>'
+          +'<div title="Output tokens per dollar at this model\'s output price."><dt>Output per $</dt><dd>'+outPerDollar+'K tok</dd></div>'
+        +'</dl>'
       +'</div>'
       +'<div class="ctx-bar-wrap">'
-        +'<div class="ctx-bar-label"><span>Context Window</span><span id="'+id+'-ctx-pct">0%</span></div>'
-        +'<div class="ctx-bar"><div id="'+id+'-ctx-fill" class="ctx-bar-fill" style="width:0%"></div></div>'
+        +'<div class="ctx-bar-label"><span>Context window</span><span id="'+id+'-ctx-pct">0%</span></div>'
+        +'<div class="ctx-bar" role="progressbar" aria-label="Context window used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="'+id+'-ctx-bar"><div id="'+id+'-ctx-fill" class="ctx-bar-fill" style="width:0%"></div></div>'
       +'</div>'
       +'<div class="sparkline-wrap">'
-        +'<div class="sparkline-label">📈 Input tokens per turn (grows with context accumulation)</div>'
-        +'<div id="'+id+'-spark">'+CHARTS.sparkline([])+'</div>'
+        +'<div class="sparkline-head"><span class="sparkline-label">Input tokens per turn</span><span class="sparkline-read" id="'+id+'-spark-read" aria-live="polite"></span></div>'
+        +'<div id="'+id+'-spark" class="spark" tabindex="0" role="img" aria-label="Input tokens per turn, grows as context accumulates" data-values="">'+sparkHtml([])+'</div>'
       +'</div>'
-      +'<div class="col-turns" id="'+id+'-turns"></div>'
+      +'<div class="col-turns" id="'+id+'-turns" tabindex="0" role="region" aria-label="Turns for '+name+'"></div>'
       +'<div class="col-totals">'
-        +'<div class="col-totals-label">∑ Cumulative totals across all turns</div>'
-        +'<div class="total-item"><div class="tv" id="'+id+'-t-cost">$0.00</div><div class="tl">💰 Cost</div></div>'
-        +'<div class="total-item"><div class="tv" id="'+id+'-t-in" style="color:var(--blue)">0</div><div class="tl" id="'+id+'-t-in-lbl">📥 Total In</div></div>'
-        +'<div class="total-item"><div class="tv" id="'+id+'-t-out" style="color:var(--tl)">0</div><div class="tl">📤 Total Out</div></div>'
-        +'<div class="total-item"><div class="tv" id="'+id+'-t-co2">0g</div><div class="tl">🌱 CO₂</div></div>'
-        +'<div class="total-item"><div class="tv" id="'+id+'-t-water">0mL</div><div class="tl">💧 Water</div></div>'
-        +'<div class="total-item"><div class="tv" id="'+id+'-t-power" style="color:var(--amber)">0mWh</div><div class="tl">⚡ Power</div></div>'
+        +'<div class="col-totals-label">Totals across all turns</div>'
+        +'<div class="total-item"><div class="tl">Cost</div><div class="tv" id="'+id+'-t-cost">$0.00</div></div>'
+        +'<div class="total-item"><div class="tl" id="'+id+'-t-in-lbl">Input</div><div class="tv" id="'+id+'-t-in">0</div></div>'
+        +'<div class="total-item"><div class="tl">Output</div><div class="tv" id="'+id+'-t-out">0</div></div>'
+        +'<div class="total-item"><div class="tl">CO₂</div><div class="tv" id="'+id+'-t-co2">0g</div></div>'
+        +'<div class="total-item"><div class="tl">Water</div><div class="tv" id="'+id+'-t-water">0mL</div></div>'
+        +'<div class="total-item"><div class="tl">Power</div><div class="tv" id="'+id+'-t-power">0mWh</div></div>'
       +'</div>'
       +'<div class="col-export">'
-        +'<button class="export-btn" onclick="UI_COMPARE.exportJSON(\''+esc(model.id)+'\')">⬇ JSON</button>'
-        +'<button class="export-btn" onclick="UI_COMPARE.exportCSV(\''+esc(model.id)+'\')">⬇ CSV</button>'
-        +'<button class="export-btn" onclick="UI_COMPARE.clearModel(\''+esc(model.id)+'\')">🗑 Clear</button>'
+        +'<button class="export-btn" onclick="UI_COMPARE.exportJSON(\''+mid+'\')">'+TL_ICON('download')+'JSON</button>'
+        +'<button class="export-btn" onclick="UI_COMPARE.exportCSV(\''+mid+'\')">'+TL_ICON('download')+'CSV</button>'
+        +'<button class="export-btn" onclick="UI_COMPARE.clearModel(\''+mid+'\')">'+TL_ICON('trash')+'Clear</button>'
       +'</div>';
     return col;
   }
@@ -119,73 +152,75 @@ window.UI_COMPARE = (function() {
   // Global map so inline onclick can retrieve turn data for explainer
   var _turnStore = {};
 
+  function money(v) { return CALC.fmtCost(v); }
+
   function appendTurn(model, turn) {
     var id      = cid(model.id);
     var turnsEl = document.getElementById(id+'-turns');
     if (!turnsEl) return;
     var card = document.createElement('div');
     card.className = 'turn-card';
-    // Store turn for explainer modal
     var storeKey = id + '_t' + turn.turnNum;
     _turnStore[storeKey] = { modelId: model.id, turn: turn };
-    var simCls  = API.hasKey() ? '' : ' simulated';
-    var simNote = API.hasKey()
-      ? '📤 Model Response &nbsp;·&nbsp; ' + turn.outputTokens + ' tokens'
-      : '📤 Simulated Response &nbsp;·&nbsp; ' + turn.outputTokens + ' tokens &nbsp;·&nbsp; <em style="font-weight:400">Add API key for real output</em>';
+    var simulated = !API.hasKey();
+    var simCls  = simulated ? ' simulated' : '';
     var respId  = 'resp-' + model.id.replace(/[^a-z0-9]/gi,'-') + '-' + turn.turnNum;
+    var tps = CHARTS.getTPS(model.id);
+    var eta = (turn.outputTokens / tps).toFixed(1);
+    var saved = turn.costNoCache - turn.cost;
+    var priceIn  = (turn.priceIn  || 0).toFixed(3);
+    var priceOut = (turn.priceOut || 0).toFixed(3);
+    var inTitle = turn.inputTokens.toLocaleString() + ' tokens sent: your prompt (' + (turn.promptTokens || 0).toLocaleString()
+      + ') plus the context carried over from earlier turns.' + (turn.cachedTokens ? ' ' + turn.cachedTokens.toLocaleString() + ' were served from the prompt cache.' : '');
+    var costTitle = turn.inputTokens.toLocaleString() + ' input tokens at $' + priceIn + ' per 1M plus ' + turn.outputTokens.toLocaleString()
+      + ' output tokens at $' + priceOut + ' per 1M' + (saved > 1e-12 ? ', after the prompt-cache discount.' : '.');
+    var rate = turn.cacheOn ? 'effective input (cache reads count at 10% of a fresh token)' : 'input plus output tokens';
     card.innerHTML =
       '<div class="turn-card-header">'
         +'<span class="turn-n">Turn '+turn.turnNum+'</span>'
-        +'<span>&middot;</span>'
-        +'<span>'+esc(turn.intentLabel)+'</span>'
-        +'<span style="margin-left:auto;font-size:9px;color:var(--text-3)">'+new Date(turn.ts).toLocaleTimeString()+'</span>'
+        +'<span class="turn-intent">'+esc(String(turn.intentLabel||'').replace(/^[^\p{L}\p{N}]+/u,''))+'</span>'
+        +'<time class="turn-time">'+new Date(turn.ts).toLocaleTimeString()+'</time>'
       +'</div>'
-      +'<div style="padding:4px 11px 2px;font-size:9px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--tl);background:var(--tl-bg)">📝 Prompt</div>'
-      +'<div class="turn-prompt-text">'+esc(turn.prompt)+'</div>'
-      +'<div class="turn-response-label">'+simNote+'</div>'
-      +'<div class="turn-response-text'+simCls+'" id="'+respId+'">'+esc(turn.response)+'</div>'
-      +(function(){
-          var tps = CHARTS.getTPS(model.id);
-          var eta = (turn.outputTokens / tps).toFixed(1);
-          var tpsStr = '~'+tps+'tk/s · ~'+eta+'s';
-          return '<div class="turn-stats" style="grid-template-columns:repeat(4,1fr)">'
-            +tstat(turn.inputTokens.toLocaleString() + (turn.cachedTokens ? '<div style="font-size:9px;font-weight:700;color:var(--ok)">' + turn.cachedTokens.toLocaleString() + ' cached</div>' : ''), '📥 Input tokens', '')
-            +tstat(turn.outputTokens.toLocaleString(), '📤 Output tokens','')
-            +tstat(CALC.fmtCost(turn.cost) + ((turn.costNoCache - turn.cost) > 1e-12 ? '<div style="font-size:9px;font-weight:700;color:var(--ok)">saved ' + CALC.fmtCost(turn.costNoCache - turn.cost) + '</div>' : ''), '💰 Turn cost',    'cost')
-            +tstat(tpsStr,                             '⏱ Speed est.',    '')
-            +tstat(turn.contextTokens.toLocaleString(),'🧠 Context total','')
-            +tstat(CALC.fmtCO2(turn.co2),             '🌱 CO₂',          'co2')
-            +tstat(CALC.fmtWater(turn.water),          '💧 Water',        'water')
-            +tstat(CALC.fmtPower(turn.power),          '⚡ Power',        'power')
-          +'</div>'
-          +'<div style="padding:5px 10px 8px;text-align:right">'
-            +'<button class="expl-turn-btn" onclick="(function(){var d=UI_COMPARE._getTurnData(\''+storeKey+'\');if(d)EXPLAIN.showTurnExplainer(d.modelId,d.turn);})()" aria-label="Show calculation breakdown for turn '+turn.turnNum+'">'
-              +'🔍 How was this calculated?'
-              +'<span class="expl-inline-pop">'
-                +'<div style="font-size:11px;font-weight:800;color:#9EDFC0;margin-bottom:6px">Quick Formula ⚡</div>'
-                +'<div class="eip-row"><span class="eip-label">Input tokens</span><span class="eip-val">'+turn.inputTokens.toLocaleString()+'</span></div>'
-                +'<div class="eip-row"><span class="eip-label">Output tokens</span><span class="eip-val">'+turn.outputTokens.toLocaleString()+'</span></div>'
-                +'<div class="eip-row"><span class="eip-label">Cost</span><span class="eip-val">'+CALC.fmtCost(turn.cost)+'</span></div>'
-                +'<div class="eip-row"><span class="eip-label">CO₂</span><span class="eip-val">'+CALC.fmtCO2(turn.co2)+'</span></div>'
-                +'<div class="eip-row"><span class="eip-label">Water</span><span class="eip-val">'+CALC.fmtWater(turn.water)+'</span></div>'
-                +'<div style="font-size:9px;color:#64748B;margin-top:7px;border-top:1px solid #1E3A2A;padding-top:6px">Click for full breakdown →</div>'
-              +'</span>'
-            +'</button>'
-          +'</div>'
-          // Ratings + Bookmarks row
-          +(typeof RATINGS !== 'undefined' ? RATINGS.getRatingHtml(model.id, turn.turnNum) : '')
-          +(typeof BOOKMARKS !== 'undefined' ? BOOKMARKS.getAnnotationHtml(model.id, turn.turnNum) : '');
-        })();
+      +'<div class="turn-block">'
+        +'<div class="turn-label">Prompt</div>'
+        +'<div class="turn-prompt-text">'+esc(turn.prompt)+'</div>'
+      +'</div>'
+      +'<div class="turn-block">'
+        +'<div class="turn-response-label">'
+          +'<span class="turn-label">Response</span>'
+          +'<span class="turn-label-meta">'+turn.outputTokens.toLocaleString()+' tokens</span>'
+          +(simulated ? '<span class="pill-sim" title="No API key is set, so this text is generated locally. Add a key for real model output.">Simulated</span>' : '')
+          +'<button type="button" class="turn-copy js-copy" data-target="'+respId+'" aria-label="Copy response from turn '+turn.turnNum+'" title="Copy response">'+TL_ICON('copy')+'</button>'
+        +'</div>'
+        +'<div class="turn-response-text js-clamp'+simCls+'" id="'+respId+'">'+esc(turn.response)+'</div>'
+        +'<button type="button" class="turn-more js-more" aria-expanded="false" aria-controls="'+respId+'" hidden>Show more</button>'
+      +'</div>'
+      +'<div class="turn-stats">'
+        +tstat(turn.inputTokens.toLocaleString() + (turn.cachedTokens ? '<small class="ts-note">' + turn.cachedTokens.toLocaleString() + ' cached</small>' : ''), 'Input tokens', '', inTitle)
+        +tstat(turn.outputTokens.toLocaleString(), 'Output tokens', '', turn.outputTokens.toLocaleString() + ' tokens in the reply' + (simulated ? ', counted from the simulated text.' : '.'))
+        +tstat(money(turn.cost) + (saved > 1e-12 ? '<small class="ts-note">saved ' + money(saved) + '</small>' : ''), 'Turn cost', 'cost', costTitle)
+        +tstat('~'+tps+' tk/s<small class="ts-note">~'+eta+' s</small>', 'Speed est.', '', 'About ' + eta + ' s to generate ' + turn.outputTokens.toLocaleString() + ' tokens at a typical ~' + tps + ' tokens per second for this model class. Estimated, not measured.')
+        +tstat(turn.contextTokens.toLocaleString(), 'Context total', '', 'Tokens in the context window after this turn: earlier context, this prompt and this reply.')
+        +tstat(CALC.fmtCO2(turn.co2), 'CO₂', 'co2', 'Tokens counted as ' + rate + ', divided by 1M, times this model\'s grams of CO₂ per 1M tokens.')
+        +tstat(CALC.fmtWater(turn.water), 'Water', 'water', 'Tokens counted as ' + rate + ', divided by 1M, times this model\'s water use per 1M tokens.')
+        +tstat(CALC.fmtPower(turn.power), 'Power', 'power', 'Tokens counted as ' + rate + ', divided by 1M, times this model\'s watt-hours per 1M tokens.')
+      +'</div>'
+      +'<div class="turn-actions">'
+        +'<button type="button" class="expl-turn-btn" onclick="(function(){var d=UI_COMPARE._getTurnData(\''+storeKey+'\');if(d)EXPLAIN.showTurnExplainer(d.modelId,d.turn);})()" aria-label="Show calculation breakdown for turn '+turn.turnNum+'">'
+          +TL_ICON('info')+'How was this calculated?'
+        +'</button>'
+        +(typeof RATINGS !== 'undefined' ? RATINGS.getRatingHtml(model.id, turn.turnNum) : '')
+        +(typeof BOOKMARKS !== 'undefined' ? BOOKMARKS.getAnnotationHtml(model.id, turn.turnNum) : '')
+      +'</div>';
     turnsEl.appendChild(card);
-    // Scroll so the TOP of the new turn card is visible — user sees prompt then response then stats
     requestAnimationFrame(function() {
       turnsEl.scrollTop = card.offsetTop;
     });
     refreshMeta(model);
   }
 
-  function tstat(val,label,cls) {
-    return '<div class="turn-stat '+cls+'"><div class="tsv">'+val+'</div><div class="tsl">'+label+'</div></div>';
+  function tstat(val,label,cls,title) {
+    return '<div class="turn-stat '+cls+'" title="'+esc(title||'')+'"><div class="tsv">'+val+'</div><div class="tsl">'+label+'</div></div>';
   }
 
   function refreshMeta(model) {
@@ -195,8 +230,9 @@ window.UI_COMPARE = (function() {
     setEl(id+'-t-in',    s.totalIn.toLocaleString());
     var inLbl = document.getElementById(id+'-t-in-lbl');
     if (inLbl) inLbl.textContent = (s.totalCached > 0 && s.totalIn > 0)
-      ? '📥 In · ' + Math.round(s.totalCached / s.totalIn * 100) + '% cached'
-      : '📥 Total In';
+      ? 'In · ' + Math.round(s.totalCached / s.totalIn * 100) + '% cached'
+      : 'Input';
+    if (inLbl) inLbl.title = s.totalCached > 0 ? 'Input tokens, with the share served from the prompt cache' : '';
     setEl(id+'-t-out',   s.totalOut.toLocaleString());
     setEl(id+'-t-co2',   CALC.fmtCO2(s.totalCO2));
     setEl(id+'-t-water', CALC.fmtWater(s.totalWater));
@@ -204,10 +240,22 @@ window.UI_COMPARE = (function() {
     var pct = Math.min(100, (s.contextTokens/Math.max(model.context_length,1))*100);
     var fillEl = document.getElementById(id+'-ctx-fill');
     var pctEl  = document.getElementById(id+'-ctx-pct');
+    var barEl  = document.getElementById(id+'-ctx-bar');
     if (fillEl) { fillEl.style.width=pct.toFixed(1)+'%'; fillEl.className=CHARTS.ctxBarClass(pct); }
     if (pctEl)  pctEl.textContent = pct.toFixed(1)+'%';
+    if (barEl) {
+      barEl.setAttribute('aria-valuenow', pct.toFixed(1));
+      barEl.title = s.contextTokens.toLocaleString() + ' of ' + (model.context_length || 0).toLocaleString() + ' tokens in the context window';
+    }
     var sparkEl = document.getElementById(id+'-spark');
-    if (sparkEl) sparkEl.innerHTML = CHARTS.sparkline(s.turns.map(function(t){return t.inputTokens;}));
+    if (sparkEl) {
+      var vals = s.turns.map(function(t){return t.inputTokens;});
+      sparkEl.innerHTML = sparkHtml(vals);
+      sparkEl.setAttribute('data-values', vals.join(','));
+      var readEl = document.getElementById(id+'-spark-read');
+      if (readEl) readEl.textContent = vals.length ? 'Peak ' + Math.max.apply(null, vals).toLocaleString() : '';
+      if (readEl) readEl.setAttribute('data-default', readEl.textContent);
+    }
   }
 
   function updateLivePreview(text) {
@@ -326,40 +374,33 @@ window.UI_COMPARE = (function() {
     updateLivePreview('');
   }
 
-  // Provider brand colors for output panel card headers
-  var PROVIDER_COLORS = {
-    'openai':'#10a37f', 'anthropic':'#c9561e', 'google':'#4285F4',
-    'meta-llama':'#1877F2', 'mistralai':'#FF7000', 'deepseek':'#2563EB',
-    'x-ai':'#222222', 'cohere':'#0047FF', 'perplexity':'#20B2AA',
-    'qwen':'#FF6A00', 'perceptron':'#7C3AED', '_default':'#555555',
-  };
-
   function updateOutputPanel() {
     var panel = document.getElementById('output-panel');
     var cardsEl = document.getElementById('op-cards');
     if (!panel || !cardsEl) return;
     var models = STATE.getActiveModels();
     var maxTurn = 0;
-    var html = models.map(function(model) {
+    var html = models.map(function(model, i) {
       var s = STATE.getSession(model.id);
       if (!s || !s.turns.length) return '';
       var lt = s.turns[s.turns.length - 1]; // latest turn
       if (lt.turnNum > maxTurn) maxTurn = lt.turnNum;
-      var provider = model.id.split('/')[0].toLowerCase();
-      var color = PROVIDER_COLORS[provider] || PROVIDER_COLORS['_default'];
       var sname = (model.name || model.id.split('/').pop());
       var simCls = API.hasKey() ? '' : ' simulated';
+      var bodyId = 'op-resp-' + i;
       var metaStr = 'Turn ' + lt.turnNum
-        + ' &nbsp;·&nbsp; ' + lt.outputTokens.toLocaleString() + ' tokens'
-        + ' &nbsp;·&nbsp; ' + CALC.fmtCost(lt.cost)
-        + ' &nbsp;·&nbsp; ' + CALC.fmtCO2(lt.co2);
-      return '<div class="op-card">'
-        + '<div class="op-card-head" style="background:' + color + '">'
-          + '<span class="ocm">' + esc(sname) + '</span>'
-          + '<span class="occ">' + metaStr + '</span>'
+        + ' · ' + lt.outputTokens.toLocaleString() + ' tokens'
+        + ' · ' + CALC.fmtCost(lt.cost)
+        + ' · ' + CALC.fmtCO2(lt.co2);
+      return '<article class="op-card" data-model="' + esc(model.id) + '">'
+        + '<div class="op-card-head">'
+          + '<button type="button" class="ocm js-model" data-hl="' + esc(model.id) + '" aria-pressed="false" title="Highlight ' + esc(sname) + ' across the page">' + esc(sname) + '</button>'
+          + '<button type="button" class="turn-copy js-copy" data-target="' + bodyId + '" aria-label="Copy latest response from ' + esc(sname) + '" title="Copy response">' + TL_ICON('copy') + '</button>'
         + '</div>'
-        + '<div class="op-card-body' + simCls + '">' + esc(lt.response) + '</div>'
-        + '</div>';
+        + '<div class="occ">' + metaStr + (simCls ? '<span class="pill-sim" title="No API key is set, so this text is generated locally.">Simulated</span>' : '') + '</div>'
+        + '<div class="op-card-body js-clamp' + simCls + '" id="' + bodyId + '">' + esc(lt.response) + '</div>'
+        + '<button type="button" class="turn-more js-more" aria-expanded="false" aria-controls="' + bodyId + '" hidden>Show more</button>'
+        + '</article>';
     }).join('');
     if (!html) return;
     cardsEl.innerHTML = html;
@@ -429,7 +470,5 @@ window.UI_COMPARE = (function() {
   }
 
   function _getTurnData(key) { return _turnStore[key] || null; }
-  return {renderAll, updateLivePreview, sendPrompt, updateOutputPanel, hideOutputPanel, updateGlobalStats, refreshAllCurrencies, clearModel, exportJSON, exportCSV, _getTurnData};
+  return {renderAll, pickPopular, updateLivePreview, sendPrompt, updateOutputPanel, hideOutputPanel, updateGlobalStats, refreshAllCurrencies, clearModel, exportJSON, exportCSV, _getTurnData};
 })();
-
-
