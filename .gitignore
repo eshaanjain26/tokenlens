@@ -2,3 +2,9 @@ node_modules/
 dist/
 test-results/
 playwright-report/
+.taste-skill/
+qa/e2e/node_modules/
+qa/e2e/results.json
+qa/e2e/viewport-report*.json
+qa/e2e/shots/
+qa/e2e/test-results/
