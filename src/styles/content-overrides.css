@@ -275,30 +275,6 @@
 .policy-meta-chip { border-radius: var(--r-sm) !important; font-family: var(--font) !important; }
 .wh-endpoint { border-radius: var(--r) !important; transition: all var(--duration); }
 .wh-endpoint.active { border-color: var(--brand-border) !important; background: var(--brand-soft) !important; }
-.an-hero {
-  background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%) !important;
-  border-radius: var(--r-lg) !important;
-  margin: 16px !important;
-  padding: 20px !important;
-}
-.an-kpi {
-  border-radius: var(--r) !important;
-  border: 1px solid var(--s3) !important;
-  background: var(--s0) !important;
-  box-shadow: var(--elev-1) !important;
-}
-.an-kpi-val {
-  font-family: var(--font-mono) !important;
-  font-size: 1.4286rem !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.5px !important;
-}
-.an-chart-card {
-  border-radius: var(--r-lg) !important;
-  border: 1px solid var(--s3) !important;
-  background: var(--s0) !important;
-  box-shadow: var(--elev-1) !important;
-}
 .bench-card {
   border-radius: var(--r-lg) !important;
   border: 1px solid var(--s3) !important;
@@ -317,20 +293,15 @@
 /* ─── Responsive guards for page content ──────────
    Keeps grids and tables inside the viewport. The content restyle owns the final look. */
 .bench-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
-.bench-card, .an-card, .an-chart-card, .hiw-section, .hiw-formula-card { min-width: 0; }
+.bench-card, .hiw-section, .hiw-formula-card { min-width: 0; }
 .bench-card, .hiw-formula-card { overflow-x: auto; }
-.an-kpi-row { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-.an-kpi { min-width: 0; }
-.an-hero { flex-wrap: wrap; }
-#benchmarks-panel, #analytics-panel, #howitworks-panel { min-width: 0; }
-#benchmarks-panel img, #analytics-panel svg { max-width: 100%; }
+#benchmarks-panel, #howitworks-panel { min-width: 0; }
+#benchmarks-panel img { max-width: 100%; }
 
 @media (max-width: 768px) {
-  .an-row.cols-2, .an-row.cols-3, .ctx-calc, .equiv-grid, .rec-form, .opt-layout, .scenario-layout, .ab-config,
+  .ctx-calc, .equiv-grid, .rec-form, .opt-layout, .scenario-layout, .ab-config,
   .be-grid, .finder-sliders, .fc-inputs, .vault-form-grid, .expl-grid-2 { grid-template-columns: minmax(0, 1fr) !important; }
-  .ctx-result-row, .ab-summary, .be-results, .fc-kpis, .fc2-kpis, .esg-kpi-row, .shadow-kpis, .eff-score-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .an-hero { margin: 0 0 var(--gap) !important; }
-  .an-body { padding: var(--gap) 0 0; }
+  .ctx-result-row, .ab-summary, .be-results, .fc-kpis, .esg-kpi-row, .shadow-kpis, .eff-score-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hiw-pipeline { flex-direction: column; align-items: stretch; gap: 8px; }
   .hiw-arrow { display: none; }
   .bench-table { display: block; overflow-x: auto; max-width: 100%; }

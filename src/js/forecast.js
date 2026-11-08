@@ -13,7 +13,6 @@ window.FORECAST = (function() {
   }
   function setScenario(s) {
     _scenario = s;
-    document.querySelectorAll('.fc2-scenario-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.scenario === s); });
     _render();
   }
 
@@ -24,7 +23,7 @@ window.FORECAST = (function() {
     var turns = totals.turns || 0;
     var totalCost = totals.cost || 0;
     if (!turns) {
-      el.innerHTML = '<p style="color:var(--text-2);font-size:12px">Run some prompts first — forecast requires at least one session turn.</p>';
+      el.innerHTML = '<div class="an-empty">Run a prompt first. The forecast needs at least one session turn.</div>';
       return;
     }
     var costPerTurn = totalCost / turns;
@@ -42,7 +41,7 @@ window.FORECAST = (function() {
     var daysToCapExhaust = breakEvenBudget / dailyRate;
 
     // SVG chart: 30 day projection
-    var W=560, H=180, padL=50, padR=16, padT=16, padB=28;
+    var W = Math.max(280, Math.floor(el.clientWidth - 2 * 24) || 560), H = 240, padL = 64, padR = 16, padT = 12, padB = 30;
     var points = [];
     for (var d=0; d<=30; d++) {
       var cumCost = totalCost + dailyRate * d;
@@ -53,46 +52,52 @@ window.FORECAST = (function() {
     function sy(v) { return padT + (1 - v/maxY)*(H-padT-padB); }
 
     var path = points.map(function(v,i){ return (i===0?'M':'L')+sx(i).toFixed(1)+','+sy(v).toFixed(1); }).join(' ');
-    // Shade area under curve
-    var areaPath = path + ' L'+sx(30).toFixed(1)+','+(H-padB)+' L'+sx(0).toFixed(1)+','+(H-padB)+' Z';
-    // Budget cap line
     var capY = sy(breakEvenBudget);
     var capLine = breakEvenBudget <= maxY
-      ? '<line x1="'+padL+'" y1="'+capY.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+capY.toFixed(1)+'" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="5,3"/><text x="'+(W-padR-2)+'" y="'+(capY-4)+'" text-anchor="end" font-size="9" fill="#EF4444">Budget cap $'+breakEvenBudget.toFixed(2)+'</text>'
+      ? '<line x1="'+padL+'" y1="'+capY.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+capY.toFixed(1)+'" class="ch-cap"/><text x="'+(W-padR-2)+'" y="'+(capY-6)+'" text-anchor="end" class="an-cap-label">Budget cap $'+breakEvenBudget.toFixed(2)+'</text>'
       : '';
     var yLabels = [0,0.25,0.5,0.75,1].map(function(f){
       var v=maxY*f, y=sy(v);
-      var lbl = v>=1?'$'+(v).toFixed(2):'$'+(v*100).toFixed(1)+'¢';
-      if (v>=1) lbl='$'+v.toFixed(2);
-      return '<text x="'+(padL-5)+'" y="'+(y+4)+'" text-anchor="end" font-size="9" fill="#888">'+lbl+'</text><line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="#eee" stroke-width="1"/>';
+      var lbl = v>=1?'$'+v.toFixed(2):'$'+(v*100).toFixed(1)+'¢';
+      return '<text x="'+(padL-8)+'" y="'+(y+4)+'" text-anchor="end" class="ch-tick">'+lbl+'</text><line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" class="ch-grid"/>';
     }).join('');
     var xLabels = [0,7,14,21,30].map(function(d){
-      return '<text x="'+sx(d).toFixed(1)+'" y="'+(H-padB+14)+'" text-anchor="middle" font-size="9" fill="#888">Day '+d+'</text>';
+      return '<text x="'+sx(d).toFixed(1)+'" y="'+(H-padB+20)+'" text-anchor="middle" class="ch-tick">Day '+d+'</text>';
     }).join('');
 
-    var chart = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;border-radius:8px;border:1px solid var(--border)">'
+    var chart = '<div class="an-chart" id="fc2-chart"><svg width="'+W+'" height="'+H+'" role="img" aria-label="Projected cumulative cost over 30 days">'
       + yLabels+xLabels+capLine
-      + '<path d="'+areaPath+'" fill="rgba(10,107,60,0.07)"/>'
-      + '<path d="'+path+'" fill="none" stroke="var(--tl)" stroke-width="2"/>'
-      + '<circle cx="'+sx(0).toFixed(1)+'" cy="'+sy(points[0]).toFixed(1)+'" r="3" fill="var(--tl)"/>'
-      + '<circle cx="'+sx(30).toFixed(1)+'" cy="'+sy(points[30]).toFixed(1)+'" r="4" fill="var(--tl)"/>'
-      + '</svg>';
+      + '<path d="'+path+'" class="ch-line" style="--sc:var(--data)"/>'
+      + '<circle cx="'+sx(0).toFixed(1)+'" cy="'+sy(points[0]).toFixed(1)+'" r="3" class="ch-pt" style="--sc:var(--data)"/>'
+      + '<circle cx="'+sx(30).toFixed(1)+'" cy="'+sy(points[30]).toFixed(1)+'" r="4" class="ch-pt" style="--sc:var(--data)"/>'
+      + '</svg></div>';
 
-    var kpis = '<div class="fc2-kpis">'
-      + '<div class="fc2-kpi"><div class="fc2-kpi-val">$'+projected7.toFixed(4)+'</div><div class="fc2-kpi-lbl">7-day projection</div></div>'
-      + '<div class="fc2-kpi"><div class="fc2-kpi-val" style="color:'+( projected30 > breakEvenBudget ? '#EF4444':'var(--tl)')+'">$'+projected30.toFixed(4)+'</div><div class="fc2-kpi-lbl">30-day projection</div></div>'
-      + '<div class="fc2-kpi"><div class="fc2-kpi-val" style="color:'+(daysToCapExhaust<7?'#EF4444':daysToCapExhaust<14?'#F59E0B':'var(--tl)')+'">'+( isFinite(daysToCapExhaust) ? daysToCapExhaust.toFixed(1)+' days' : '∞')+'</div><div class="fc2-kpi-lbl">Days until cap</div></div>'
+    var daysCls = daysToCapExhaust<7?' is-bad':daysToCapExhaust<14?' is-warn':'';
+    var kpis = '<div class="an-kpis an-kpis-fc">'
+      + '<div class="an-kpi"><div class="an-kpi-lbl">7-day projection</div><div class="an-kpi-val">$'+projected7.toFixed(4)+'</div></div>'
+      + '<div class="an-kpi"><div class="an-kpi-lbl">30-day projection</div><div class="an-kpi-val'+(projected30 > breakEvenBudget ? ' is-bad':'')+'">$'+projected30.toFixed(4)+'</div></div>'
+      + '<div class="an-kpi"><div class="an-kpi-lbl">Days until cap</div><div class="an-kpi-val'+daysCls+'">'+( isFinite(daysToCapExhaust) ? daysToCapExhaust.toFixed(1)+' days' : '∞')+'</div></div>'
       + '</div>';
 
-    var scenarios = '<div class="fc2-scenario-row">'
+    var scenarios = '<div class="an-seg fc2-scenario-row" role="group" aria-label="Growth scenario">'
       + ['linear','conservative','aggressive'].map(function(s){
-          var labels = { linear:'📈 Linear', conservative:'📉 Conservative (−30%)', aggressive:'🚀 Aggressive (+80%)' };
-          return '<button class="fc2-scenario-btn'+(s===_scenario?' active':'')+'" data-scenario="'+s+'" onclick="FORECAST.setScenario(\''+s+'\')">'+labels[s]+'</button>';
+          var labels = { linear:'Linear', conservative:'Conservative (−30%)', aggressive:'Aggressive (+80%)' };
+          return '<button type="button" class="fc2-scenario-btn'+(s===_scenario?' active':'')+'" data-scenario="'+s+'" aria-pressed="'+(s===_scenario)+'" onclick="FORECAST.setScenario(\''+s+'\')">'+labels[s]+'</button>';
         }).join('')
       + '</div>';
 
-    var note = '<p style="font-size:10px;color:var(--text-3);margin-top:8px">Based on '+turns+' turns at $'+costPerTurn.toFixed(5)+'/turn avg · '+_scenario+' growth model</p>';
+    var note = '<p class="fc2-note">Based on '+turns+' turns at $'+costPerTurn.toFixed(5)+'/turn average, '+_scenario+' growth model.</p>';
     el.innerHTML = kpis + scenarios + chart + note;
+
+    CHARTS.scrub(document.getElementById('fc2-chart'), {
+      n: 31, xs: points.map(function(v, i){ return sx(i); }), top: padT, bottom: H - padB,
+      label: 'Projected cost chart. Use the left and right arrow keys to read each day.',
+      dots: function(i){ return [{ x: sx(i), y: sy(points[i]), color: 'var(--data)' }]; },
+      html: function(i){
+        return '<div class="chart-tip-h">Day '+i+'</div><div class="chart-tip-r"><span>Cumulative</span><span class="chart-tip-v">$'+points[i].toFixed(4)+'</span></div>'
+          + (points[i] > breakEvenBudget ? '<div class="chart-tip-r"><span class="chart-tip-d up">Over the $'+breakEvenBudget.toFixed(2)+' cap</span></div>' : '');
+      }
+    });
   }
 
   document.addEventListener('keydown', function(e) {
