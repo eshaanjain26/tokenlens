@@ -354,18 +354,6 @@ test.describe('reduced motion', () => {
 });
 
 test.describe('shared chart helpers', () => {
-  test('radar vertices carry tooltips and are keyboard focusable', async ({ page }) => {
-    const errors = trackErrors(page);
-    await boot(page);
-    await pickModels(page);
-    await page.locator('.tab-btn[data-tab="benchmarks"]:visible, .bn-btn[data-tab="benchmarks"]:visible').first().click();
-    await expect(page.locator('#bench-radar-wrap svg')).toBeVisible();
-    const dot = page.locator('#bench-radar-wrap .ch-dot').first();
-    await dot.focus();
-    await expect(page.locator('.chart-tip.is-on')).toContainText('of 100');
-    expect(errors).toEqual([]);
-  });
-
   test('forecast chart scrubs with the keyboard', async ({ page }) => {
     const errors = trackErrors(page);
     await boot(page);

@@ -45,9 +45,3 @@
 .policy-meta-chip { border-radius: var(--r-sm) !important; font-family: var(--font) !important; }
 .wh-endpoint { border-radius: var(--r) !important; transition: all var(--duration); }
 .wh-endpoint.active { border-color: var(--brand-border) !important; background: var(--brand-soft) !important; }
-  border-radius: var(--r-lg) !important;
-  border: 1px solid var(--s3) !important;
-  background: var(--s0) !important;
-  box-shadow: var(--elev-1) !important;
-}
-}
