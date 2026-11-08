@@ -1,19 +1,54 @@
-/* ─── Pricing freshness badge ───────────────────── */
-#pricing-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; font-size: 0.7857rem; font-weight: 700; margin-left: 6px; }
-#pricing-badge.fresh  { background: var(--green-bg); color: var(--green); }
-#pricing-badge.stale  { background: var(--amber-bg); color: var(--amber); }
-#pricing-badge.live   { background: var(--tl-bg); color: var(--tl); }
+/* Pricing freshness badge */
+#pricing-badge {
+  display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 8px; margin-left: 6px;
+  border-radius: 999px; background: var(--pill-neutral-bg); color: var(--pill-neutral-ink);
+  font-size: var(--fs-small); font-weight: 400;
+}
+#pricing-badge.live { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
+#pricing-badge.stale { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
 
-/* ─── Keyboard shortcut hint ────────────────────── */
-.kbd-hint { font-size: 0.7857rem; color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); border-radius: 4px; padding: 1px 5px; font-family: monospace; margin-left: 6px; }
+/* Grade badge */
+.grade-badge {
+  position: relative; display: inline-flex; flex: none; align-items: center; justify-content: center;
+  min-width: 28px; height: 24px; padding: 0 8px; border-radius: 999px;
+  background: var(--pill-neutral-bg); color: var(--pill-neutral-ink);
+  font-size: var(--fs-small); font-weight: 500; cursor: help;
+}
+.grade-badge.A { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
+.grade-badge.B { background: var(--pill-info-bg); color: var(--pill-info-ink); }
+.grade-badge.D { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+.grade-badge.F { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+.grade-tip {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0; z-index: 20;
+  width: min(260px, 70vw); padding: 8px 10px; text-align: left; white-space: normal;
+  background: var(--accent); color: var(--accent-ink); border-radius: var(--radius-control);
+  box-shadow: var(--shadow-float); font-size: var(--fs-small); font-weight: 400; line-height: 1.45; pointer-events: none;
+}
+.grade-badge:hover .grade-tip, .grade-badge:focus-visible .grade-tip { display: block; }
 
-/* ─── Export dropdown ───────────────────────────── */
-.export-wrap { position: relative; }
-.export-dropdown { position: absolute; top: calc(100% + 6px); right: 0; background: white; border-radius: 8px; box-shadow: 0 6px 24px rgba(0,0,0,0.18); padding: 5px; display: none; flex-direction: column; min-width: 160px; z-index: 1000; }
-.export-dropdown.open { display: flex; }
-.export-dd-item { padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8571rem; font-weight: 600; color: var(--text); border: none; background: none; text-align: left; display: flex; align-items: center; gap: 8px; }
-.export-dd-item:hover { background: var(--tl-bg); color: var(--tl); }
-body.dark .export-dropdown { background: #1A1A1A; border: 1px solid #333; }
-body.dark .export-dd-item { color: #E8E8E8; }
-body.dark .export-dd-item:hover { background: #0A2C18; color: var(--tl-light); }
+/* Green renewable badge in the model list */
+.green-badge {
+  display: inline-flex; align-items: center; gap: 3px; height: 18px; margin-left: 6px; padding: 0 6px;
+  border-radius: 999px; vertical-align: middle; font-size: var(--fs-small); font-weight: 400;
+  background: var(--pill-neutral-bg); color: var(--pill-neutral-ink);
+}
+.green-badge svg { width: 12px; height: 12px; }
+.green-badge.high { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
+.green-badge.mid { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+.green-badge.low { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
 
+/* Per-column export buttons */
+.col-export { flex: none; display: flex; gap: 8px; padding: 12px var(--col-pad); border-top: 1px solid var(--rule); }
+.export-btn {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: var(--control-height); padding: 0 8px;
+  background: var(--raised); color: var(--text); border-radius: var(--radius-control);
+  font-size: var(--fs-small); font-weight: 500;
+  transition: background var(--duration);
+}
+.export-btn:hover { background: var(--border); }
+.export-btn svg { width: 14px; height: 14px; }
+
+@media (pointer: coarse) {
+  .export-btn { min-height: 44px; }
+}

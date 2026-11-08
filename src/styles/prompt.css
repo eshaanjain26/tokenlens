@@ -114,23 +114,6 @@
 .compress-cache-hit { display: none; margin-top: 10px; padding: 8px 12px; border-radius: var(--radius-control); background: var(--pill-warning-bg); color: var(--pill-warning-ink); border: 0; font-size: var(--fs-small); }
 .compress-cache-hit.visible { display: block; }
 
-#quality-bar { display: none; margin: 0; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); }
-#quality-bar.visible { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; }
-
-/* View toggle */
-.view-toggle-bar { display: flex; align-items: center; gap: 4px; margin: 0; padding: 0; background: none; border: 0; }
-.view-toggle-label { color: var(--muted); margin-right: 6px; font-size: var(--fs-small); }
-.view-toggle-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  height: var(--control-height); padding: 0 12px;
-  background: var(--raised); color: var(--muted);
-  border: 0; border-radius: var(--radius-control);
-  font-weight: 500;
-  transition: background var(--duration), color var(--duration);
-}
-.view-toggle-btn:hover:not(.active) { background: var(--border); color: var(--text); border: 0; }
-.view-toggle-btn.active { background: var(--accent); color: var(--accent-ink); border: 0; }
-
 @media (max-width: 768px) {
   .prompt-row { grid-template-columns: minmax(0, 1fr); grid-template-areas: "input" "chips" "actions"; }
   #prompt-input { min-height: 112px; }
@@ -142,7 +125,7 @@
 }
 
 @media (pointer: coarse) {
-  #mobile-menu-btn, #tpl-btn, #proj-btn, .compress-btn, .view-toggle-btn, .compress-apply-btn { min-height: 44px; }
+  #mobile-menu-btn, #tpl-btn, #proj-btn, .compress-btn, .compress-apply-btn { min-height: 44px; }
   .compress-btn { min-width: 44px; }
   .tpl-item { min-height: 44px; }
 }
