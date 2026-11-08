@@ -204,36 +204,56 @@
         <button id="tools-btn" onclick="TOAST._toggleTools()" aria-haspopup="true" aria-expanded="false" aria-controls="tools-dropdown" aria-label="Open tools menu">
           <span class="ic" data-icon="tools"></span><span class="tools-label">Tools</span><span class="ic tools-caret" data-icon="chevronDown"></span>
         </button>
-        <div id="tools-dropdown" role="menu" aria-label="Analysis tools">
-          <button class="tools-item" onclick="USAGE.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="usage"></span>Usage &amp; caching</button>
-          <button class="tools-item" onclick="FINDER.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="search"></span>Smart model finder</button>
-          <div class="tools-divider" role="separator"></div>
-          <button class="tools-item" onclick="V6.openModal('rec');TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="target"></span>Model recommender</button>
-          <button class="tools-item" onclick="V6.openModal('optimizer');TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="scissors"></span>Prompt optimizer</button>
-          <button class="tools-item" onclick="V6.openModal('scenario');TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="shuffle"></span>Scenario builder</button>
-          <button class="tools-item" onclick="V6.openModal('abtest');TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="flask"></span>A/B test mode</button>
-          <div class="tools-divider" role="separator"></div>
-          <button class="tools-item" onclick="APP.openHistory();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="clock"></span>Session history</button>
-          <button class="tools-item" onclick="APP.shareURL();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="link"></span>Share URL</button>
-          <div class="tools-divider" role="separator"></div>
-          <button class="tools-item" onclick="TOAST._openAbout();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="info"></span>About &amp; methodology</button>
-          <div class="tools-divider" role="separator"></div>
-          <button class="tools-item" onclick="APP.exportCSV();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="download"></span>Export CSV</button>
-          <button class="tools-item" onclick="APP.exportJSON();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="file"></span>Export JSON</button>
-          <div class="tools-divider" role="separator"></div>
-          <button class="tools-item" onclick="ROUTER.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="route"></span>Smart route</button>
-          <button class="tools-item" onclick="FINECALC.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="trendUp"></span>Fine-tune ROI</button>
-          <button class="tools-item" onclick="ESG.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="clipboard"></span>ESG report</button>
-          <button class="tools-item" onclick="LIVEBENCH.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="zap"></span>Live bench</button>
-          <div class="tools-divider" role="separator"></div>
-          <button class="tools-item" onclick="RBAC.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="lock"></span>Key vault &amp; teams</button>
-          <button class="tools-item" onclick="SHADOW.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="eye"></span>Shadow AI discovery</button>
-          <button class="tools-item" onclick="POLICY.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="shield"></span>Policy enforcement</button>
-          <div class="tools-divider" role="separator"></div>
-          <button class="tools-item" onclick="FORECAST.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="trendDown"></span>Cost forecast</button>
-          <button class="tools-item" onclick="BOOKMARKS.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="bookmark"></span>Bookmarked turns</button>
-          <button class="tools-item" onclick="WEBHOOKS.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="bell"></span>Alert webhooks</button>
-          <button class="tools-item" onclick="NOTES.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="note"></span>Session notes</button>
+        <div id="tools-dropdown" role="menu" aria-label="Tools">
+          <div class="tools-search">
+            <span class="ic" data-icon="search"></span>
+            <input id="tools-search" type="search" placeholder="Search tools" aria-label="Search tools" autocomplete="off" spellcheck="false">
+            <kbd aria-hidden="true">/</kbd>
+          </div>
+          <div class="tools-list">
+            <div class="tools-group" role="group" aria-labelledby="tg-analyse">
+              <div class="tools-group-label" id="tg-analyse">Analyse</div>
+              <button class="tools-item" onclick="USAGE.open();TOAST._closeTools()" role="menuitem" data-keys="tokens cache budget spend"><span class="ic" data-icon="usage"></span>Usage &amp; caching</button>
+              <button class="tools-item" onclick="APP.openProjection();TOAST._closeTools()" role="menuitem" data-keys="projection daily monthly yearly runs"><span class="ic" data-icon="coins"></span>Cost projection</button>
+              <button class="tools-item" onclick="FORECAST.open();TOAST._closeTools()" role="menuitem" data-keys="forecast budget cap days"><span class="ic" data-icon="trendDown"></span>Cost forecast</button>
+              <button class="tools-item" onclick="LIVEBENCH.open();TOAST._closeTools()" role="menuitem" data-keys="latency ttft uptime benchmark"><span class="ic" data-icon="zap"></span>Live bench</button>
+              <button class="tools-item" onclick="APP.openHistory();TOAST._closeTools()" role="menuitem" data-keys="sessions past"><span class="ic" data-icon="clock"></span>Session history</button>
+              <button class="tools-item" onclick="BOOKMARKS.open();TOAST._closeTools()" role="menuitem" data-keys="saved turns"><span class="ic" data-icon="bookmark"></span>Bookmarked turns</button>
+            </div>
+            <div class="tools-group" role="group" aria-labelledby="tg-optimise">
+              <div class="tools-group-label" id="tg-optimise">Optimise</div>
+              <button class="tools-item" onclick="FINDER.open();TOAST._closeTools()" role="menuitem" data-keys="find score priorities"><span class="ic" data-icon="search"></span>Smart model finder</button>
+              <button class="tools-item" onclick="V6.openModal('rec');TOAST._closeTools()" role="menuitem" data-keys="recommend task volume"><span class="ic" data-icon="target"></span>Model recommender</button>
+              <button class="tools-item" onclick="V6.openModal('optimizer');TOAST._closeTools()" role="menuitem" data-keys="compress prompt tokens shorten"><span class="ic" data-icon="scissors"></span>Prompt optimizer</button>
+              <button class="tools-item" onclick="ROUTER.open();TOAST._closeTools()" role="menuitem" data-keys="route complexity"><span class="ic" data-icon="route"></span>Smart route</button>
+              <button class="tools-item" onclick="V6.openModal('scenario');TOAST._closeTools()" role="menuitem" data-keys="conversation turns multi-turn"><span class="ic" data-icon="shuffle"></span>Scenario builder</button>
+              <button class="tools-item" onclick="V6.openModal('abtest');TOAST._closeTools()" role="menuitem" data-keys="variance runs consistency"><span class="ic" data-icon="flask"></span>A/B test mode</button>
+              <button class="tools-item" onclick="FINECALC.open();TOAST._closeTools()" role="menuitem" data-keys="fine-tune roi break-even training"><span class="ic" data-icon="trendUp"></span>Fine-tune ROI</button>
+            </div>
+            <div class="tools-group" role="group" aria-labelledby="tg-govern">
+              <div class="tools-group-label" id="tg-govern">Govern</div>
+              <button class="tools-item" onclick="ESG.open();TOAST._closeTools()" role="menuitem" data-keys="esg carbon report print emissions"><span class="ic" data-icon="clipboard"></span>ESG report</button>
+              <button class="tools-item" onclick="RBAC.open();TOAST._closeTools()" role="menuitem" data-keys="keys vault rbac team members projects"><span class="ic" data-icon="lock"></span>Key vault &amp; teams</button>
+              <button class="tools-item" onclick="SHADOW.open();TOAST._closeTools()" role="menuitem" data-keys="shadow ai pii traffic"><span class="ic" data-icon="eye"></span>Shadow AI discovery</button>
+              <button class="tools-item" onclick="POLICY.open();TOAST._closeTools()" role="menuitem" data-keys="policy rules enforcement"><span class="ic" data-icon="shield"></span>Policy enforcement</button>
+              <button class="tools-item" onclick="WEBHOOKS.open();TOAST._closeTools()" role="menuitem" data-keys="alerts slack webhook notify"><span class="ic" data-icon="bell"></span>Alert webhooks</button>
+            </div>
+            <div class="tools-group" role="group" aria-labelledby="tg-share">
+              <div class="tools-group-label" id="tg-share">Share</div>
+              <button class="tools-item" onclick="APP.shareURL();TOAST._closeTools()" role="menuitem" data-keys="link copy url"><span class="ic" data-icon="link"></span>Share URL</button>
+              <button class="tools-item" onclick="APP.exportCSV();TOAST._closeTools()" role="menuitem" data-keys="download spreadsheet"><span class="ic" data-icon="download"></span>Export CSV</button>
+              <button class="tools-item" onclick="APP.exportJSON();TOAST._closeTools()" role="menuitem" data-keys="download data"><span class="ic" data-icon="file"></span>Export JSON</button>
+              <button class="tools-item" onclick="NOTES.open();TOAST._closeTools()" role="menuitem" data-keys="notes jot"><span class="ic" data-icon="note"></span>Session notes</button>
+              <button class="tools-item" onclick="TOAST._openAbout();TOAST._closeTools()" role="menuitem" data-keys="methodology help"><span class="ic" data-icon="info"></span>About &amp; methodology</button>
+            </div>
+            <div class="tools-empty" id="tools-empty" hidden>No tools match that search.</div>
+          </div>
+          <div class="tools-foot" aria-hidden="true">
+            <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> Move</span>
+            <span><kbd>&crarr;</kbd> Open</span>
+            <span><kbd>/</kbd> Search</span>
+            <span><kbd>Esc</kbd> Close</span>
+          </div>
         </div>
       </div>
       <button id="dark-toggle" onclick="APP.toggleDark()" title="Toggle dark or light mode" aria-label="Toggle dark mode">
@@ -246,164 +266,177 @@
 
   <!-- History Overlay -->
   <div id="history-overlay" class="tl-overlay" onclick="if(event.target===this)APP.closeHistory()">
-    <div id="history-modal" class="tl-dialog">
-      <div class="hm-head">
-        <h3>Session history</h3>
+    <div id="history-modal" class="tl-dialog tool-dialog">
+      <div class="tl-head">
+        <h2>Session history</h2>
         <button class="tl-close" onclick="APP.closeHistory()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
       </div>
-      <div class="hm-body" id="history-list"></div>
-      <div class="hm-actions">
-        <button class="hm-clear-btn" onclick="APP.clearHistory()">Clear all history</button>
+      <div class="tl-body">
+        <p class="tl-lede">Sessions are saved after every prompt. Each row shows the turns, spend and models of one session.</p>
+        <div id="history-list"></div>
+      </div>
+      <div class="tl-foot">
+        <button class="tl-btn secondary danger" data-confirm="Click again to clear all" onclick="APP.clearHistory()">Clear all history</button>
       </div>
     </div>
   </div>
 
   <!-- Cost Projection Modal -->
   <div id="projection-overlay" class="tl-overlay" onclick="if(event.target===this)APP.closeProjection()">
-    <div id="projection-modal" class="tl-dialog">
-      <div class="pm-head">
-        <h3>Cost projection</h3>
+    <div id="projection-modal" class="tl-dialog tool-dialog">
+      <div class="tl-head">
+        <h2>Cost projection</h2>
         <button class="tl-close" onclick="APP.closeProjection()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
       </div>
-      <div class="pm-body">
-        <div class="pm-input-row">
-          <label>Daily prompt runs:</label>
-          <input type="number" id="proj-runs" value="1000" min="1" oninput="APP.updateProjection()">
-          <label style="margin-left:8px">Avg input tokens:</label>
-          <input type="number" id="proj-in" value="500" min="1" oninput="APP.updateProjection()">
-          <label style="margin-left:8px">Avg output tokens:</label>
-          <input type="number" id="proj-out" value="300" min="1" oninput="APP.updateProjection()">
+      <div class="tl-body">
+        <p class="tl-lede">Estimate spend for a steady workload on every selected model. Results update as you type.</p>
+        <div class="tl-form three">
+          <div class="tl-field"><label class="tl-label" for="proj-runs">Runs per day</label><input class="tl-input" type="number" id="proj-runs" value="1000" min="1" inputmode="numeric" oninput="APP.updateProjection()"></div>
+          <div class="tl-field"><label class="tl-label" for="proj-in">Input tokens per run</label><input class="tl-input" type="number" id="proj-in" value="500" min="1" inputmode="numeric" oninput="APP.updateProjection()"></div>
+          <div class="tl-field"><label class="tl-label" for="proj-out">Output tokens per run</label><input class="tl-input" type="number" id="proj-out" value="300" min="1" inputmode="numeric" oninput="APP.updateProjection()"></div>
         </div>
-        <div id="proj-table-wrap"></div>
+        <div class="tl-toolbar">
+          <div class="tl-seg" role="group" aria-label="Highlight period" data-for="proj-table-wrap" data-attr="period" data-persist="proj_period">
+            <button type="button" data-v="d" aria-pressed="false">Day</button>
+            <button type="button" data-v="m" aria-pressed="true">Month</button>
+            <button type="button" data-v="y" aria-pressed="false">Year</button>
+          </div>
+          <button type="button" class="tl-btn secondary sm" id="proj-copy" onclick="APP.copyProjection()"><span class="ic" data-icon="copy"></span>Copy table</button>
+        </div>
+        <div id="proj-table-wrap" data-period="m"></div>
       </div>
     </div>
   </div>
 
   <!-- Model Recommender Modal -->
   <div class="v6-overlay tl-overlay" id="rec-overlay" onclick="if(event.target===this)V6.closeModal('rec')">
-    <div class="v6-modal tl-dialog">
-      <div class="v6-head"><h3>Model recommendation engine</h3><button class="tl-close v6-close" onclick="V6.closeModal('rec')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
-      <div class="v6-body">
-        <div class="rec-form">
-          <div class="rec-field"><label>Primary task type</label>
-            <select id="rec-task">
-              <option value="code">💻 Code generation / debugging</option>
-              <option value="chat">💬 Conversational / chatbot</option>
-              <option value="analysis">📊 Data analysis / reasoning</option>
-              <option value="writing">📝 Long-form writing / essays</option>
-              <option value="summary">📌 Summarization / extraction</option>
-              <option value="translate">🌍 Translation / multilingual</option>
-              <option value="rag">🔍 RAG / document Q&A</option>
-              <option value="vision">👁 Vision / multimodal</option>
+    <div class="v6-modal tl-dialog tool-dialog">
+      <div class="tl-head"><h2>Model recommender</h2><button class="tl-close v6-close" onclick="V6.closeModal('rec')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
+      <div class="tl-body">
+        <p class="tl-lede">Describe the workload and the three best-fitting models are ranked below. Results update when you change an answer.</p>
+        <div class="tl-form">
+          <div class="tl-field"><label class="tl-label" for="rec-task">Primary task</label>
+            <select class="tl-select" id="rec-task" onchange="V6.runRecommender()">
+              <option value="code">Code generation and debugging</option>
+              <option value="chat">Conversation and chatbots</option>
+              <option value="analysis">Data analysis and reasoning</option>
+              <option value="writing">Long-form writing</option>
+              <option value="summary">Summarization and extraction</option>
+              <option value="translate">Translation and multilingual</option>
+              <option value="rag">RAG and document Q&amp;A</option>
+              <option value="vision">Vision and multimodal</option>
             </select></div>
-          <div class="rec-field"><label>Daily request volume</label>
-            <select id="rec-vol">
-              <option value="low">Low (&lt; 1,000 / day)</option>
-              <option value="medium" selected>Medium (1K – 100K / day)</option>
-              <option value="high">High (100K – 1M / day)</option>
-              <option value="massive">Massive (&gt; 1M / day)</option>
+          <div class="tl-field"><label class="tl-label" for="rec-vol">Daily request volume</label>
+            <select class="tl-select" id="rec-vol" onchange="V6.runRecommender()">
+              <option value="low">Low (under 1,000 per day)</option>
+              <option value="medium" selected>Medium (1K to 100K per day)</option>
+              <option value="high">High (100K to 1M per day)</option>
+              <option value="massive">Massive (over 1M per day)</option>
             </select></div>
-          <div class="rec-field"><label>Monthly budget (USD)</label>
-            <select id="rec-budget">
+          <div class="tl-field"><label class="tl-label" for="rec-budget">Monthly budget</label>
+            <select class="tl-select" id="rec-budget" onchange="V6.runRecommender()">
               <option value="10">Under $10</option>
               <option value="100">Under $100</option>
               <option value="500" selected>Under $500</option>
               <option value="5000">Under $5,000</option>
               <option value="99999">No limit</option>
             </select></div>
-          <div class="rec-field"><label>Latency priority</label>
-            <select id="rec-latency">
-              <option value="fast">⚡ Fast (real-time UX required)</option>
-              <option value="normal" selected>🕐 Normal (async OK)</option>
-              <option value="slow">🐢 Batch (minutes acceptable)</option>
+          <div class="tl-field"><label class="tl-label" for="rec-latency">Latency priority</label>
+            <select class="tl-select" id="rec-latency" onchange="V6.runRecommender()">
+              <option value="fast">Fast (real-time UX)</option>
+              <option value="normal" selected>Normal (async is fine)</option>
+              <option value="slow">Batch (minutes are fine)</option>
             </select></div>
-          <div class="rec-field"><label>Context window needs</label>
-            <select id="rec-ctx">
-              <option value="small">Small (&lt; 16K tokens)</option>
-              <option value="medium" selected>Medium (16K – 128K)</option>
-              <option value="large">Large (128K – 1M+)</option>
+          <div class="tl-field"><label class="tl-label" for="rec-ctx">Context window</label>
+            <select class="tl-select" id="rec-ctx" onchange="V6.runRecommender()">
+              <option value="small">Small (under 16K tokens)</option>
+              <option value="medium" selected>Medium (16K to 128K)</option>
+              <option value="large">Large (128K to 1M+)</option>
             </select></div>
-          <div class="rec-field"><label>Sustainability priority</label>
-            <select id="rec-eco">
+          <div class="tl-field"><label class="tl-label" for="rec-eco">Sustainability priority</label>
+            <select class="tl-select" id="rec-eco" onchange="V6.runRecommender()">
               <option value="low">Not a priority</option>
               <option value="medium" selected>Moderate (prefer lower CO₂)</option>
-              <option value="high">High (minimize environmental impact)</option>
+              <option value="high">High (minimise impact)</option>
             </select></div>
-          <button class="rec-run-btn" onclick="V6.runRecommender()">Find my best models</button>
         </div>
-        <div id="rec-results"></div>
+        <div class="tl-block" id="rec-results" aria-live="polite"></div>
       </div>
     </div>
   </div>
 
   <!-- Prompt Optimizer Modal -->
   <div class="v6-overlay tl-overlay" id="optimizer-overlay" onclick="if(event.target===this)V6.closeModal('optimizer')">
-    <div class="v6-modal tl-dialog wide">
-      <div class="v6-head"><h3>Prompt optimizer</h3><button class="tl-close v6-close" onclick="V6.closeModal('optimizer')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
-      <div class="v6-body">
-        <p style="font-size:11px;color:var(--text-2);margin-bottom:14px">Paste a verbose prompt and get a compressed version achieving the same intent at fewer tokens. Savings are calculated for all active models.</p>
+    <div class="v6-modal tl-dialog tool-dialog xl">
+      <div class="tl-head"><h2>Prompt optimizer</h2><button class="tl-close v6-close" onclick="V6.closeModal('optimizer')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
+      <div class="tl-body">
+        <p class="tl-lede">Paste a verbose prompt to see a shorter version with the same intent. Savings are priced for every active model.</p>
         <div class="opt-layout">
-          <div class="opt-pane">
-            <label>📥 Original prompt</label>
-            <textarea class="opt-textarea" id="opt-original" placeholder="Paste your verbose prompt here…"></textarea>
-            <button class="opt-run-btn" onclick="V6.runOptimizer()">Optimize</button>
-            <div class="opt-stats" id="opt-orig-stats"></div>
+          <div class="tl-field">
+            <label class="tl-label" for="opt-original">Original prompt</label>
+            <textarea class="tl-textarea opt-textarea" id="opt-original" placeholder="Paste your prompt here" oninput="V6.liveOptimize()"></textarea>
           </div>
-          <div class="opt-pane">
-            <label>✅ Optimized prompt</label>
-            <textarea class="opt-textarea" id="opt-result" placeholder="Optimized version will appear here…" readonly></textarea>
-            <div class="opt-stats" id="opt-result-stats"></div>
-            <div id="opt-savings" style="margin-top:8px;font-size:11px;color:var(--green);font-weight:700"></div>
+          <div class="tl-field">
+            <label class="tl-label" for="opt-result">Optimized prompt</label>
+            <textarea class="tl-textarea opt-textarea" id="opt-result" placeholder="The shorter version appears here" readonly></textarea>
           </div>
         </div>
-        <div id="opt-model-savings" style="margin-top:14px"></div>
+        <div class="tl-actions opt-actions">
+          <button type="button" class="tl-btn" onclick="V6.runOptimizer()">Optimize</button>
+          <button type="button" class="tl-btn secondary" onclick="V6.copyOptimized()"><span class="ic" data-icon="copy"></span>Copy optimized</button>
+          <button type="button" class="tl-btn secondary" onclick="V6.useOptimized()">Use as prompt</button>
+        </div>
+        <div class="tl-block" id="opt-stats-wrap" aria-live="polite"></div>
+        <div class="tl-block" id="opt-model-savings"><div class="tl-empty">Paste a prompt above to see the shorter version and what it saves.</div></div>
       </div>
     </div>
   </div>
 
   <!-- Multi-turn Scenario Builder Modal -->
   <div class="v6-overlay tl-overlay" id="scenario-overlay" onclick="if(event.target===this)V6.closeModal('scenario')">
-    <div class="v6-modal tl-dialog wide">
-      <div class="v6-head"><h3>Multi-turn scenario builder</h3><button class="tl-close v6-close" onclick="V6.closeModal('scenario')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
-      <div class="v6-body">
-        <p style="font-size:11px;color:var(--text-2);margin-bottom:14px">Design a conversation flow, pick models, and project total cost + tokens before running it.</p>
-        <div class="scenario-layout">
-          <div>
-            <div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:8px">Conversation turns</div>
-            <div class="scenario-turns-list" id="scenario-turns-list"></div>
-            <button class="scenario-add-btn" onclick="V6.scenarioAddTurn()" style="margin-top:8px">+ Add turn</button>
+    <div class="v6-modal tl-dialog tool-dialog xl">
+      <div class="tl-head"><h2>Scenario builder</h2><button class="tl-close v6-close" onclick="V6.closeModal('scenario')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
+      <div class="tl-body">
+        <p class="tl-lede">Design a conversation, pick up to three models and project total cost and tokens before you run it.</p>
+        <section class="tl-block">
+          <div class="tl-block-head"><div><h3 class="tl-h">1. Conversation turns</h3><p class="tl-sub">Each turn re-sends the history, so cost grows with every message.</p></div></div>
+          <div class="scenario-turns-list" id="scenario-turns-list"></div>
+          <button type="button" class="tl-btn secondary sm scenario-add-btn" onclick="V6.scenarioAddTurn()"><span class="ic" data-icon="plus"></span>Add turn</button>
+        </section>
+        <section class="tl-block">
+          <div class="tl-block-head"><div><h3 class="tl-h">2. Models</h3><p class="tl-sub">Model A is required. B and C are optional comparisons.</p></div></div>
+          <div class="tl-form three scenario-model-sel">
+            <div class="tl-field"><label class="tl-label" for="scenario-model-a">Model A</label><select class="tl-select" id="scenario-model-a" onchange="V6.scenarioRefresh()"><option value="">Select a model</option></select></div>
+            <div class="tl-field"><label class="tl-label" for="scenario-model-b">Model B</label><select class="tl-select" id="scenario-model-b" onchange="V6.scenarioRefresh()"><option value="">None</option></select></div>
+            <div class="tl-field"><label class="tl-label" for="scenario-model-c">Model C</label><select class="tl-select" id="scenario-model-c" onchange="V6.scenarioRefresh()"><option value="">None</option></select></div>
           </div>
-          <div>
-            <div class="scenario-model-sel">
-              <label>Compare models</label>
-              <select id="scenario-model-a"><option value="">— Model A —</option></select>
-              <select id="scenario-model-b" style="margin-top:6px"><option value="">— Model B (optional) —</option></select>
-              <select id="scenario-model-c" style="margin-top:6px"><option value="">— Model C (optional) —</option></select>
-            </div>
-            <button class="scenario-run-btn" onclick="V6.runScenario()">Project costs</button>
-            <div class="scenario-results" id="scenario-results"></div>
-          </div>
-        </div>
+          <div class="tl-actions" style="margin-top:16px"><button type="button" class="tl-btn scenario-run-btn" onclick="V6.runScenario()">Project costs</button></div>
+        </section>
+        <section class="tl-block">
+          <div class="tl-block-head"><div><h3 class="tl-h">3. Projection</h3><p class="tl-sub">Input, output and running context for each turn.</p></div><button type="button" class="tl-btn secondary sm" id="scenario-copy" onclick="V6.copyScenario()" hidden><span class="ic" data-icon="copy"></span>Copy</button></div>
+          <div class="scenario-results" id="scenario-results" aria-live="polite"><div class="tl-empty">Choose a model and select Project costs.</div></div>
+        </section>
       </div>
     </div>
   </div>
 
   <!-- A/B Test Mode Modal -->
   <div class="v6-overlay tl-overlay" id="abtest-overlay" onclick="if(event.target===this)V6.closeModal('abtest')">
-    <div class="v6-modal tl-dialog wide">
-      <div class="v6-head"><h3>A/B test mode</h3><button class="tl-close v6-close" onclick="V6.closeModal('abtest')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
-      <div class="v6-body">
-        <p style="font-size:11px;color:var(--text-2);margin-bottom:14px">Run the same prompt multiple times per model to measure output variance — length, cost, and consistency.</p>
-        <div class="ab-config">
-          <div class="ab-field"><label>Model to test</label>
-            <select id="ab-model"><option value="">— select model —</option></select></div>
-          <div class="ab-field"><label>Runs (3–5 recommended)</label>
-            <select id="ab-runs"><option value="3">3 runs</option><option value="5" selected>5 runs</option><option value="10">10 runs</option></select></div>
-          <div class="ab-field" style="grid-column:1/-1"><label>Prompt to test</label>
-            <textarea id="ab-prompt">Explain the difference between supervised and unsupervised machine learning in 2-3 sentences.</textarea></div>
-          <button class="ab-run-btn" onclick="V6.runABTest()">Run A/B test</button>
+    <div class="v6-modal tl-dialog tool-dialog xl">
+      <div class="tl-head"><h2>A/B test mode</h2><button class="tl-close v6-close" onclick="V6.closeModal('abtest')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
+      <div class="tl-body">
+        <p class="tl-lede">Run one prompt several times on a single model to measure how much the output length, cost and consistency vary.</p>
+        <div class="tl-form ab-config">
+          <div class="tl-field"><label class="tl-label" for="ab-model">Model to test</label><select class="tl-select" id="ab-model"><option value="">Select a model</option></select></div>
+          <div class="tl-field"><label class="tl-label" for="ab-runs">Runs</label><select class="tl-select" id="ab-runs"><option value="3">3 runs</option><option value="5" selected>5 runs</option><option value="10">10 runs</option></select></div>
+          <div class="tl-field full"><label class="tl-label" for="ab-prompt">Prompt to test</label>
+            <textarea class="tl-textarea" id="ab-prompt">Explain the difference between supervised and unsupervised machine learning in 2-3 sentences.</textarea></div>
         </div>
-        <div id="ab-results"></div>
+        <div class="tl-actions" style="margin-top:16px">
+          <button type="button" class="tl-btn ab-run-btn" onclick="V6.runABTest()">Run A/B test</button>
+          <span class="pill tl-sample" title="Responses are simulated, not sent to a provider">Simulated responses</span>
+        </div>
+        <div class="tl-block" id="ab-results" aria-live="polite"></div>
       </div>
     </div>
   </div>
@@ -960,42 +993,43 @@
 
   <!-- Smart Model Finder Modal -->
   <div id="finder-overlay" class="tl-overlay" role="dialog" aria-modal="true" aria-labelledby="finder-title" onclick="if(event.target===this)FINDER.close()">
-    <div id="finder-modal" class="tl-dialog">
-      <div class="finder-head">
-        <div style="flex:1">
-          <h2 id="finder-title" style="font-size:18px;font-weight:900;margin-bottom:4px">Smart model finder</h2>
-          <p style="font-size:12px;opacity:0.8">Set your priorities — TokenLens scores all loaded models and finds your best match.</p>
-        </div>
+    <div id="finder-modal" class="tl-dialog tool-dialog xl">
+      <div class="tl-head">
+        <h2 id="finder-title">Smart model finder</h2>
         <button class="tl-close finder-close" onclick="FINDER.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
       </div>
-      <div class="finder-body">
+      <div class="tl-body">
+        <p class="tl-lede">Set your priorities and every loaded model is scored against them. The ranking updates as you move a slider.</p>
         <div class="finder-sliders">
-          <div class="finder-slider">
-            <label>💰 Cost Sensitivity <span id="fs-cost-val">50</span>%</label>
-            <input id="fs-cost" type="range" min="0" max="100" value="50" oninput="document.getElementById('fs-cost-val').textContent=this.value;FINDER.run()">
+          <div class="tl-field">
+            <div class="tl-row-label"><label class="tl-label" for="fs-cost">Cost sensitivity</label><span class="tl-label"><span class="val" id="fs-cost-val">50</span>%</span></div>
+            <input class="tl-range" id="fs-cost" type="range" min="0" max="100" value="50" oninput="document.getElementById('fs-cost-val').textContent=this.value;FINDER.run()">
           </div>
-          <div class="finder-slider">
-            <label>🌱 Sustainability Priority <span id="fs-eco-val">50</span>%</label>
-            <input id="fs-eco" type="range" min="0" max="100" value="50" oninput="document.getElementById('fs-eco-val').textContent=this.value;FINDER.run()">
+          <div class="tl-field">
+            <div class="tl-row-label"><label class="tl-label" for="fs-eco">Sustainability priority</label><span class="tl-label"><span class="val" id="fs-eco-val">50</span>%</span></div>
+            <input class="tl-range" id="fs-eco" type="range" min="0" max="100" value="50" oninput="document.getElementById('fs-eco-val').textContent=this.value;FINDER.run()">
           </div>
-          <div class="finder-slider">
-            <label>⚡ Speed Priority <span id="fs-speed-val">50</span>%</label>
-            <input id="fs-speed" type="range" min="0" max="100" value="50" oninput="document.getElementById('fs-speed-val').textContent=this.value;FINDER.run()">
+          <div class="tl-field">
+            <div class="tl-row-label"><label class="tl-label" for="fs-speed">Speed priority</label><span class="tl-label"><span class="val" id="fs-speed-val">50</span>%</span></div>
+            <input class="tl-range" id="fs-speed" type="range" min="0" max="100" value="50" oninput="document.getElementById('fs-speed-val').textContent=this.value;FINDER.run()">
           </div>
-          <div class="finder-slider">
-            <label>📄 Context Size Needed <span id="fs-ctx-val">50</span>%</label>
-            <input id="fs-ctx" type="range" min="0" max="100" value="50" oninput="document.getElementById('fs-ctx-val').textContent=this.value;FINDER.run()">
+          <div class="tl-field">
+            <div class="tl-row-label"><label class="tl-label" for="fs-ctx">Context size needed</label><span class="tl-label"><span class="val" id="fs-ctx-val">50</span>%</span></div>
+            <input class="tl-range" id="fs-ctx" type="range" min="0" max="100" value="50" oninput="document.getElementById('fs-ctx-val').textContent=this.value;FINDER.run()">
           </div>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;padding:0 18px 12px">
-          <button class="finder-chip on" id="fchip-all" onclick="FINDER.chipAll()">All Models</button>
-          <button class="finder-chip" id="fchip-openai" onclick="FINDER.chipProvider('openai')">OpenAI</button>
-          <button class="finder-chip" id="fchip-anthropic" onclick="FINDER.chipProvider('anthropic')">Anthropic</button>
-          <button class="finder-chip" id="fchip-google" onclick="FINDER.chipProvider('google')">Google</button>
-          <button class="finder-chip" id="fchip-meta" onclick="FINDER.chipProvider('meta')">Meta</button>
-          <button class="finder-chip" id="fchip-mistral" onclick="FINDER.chipProvider('mistralai')">Mistral</button>
+        <div class="tl-toolbar" style="margin-top:20px">
+          <div class="tl-seg finder-filters" role="group" aria-label="Provider filter">
+            <button type="button" class="finder-chip on" id="fchip-all" aria-pressed="true" onclick="FINDER.chipAll()">All models</button>
+            <button type="button" class="finder-chip" id="fchip-openai" aria-pressed="false" onclick="FINDER.chipProvider('openai')">OpenAI</button>
+            <button type="button" class="finder-chip" id="fchip-anthropic" aria-pressed="false" onclick="FINDER.chipProvider('anthropic')">Anthropic</button>
+            <button type="button" class="finder-chip" id="fchip-google" aria-pressed="false" onclick="FINDER.chipProvider('google')">Google</button>
+            <button type="button" class="finder-chip" id="fchip-meta" aria-pressed="false" onclick="FINDER.chipProvider('meta')">Meta</button>
+            <button type="button" class="finder-chip" id="fchip-mistral" aria-pressed="false" onclick="FINDER.chipProvider('mistralai')">Mistral</button>
+          </div>
+          <button type="button" class="tl-btn secondary sm" onclick="FINDER.copy()"><span class="ic" data-icon="copy"></span>Copy ranking</button>
         </div>
-        <div id="finder-results" style="padding:0 18px 18px"></div>
+        <div id="finder-results" aria-live="polite"></div>
       </div>
     </div>
   </div>
@@ -1004,71 +1038,78 @@
 
 <!-- ── Usage & Impact Panel ───────────────────────── -->
 <div id="usage-overlay" class="tl-overlay" onclick="if(event.target===this)USAGE.close()" role="dialog" aria-modal="true" aria-labelledby="usage-title">
-  <div id="usage-modal" class="tl-dialog">
-    <div class="ux-head">
+  <div id="usage-modal" class="tl-dialog tool-dialog">
+    <div class="tl-head">
       <h2 id="usage-title">Usage</h2>
-      <div class="ux-head-r">
+      <div class="tl-head-actions">
         <button class="tl-close ux-icon" onclick="USAGE.copy()" title="Copy summary" aria-label="Copy usage summary"><span class="ic" data-icon="copy"></span></button>
-        <button class="tl-close ux-icon" onclick="USAGE.close()" title="Close" aria-label="Close usage panel"><span class="ic" data-icon="x"></span></button>
       </div>
+      <button class="tl-close ux-icon" onclick="USAGE.close()" title="Close" aria-label="Close usage panel"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div class="ux-body" id="usage-body"></div>
+    <div class="tl-body" id="usage-body"></div>
   </div>
 </div>
 
 <!-- ── Feature 1: Smart Route Modal ─────────────── -->
 <div id="router-overlay" class="tl-overlay" onclick="if(event.target===this)ROUTER.close()">
-  <div id="router-modal" class="tl-dialog">
-    <div class="router-head">
-      <span class="ic head-ic" data-icon="route"></span>
-      <h2>Smart Route Engine</h2>
+  <div id="router-modal" class="tl-dialog tool-dialog">
+    <div class="tl-head">
+      <h2>Smart route</h2>
       <button class="tl-close" onclick="ROUTER.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div class="router-body">
-      <p style="font-size:12px;color:var(--text-2);margin:0 0 10px">Paste your prompt below. The engine analyzes complexity and routes to the optimal model from your selection.</p>
-      <textarea id="router-input" placeholder="Paste your prompt here to analyze routing…"></textarea>
-      <button class="router-analyze-btn" onclick="ROUTER.analyze()">Analyze &amp; Route ▶</button>
-      <div id="router-results"></div>
+    <div class="tl-body">
+      <p class="tl-lede">Paste a prompt. The router judges its complexity and picks the best fit from your selected models.</p>
+      <div class="tl-field">
+        <label class="tl-label" for="router-input">Prompt</label>
+        <textarea class="tl-textarea" id="router-input" placeholder="Paste your prompt here" oninput="ROUTER.live()"></textarea>
+      </div>
+      <div class="tl-actions" style="margin-top:12px">
+        <button type="button" class="tl-btn" onclick="ROUTER.analyze()">Analyze and route</button>
+        <button type="button" class="tl-btn secondary" id="router-copy" onclick="ROUTER.copy()" hidden><span class="ic" data-icon="copy"></span>Copy result</button>
+      </div>
+      <div id="router-results" aria-live="polite"></div>
     </div>
   </div>
 </div>
 
 <!-- ── Feature 3: Fine-Tune ROI Modal ────────────── -->
 <div id="finecalc-overlay" class="tl-overlay" onclick="if(event.target===this)FINECALC.close()">
-  <div id="finecalc-modal" class="tl-dialog">
-    <div class="fc-head">
-      <span class="ic head-ic" data-icon="trendUp"></span>
-      <h2>Fine-Tune ROI Calculator</h2>
+  <div id="finecalc-modal" class="tl-dialog tool-dialog">
+    <div class="tl-head">
+      <h2>Fine-tune ROI</h2>
       <button class="tl-close" onclick="FINECALC.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div class="fc-body">
-      <p style="font-size:12px;color:var(--text-2);margin:0 0 14px">Calculate when training a custom open-source model becomes cheaper than paying commercial API rates.</p>
-      <div class="fc-inputs">
-        <div class="fc-field"><label>Monthly API Spend ($)</label><input id="fc-spend" type="number" value="2000" min="100" oninput="FINECALC.render()"></div>
-        <div class="fc-field"><label>Monthly Request Volume</label><input id="fc-volume" type="number" value="100000" min="1000" oninput="FINECALC.render()"></div>
-        <div class="fc-field"><label>Avg Tokens / Request</label><input id="fc-tokens" type="number" value="500" min="50" oninput="FINECALC.render()"></div>
-        <div class="fc-field"><label>Model Tier</label>
-          <select id="fc-tier" onchange="FINECALC.render()">
+    <div class="tl-body">
+      <p class="tl-lede">See when training a custom open-source model becomes cheaper than paying commercial API rates.</p>
+      <div class="tl-form fc-inputs">
+        <div class="tl-field fc-field"><label class="tl-label" for="fc-spend">Monthly API spend (USD)</label><input class="tl-input" id="fc-spend" type="number" value="2000" min="100" inputmode="decimal" oninput="FINECALC.render()"><div class="tl-error" id="fc-spend-err"></div></div>
+        <div class="tl-field fc-field"><label class="tl-label" for="fc-volume">Monthly requests</label><input class="tl-input" id="fc-volume" type="number" value="100000" min="1000" inputmode="numeric" oninput="FINECALC.render()"><div class="tl-error" id="fc-volume-err"></div></div>
+        <div class="tl-field fc-field"><label class="tl-label" for="fc-tokens">Average tokens per request</label><input class="tl-input" id="fc-tokens" type="number" value="500" min="50" inputmode="numeric" oninput="FINECALC.render()"><div class="tl-error" id="fc-tokens-err"></div></div>
+        <div class="tl-field fc-field"><label class="tl-label" for="fc-tier">Model tier</label>
+          <select class="tl-select" id="fc-tier" onchange="FINECALC.render()">
             <option value="gpt4">GPT-4 class</option>
             <option value="claude">Claude class</option>
             <option value="gemini">Gemini class</option>
           </select>
         </div>
       </div>
-      <div id="fc-results"></div>
+      <div id="fc-results" data-h="24"></div>
     </div>
   </div>
 </div>
 
 <!-- ── Feature 4: ESG Report Modal ───────────────── -->
 <div id="esg-overlay" class="tl-overlay" onclick="if(event.target===this)ESG.close()">
-  <div id="esg-modal" class="tl-dialog">
-    <div class="esg-head">
-      <span class="ic head-ic" data-icon="clipboard"></span>
-      <h2>Audit-Ready ESG Report</h2>
+  <div id="esg-modal" class="tl-dialog tool-dialog xl">
+    <div class="tl-head">
+      <h2>ESG report</h2>
+      <div class="tl-head-actions esg-actions">
+        <button type="button" class="tl-btn secondary sm" onclick="ESG.downloadJSON()" aria-label="Download JSON"><span class="ic" data-icon="download"></span><span class="lbl">Download JSON</span></button>
+        <button type="button" class="tl-btn sm" onclick="ESG.printReport()" aria-label="Print report"><span class="ic" data-icon="printer"></span><span class="lbl">Print</span></button>
+      </div>
       <button class="tl-close" onclick="ESG.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div class="esg-body" id="esg-body"></div>
+    <div class="tl-body" id="esg-body"></div>
   </div>
 </div>
 
@@ -1088,75 +1129,78 @@
 
 <!-- ── Enterprise: RBAC & Key Vault Modal ──────── -->
 <div id="rbac-overlay" class="tl-overlay" onclick="if(event.target===this)RBAC.close()">
-  <div id="rbac-modal" class="tl-dialog">
-    <div class="rbac-head">
-      <span class="ic head-ic" data-icon="lock"></span>
-      <h2>Key Vault &amp; Team Management</h2>
+  <div id="rbac-modal" class="tl-dialog tool-dialog xl">
+    <div class="tl-head">
+      <h2>Key vault and teams</h2>
+      <div class="tl-head-actions"><span class="pill tl-sample" title="Keys, members and projects shown here are illustrative">Sample data</span></div>
       <button class="tl-close" onclick="RBAC.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div class="rbac-body">
-      <div class="rbac-tabs">
-        <button class="rbac-tab active" id="rbac-tab-vault"    onclick="RBAC.switchTab('vault')">🔑 API Key Vault</button>
-        <button class="rbac-tab"        id="rbac-tab-members"  onclick="RBAC.switchTab('members')">👥 Team Members</button>
-        <button class="rbac-tab"        id="rbac-tab-projects" onclick="RBAC.switchTab('projects')">📁 Projects</button>
+    <div class="tl-body">
+      <p class="tl-lede">Provision provider keys, set budget caps and manage who can use them.</p>
+      <div class="tl-seg rbac-tabs" role="tablist" aria-label="Key vault sections">
+        <button class="rbac-tab active" id="rbac-tab-vault" role="tab" aria-selected="true" aria-controls="rbac-panel-vault" onclick="RBAC.switchTab('vault')">API keys</button>
+        <button class="rbac-tab" id="rbac-tab-members" role="tab" aria-selected="false" aria-controls="rbac-panel-members" onclick="RBAC.switchTab('members')">Team members</button>
+        <button class="rbac-tab" id="rbac-tab-projects" role="tab" aria-selected="false" aria-controls="rbac-panel-projects" onclick="RBAC.switchTab('projects')">Projects</button>
       </div>
-      <div class="rbac-panel active" id="rbac-panel-vault"></div>
-      <div class="rbac-panel"        id="rbac-panel-members"></div>
-      <div class="rbac-panel"        id="rbac-panel-projects"></div>
+      <div class="rbac-panel active" id="rbac-panel-vault" role="tabpanel" aria-labelledby="rbac-tab-vault"></div>
+      <div class="rbac-panel" id="rbac-panel-members" role="tabpanel" aria-labelledby="rbac-tab-members"></div>
+      <div class="rbac-panel" id="rbac-panel-projects" role="tabpanel" aria-labelledby="rbac-tab-projects"></div>
     </div>
   </div>
 </div>
 
 <!-- ── Enterprise: Shadow AI Discovery Modal ────── -->
 <div id="shadow-overlay" class="tl-overlay" onclick="if(event.target===this)SHADOW.close()">
-  <div id="shadow-modal" class="tl-dialog">
-    <div class="shadow-head">
-      <span class="ic head-ic" data-icon="eye"></span>
-      <h2>Shadow AI Discovery</h2>
+  <div id="shadow-modal" class="tl-dialog tool-dialog xl">
+    <div class="tl-head">
+      <h2>Shadow AI discovery</h2>
+      <div class="tl-head-actions"><span class="pill tl-sample" title="Traffic and findings are illustrative, not read from your network">Sample data</span></div>
       <button class="tl-close" onclick="SHADOW.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div class="shadow-body" id="shadow-body">
-      <p style="color:var(--text-2);font-size:12px">Loading traffic data…</p>
+    <div class="tl-body" id="shadow-body">
+      <div class="tl-skel" aria-label="Loading traffic data"><i></i><i></i><i></i></div>
     </div>
   </div>
 </div>
 
 <!-- ── Enterprise: Policy Enforcement Modal ──────── -->
 <div id="policy-overlay" class="tl-overlay" onclick="if(event.target===this)POLICY.close()">
-  <div id="policy-modal" class="tl-dialog">
-    <div class="policy-head">
-      <span class="ic head-ic" data-icon="shield"></span>
-      <h2>Policy Enforcement Engine</h2>
+  <div id="policy-modal" class="tl-dialog tool-dialog xl">
+    <div class="tl-head">
+      <h2>Policy enforcement</h2>
+      <div class="tl-head-actions"><span class="pill tl-sample" title="Rules and counts shown here are illustrative">Sample data</span></div>
       <button class="tl-close" onclick="POLICY.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div class="policy-body" id="policy-body">
-      <p style="color:var(--text-2);font-size:12px">Loading policies…</p>
+    <div class="tl-body" id="policy-body">
+      <div class="tl-skel" aria-label="Loading policies"><i></i><i></i><i></i></div>
     </div>
   </div>
 </div>
 
 <!-- ── Enhancement 2: Bookmarks Modal ────────────── -->
 <div id="bookmarks-overlay" class="tl-overlay" onclick="if(event.target===this)BOOKMARKS.close()">
-  <div id="bookmarks-modal" class="tl-dialog">
-    <div class="bk-head">
-      <span class="ic head-ic" data-icon="bookmark"></span>
-      <h2>Bookmarked Turns</h2>
+  <div id="bookmarks-modal" class="tl-dialog tool-dialog">
+    <div class="tl-head">
+      <h2>Bookmarked turns</h2>
       <button class="tl-close" onclick="BOOKMARKS.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div id="bookmarks-list"></div>
+    <div class="tl-body">
+      <p class="tl-lede">Turns you bookmark from a response card, with the notes you attached.</p>
+      <div id="bookmarks-list"></div>
+    </div>
   </div>
 </div>
 
 <!-- ── Enhancement 3: Cost Forecast Modal ─────────── -->
 <div id="forecast-overlay" class="tl-overlay" onclick="if(event.target===this)FORECAST.close()">
-  <div id="forecast-modal" class="tl-dialog">
-    <div class="fc2-head">
-      <span class="ic head-ic" data-icon="trendDown"></span>
-      <h2>Cost Forecast</h2>
+  <div id="forecast-modal" class="tl-dialog tool-dialog">
+    <div class="tl-head">
+      <h2>Cost forecast</h2>
       <button class="tl-close" onclick="FORECAST.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div class="fc2-body" id="forecast-body">
-      <p style="color:var(--text-2);font-size:12px">Loading forecast…</p>
+    <div class="tl-body">
+      <p class="tl-lede">Project the next 30 days of spend from the pace of this session, against your budget cap.</p>
+      <div id="forecast-body"><div class="tl-skel" aria-label="Loading forecast"><i></i><i></i><i></i></div></div>
     </div>
   </div>
 </div>
@@ -1165,13 +1209,12 @@
 <div id="notes-overlay" class="tl-overlay">
   <div id="notes-panel" class="tl-dialog">
     <div class="notes-head">
-      <span class="ic head-ic" data-icon="note"></span>
-      <h3>Session Notes</h3>
+      <h3>Session notes</h3>
       <button class="tl-text-btn" onclick="NOTES.copyAll()">Copy</button>
       <button class="tl-text-btn" onclick="NOTES.clear()">Clear</button>
       <button class="tl-close" onclick="NOTES.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <textarea id="notes-textarea" placeholder="Jot observations, hypotheses, or action items here…&#10;&#10;• Which model performed best?&#10;• Costs to watch&#10;• Follow-ups needed" oninput="NOTES.onInput()"></textarea>
+    <textarea id="notes-textarea" aria-label="Session notes" placeholder="Jot observations, hypotheses or follow-ups here.&#10;&#10;Which model performed best?&#10;Costs to watch&#10;Follow-ups needed" oninput="NOTES.onInput()"></textarea>
     <div class="notes-footer">
       <span><span class="notes-save-dot"></span>Auto-saved</span>
       <span id="notes-wc">0 words</span>
@@ -1181,14 +1224,14 @@
 
 <!-- ── Enhancement 6: Webhook Alerts Modal ────────── -->
 <div id="webhooks-overlay" class="tl-overlay" onclick="if(event.target===this)WEBHOOKS.close()">
-  <div id="webhooks-modal" class="tl-dialog">
-    <div class="wh-head">
-      <span class="ic head-ic" data-icon="bell"></span>
-      <h2>Alert Webhooks</h2>
+  <div id="webhooks-modal" class="tl-dialog tool-dialog xl">
+    <div class="tl-head">
+      <h2>Alert webhooks</h2>
+      <div class="tl-head-actions"><span class="pill tl-sample" title="Endpoints and delivery log are illustrative, no requests are sent">Sample data</span></div>
       <button class="tl-close" onclick="WEBHOOKS.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
-    <div class="wh-body" id="webhooks-body">
-      <p style="color:var(--text-2);font-size:12px">Loading webhooks…</p>
+    <div class="tl-body" id="webhooks-body">
+      <div class="tl-skel" aria-label="Loading webhooks"><i></i><i></i><i></i></div>
     </div>
   </div>
 </div>

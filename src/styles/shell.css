@@ -150,40 +150,6 @@
 body.dark #dark-toggle .icon-sun { display: inline-flex; }
 body.dark #dark-toggle .icon-moon { display: none; }
 
-#tools-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: var(--z-menu);
-  display: none;
-  flex-direction: column;
-  width: 264px;
-  max-height: calc(100vh - var(--header-h) - 24px);
-  max-height: calc(100dvh - var(--header-h) - 24px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 6px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-float);
-}
-#tools-dropdown.open { display: flex; }
-.tools-item {
-  display: flex; align-items: center; gap: 10px;
-  width: 100%;
-  min-height: 36px;
-  padding: 0 10px;
-  border-radius: var(--radius-control);
-  color: var(--text);
-  text-align: left;
-  flex: none;
-}
-.tools-item .ic { color: var(--muted); }
-.tools-item:hover, .tools-item:focus-visible { background: var(--raised); }
-.tools-item:focus-visible { outline-offset: -2px; }
-.tools-divider { flex: none; height: 1px; margin: 4px 6px; background: var(--rule); }
-
 /* ─── Bottom navigation (phones) ────────────────── */
 #bottom-nav { display: none; }
 
@@ -297,14 +263,6 @@ body.sheet-open { overflow: hidden; }
   .bn-btn.active::before { content: ''; position: absolute; top: -1px; left: 24%; right: 24%; height: 2px; background: var(--text); }
   .bn-btn:focus-visible { outline-offset: -4px; }
 
-  #tools-dropdown {
-    position: fixed;
-    top: calc(var(--header-h) + 6px);
-    left: var(--pad); right: var(--pad);
-    width: auto;
-    max-height: calc(100dvh - var(--header-h) - var(--bottom-nav-h) - var(--safe-bottom) - 20px);
-  }
-
   #notes-fab { right: var(--pad); bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 12px); }
   #freshness-bar { padding-bottom: 8px; }
   .fb-version { margin-left: 0; flex-basis: 100%; }
@@ -320,15 +278,10 @@ body.sheet-open { overflow: hidden; }
   #currency-select, #tools-btn, #dark-toggle, .usage-pill, .palette-btn { min-height: 44px; height: 44px; }
   #dark-toggle, #tools-btn, .palette-btn { min-width: 44px; }
   .usage-pill { min-width: 44px; }
-  .tools-item { min-height: 44px; }
   .header-tabs .tab-btn { min-height: 44px; }
   .fb-link, .fb-star { min-height: 44px; }
 }
 
 @media (min-width: 1440px) {
   :root { --row-height: 44px; }
-}
-
-@media (max-height: 700px) {
-  #tools-dropdown { max-height: calc(100dvh - var(--header-h) - 12px); }
 }

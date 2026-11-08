@@ -3,7 +3,12 @@ window.FINECALC = (function() {
   function open() {
     var ov = document.getElementById('finecalc-overlay');
     if (ov) ov.classList.add('open');
+    var res = document.getElementById('fc-results');
+    if (res && !res._wired) { res._wired = true; res.addEventListener('tl-seg', _render); }
+    var saved = TLUI.store('fc_horizon');
+    if (res && saved) res.dataset.h = saved;
     _render();
+    TLUI.countUp(res);
   }
   function close() {
     var ov = document.getElementById('finecalc-overlay');
@@ -11,8 +16,17 @@ window.FINECALC = (function() {
   }
 
   function _render() {
-    var spend = parseFloat((document.getElementById('fc-spend')||{}).value) || 2000;
-    var vol = parseFloat((document.getElementById('fc-volume')||{}).value) || 100000;
+    function field(id, fallback, label) {
+      var el = document.getElementById(id), err = document.getElementById(id + '-err');
+      var v = parseFloat(el && el.value);
+      var bad = !(v > 0);
+      if (el) el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+      if (err) err.textContent = bad ? 'Enter a number above zero. Using ' + fallback.toLocaleString() + ' for now.' : '';
+      return bad ? fallback : v;
+    }
+    var spend = field('fc-spend', 2000);
+    var vol = field('fc-volume', 100000);
+    field('fc-tokens', 500);
     var tier = (document.getElementById('fc-tier')||{}).value || 'gpt4';
 
     var tierData = {
@@ -44,56 +58,46 @@ window.FINECALC = (function() {
     var resEl = document.getElementById('fc-results');
     if (!resEl) return;
 
-    // KPIs
-    var kpiHtml = '<div class="fc-kpis">'
-      + '<div class="fc-kpi"><div class="fc-kpi-val">' + (breakEven ? 'Mo. ' + breakEven : 'N/A') + '</div><div class="fc-kpi-lbl">Break-even</div></div>'
-      + '<div class="fc-kpi"><div class="fc-kpi-val" style="color:' + (roi12>0?'var(--tl)':'#C82020') + '">' + roi12 + '%</div><div class="fc-kpi-lbl">ROI at 12 months</div></div>'
-      + '<div class="fc-kpi"><div class="fc-kpi-val" style="color:' + (roi24>0?'var(--tl)':'#C82020') + '">' + roi24 + '%</div><div class="fc-kpi-lbl">ROI at 24 months</div></div>'
-      + '</div>';
+    var HZ = resEl.dataset.h === '12' ? 12 : 24;
+    TLUI.store('fc_horizon', String(HZ));
+    function money(v) { return '$' + Math.round(v).toLocaleString(); }
+    var xs = [], i0;
+    for (i0 = 1; i0 <= HZ; i0++) xs.push(i0);
+    var beVisible = breakEven !== null && breakEven <= HZ;
+    var summary = 'Fine-tune ROI: break-even ' + (breakEven ? 'month ' + breakEven : 'not reached') + ', ROI ' + roi12 + '% at 12 months, ' + roi24 + '% at 24 months. API spend ' + money(spend) + '/mo vs fine-tuned ' + money(trainCost) + ' training plus ' + money(hostCost) + '/mo hosting.';
+    _summary = summary;
 
-    // SVG chart
-    var W = 580, H = 200, padL = 55, padB = 30, padT = 16, padR = 16;
-    var maxY = Math.max.apply(null, apiCum.concat(ftCum));
-    function sx(i) { return padL + (i / 23) * (W - padL - padR); }
-    function sy(v) { return padT + (1 - v/maxY) * (H - padT - padB); }
-
-    var apiPath = apiCum.map(function(v,i){ return (i===0?'M':'L') + sx(i).toFixed(1) + ',' + sy(v).toFixed(1); }).join(' ');
-    var ftPath = ftCum.map(function(v,i){ return (i===0?'M':'L') + sx(i).toFixed(1) + ',' + sy(v).toFixed(1); }).join(' ');
-
-    // y-axis labels
-    var yLabels = [0, 0.25, 0.5, 0.75, 1].map(function(f) {
-      var v = maxY * f;
-      var label = v >= 1000 ? '$' + (v/1000).toFixed(0) + 'k' : '$' + v.toFixed(0);
-      var y = sy(v);
-      return '<text x="' + (padL-6) + '" y="' + (y+4) + '" text-anchor="end" font-size="9" fill="#888">' + label + '</text>'
-           + '<line x1="' + padL + '" y1="' + y + '" x2="' + (W-padR) + '" y2="' + y + '" stroke="#eee" stroke-width="1"/>';
-    }).join('');
-
-    var xLabels = [1,6,12,18,24].map(function(m) {
-      return '<text x="' + sx(m-1).toFixed(1) + '" y="' + (H-padB+14) + '" text-anchor="middle" font-size="9" fill="#888">Mo.' + m + '</text>';
-    }).join('');
-
-    var beVLine = breakEven ? '<line x1="' + sx(breakEven-1).toFixed(1) + '" y1="' + padT + '" x2="' + sx(breakEven-1).toFixed(1) + '" y2="' + (H-padB) + '" stroke="#0A6B3C" stroke-width="1.5" stroke-dasharray="4,3"/><text x="' + (sx(breakEven-1)+3).toFixed(1) + '" y="' + (padT+10) + '" font-size="9" fill="#0A6B3C">Break-even</text>' : '';
-
-    var chartHtml = '<div id="fc-chart"><svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">'
-      + yLabels + xLabels + beVLine
-      + '<path d="' + apiPath + '" fill="none" stroke="#C82020" stroke-width="2"/>'
-      + '<path d="' + ftPath + '" fill="none" stroke="#0A6B3C" stroke-width="2" stroke-dasharray="6,3"/>'
-      + '<circle cx="' + sx(11).toFixed(1) + '" cy="' + sy(apiCum[11]).toFixed(1) + '" r="4" fill="#C82020"/>'
-      + '<circle cx="' + sx(11).toFixed(1) + '" cy="' + sy(ftCum[11]).toFixed(1) + '" r="4" fill="#0A6B3C"/>'
-      + '<text x="' + (W-padR-2) + '" y="' + (sy(apiCum[23])-5) + '" text-anchor="end" font-size="9" fill="#C82020">API cost</text>'
-      + '<text x="' + (W-padR-2) + '" y="' + (sy(ftCum[23])-5) + '" text-anchor="end" font-size="9" fill="#0A6B3C">Fine-tuned cost</text>'
-      + '</svg></div>';
-
-    var assumHtml = '<div class="fc-assumptions"><table>'
-      + '<tr><td>Training cost (one-time)</td><td>$' + t.trainMin.toLocaleString() + '–$' + t.trainMax.toLocaleString() + ' (avg $' + trainCost.toLocaleString() + ')</td></tr>'
-      + '<tr><td>Hosting cost/month</td><td>$' + t.hostMin + '–$' + t.hostMax + '/mo (avg $' + hostCost + ')</td></tr>'
-      + '<tr><td>API cost/month</td><td>$' + spend.toLocaleString() + ' (your input)</td></tr>'
-      + '<tr><td>Model tier</td><td>' + t.label + '</td></tr>'
-      + '</table><p style="margin-top:6px;font-size:10px">* Training costs are estimates based on GPU rental + engineering time. Hosting includes inference infrastructure for open-source models (e.g. Llama-3, Mistral).</p></div>';
-
-    resEl.innerHTML = kpiHtml + chartHtml + assumHtml;
+    resEl.innerHTML = TLUI.kpis([
+        ['Break-even', breakEven ? 'Month ' + breakEven : 'Not reached', {sub: breakEven ? 'Fine-tuned total drops below API total' : 'API stays cheaper within 24 months'}],
+        ['ROI at 12 months', roi12 + '%', {tone: roi12 > 0 ? 'pos' : 'neg'}],
+        ['ROI at 24 months', roi24 + '%', {tone: roi24 > 0 ? 'pos' : 'neg'}]
+      ])
+      + '<div class="fc-chart-wrap"><div class="tl-block-head"><div><h3 class="tl-h">Cumulative cost</h3><p class="tl-sub">What you have paid in total by each month. Where the lines cross, fine-tuning pays off.</p></div>'
+      + '<div class="tl-seg" role="group" aria-label="Horizon" data-for="fc-results" data-attr="h" data-persist="fc_horizon"><button type="button" data-v="12" aria-pressed="' + (HZ === 12) + '">12 months</button><button type="button" data-v="24" aria-pressed="' + (HZ === 24) + '">24 months</button></div></div>'
+      + '<div id="fc-chart"></div></div>'
+      + '<section class="tl-block"><div class="tl-block-head"><div><h3 class="tl-h">Assumptions</h3><p class="tl-sub">Training and hosting are estimates for the ' + t.label + ' tier.</p></div>'
+      + '<button type="button" class="tl-btn secondary sm" onclick="FINECALC.copy()"><span class="ic" data-icon="copy"></span>Copy summary</button></div>'
+      + '<dl class="tl-dl">'
+      + '<div><dt>Training cost, one time</dt><dd>' + money(t.trainMin) + ' to ' + money(t.trainMax) + ' (average ' + money(trainCost) + ')</dd></div>'
+      + '<div><dt>Hosting cost per month</dt><dd>' + money(t.hostMin) + ' to ' + money(t.hostMax) + ' (average ' + money(hostCost) + ')</dd></div>'
+      + '<div><dt>API cost per month</dt><dd>' + money(spend) + ' (your input)</dd></div>'
+      + '<div><dt>Model tier</dt><dd>' + t.label + '</dd></div></dl>'
+      + '<p class="tl-hint" style="margin-top:8px">Training costs estimate GPU rental plus engineering time. Hosting covers inference infrastructure for open-source models such as Llama 3 and Mistral.</p></section>';
+    if (window.TL_HYDRATE_ICONS) TL_HYDRATE_ICONS(resEl);
+    TLUI.lineChart(document.getElementById('fc-chart'), {
+      label: 'Cumulative cost of API versus fine-tuned model',
+      xs: xs, xTicks: HZ === 12 ? [0, 2, 5, 8, 11] : [0, 5, 11, 17, 23],
+      series: [
+        { name: 'API', values: apiCum.slice(0, HZ), tone: 'ink' },
+        { name: 'Fine-tuned', values: ftCum.slice(0, HZ), tone: 'data' }
+      ],
+      markers: beVisible ? [{ i: breakEven - 1, label: 'Break-even' }] : [],
+      fmtX: function(i, long) { return (long ? 'Month ' : 'Mo. ') + (i + 1); },
+      fmtY: function(v, long) { return long ? money(v) : (v >= 1000 ? '$' + (v / 1000).toFixed(v % 1000 ? 1 : 0) + 'k' : '$' + Math.round(v)); }
+    });
   }
+  var _summary = '';
+  function copy() { if (_summary) TLUI.copy(_summary, 'Summary copied.'); }
 
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
@@ -102,6 +106,6 @@ window.FINECALC = (function() {
     }
   });
 
-  return { open: open, close: close, render: _render };
+  return { open: open, close: close, render: _render, copy: copy };
 })();
 

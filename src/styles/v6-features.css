@@ -1,35 +1,3 @@
-/* ─── v6 Feature Modals (shared base) ────────────── */
-
-/* ─── Model Recommender ────────────────────────────── */
-.rec-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
-.rec-field { display: flex; flex-direction: column; gap: 5px; }
-.rec-field label { font-size: 0.7857rem; font-weight: 700; color: var(--text-2); }
-.rec-field select, .rec-field input {
-  padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--radius);
-  font-size: 0.8571rem; outline: none; transition: border-color 0.2s; background: var(--surface); color: var(--text);
-}
-.rec-field select:focus, .rec-field input:focus { border-color: var(--tl); }
-.rec-run-btn {
-  grid-column: 1 / -1; padding: 10px; background: var(--tl); color: white;
-  border: none; border-radius: var(--radius); font-size: 0.9286rem; font-weight: 800;
-  cursor: pointer; transition: background 0.2s;
-}
-.rec-run-btn:hover { background: var(--tl-dark); }
-.rec-card {
-  border: 2px solid var(--border); border-radius: 10px; padding: 14px 16px;
-  margin-bottom: 11px; transition: border-color 0.15s;
-}
-.rec-card.top { border-color: var(--tl); background: var(--tl-bg); }
-.rec-card.second { border-color: var(--blue); background: var(--blue-bg); }
-.rec-card.third { border-color: var(--green); background: var(--green-bg); }
-.rec-rank { font-size: 1.4286rem; margin-right: 6px; }
-.rec-model-name { font-size: 1rem; font-weight: 900; }
-.rec-score-bar-wrap { margin: 8px 0 6px; }
-.rec-score-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-.rec-score-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
-.rec-dims { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.rec-dim { padding: 3px 9px; border-radius: 12px; font-size: 0.7857rem; font-weight: 700; background: rgba(0,0,0,0.07); }
-.rec-reason { font-size: 0.7857rem; color: var(--text-2); margin-top: 6px; line-height: 1.55; }
 
 /* ─── Token Efficiency Score ──────────────────────── */
 .eff-badge {
@@ -45,91 +13,6 @@
 .eff-score-card .esv { font-size: 1.1429rem; font-weight: 900; color: var(--tl); }
 .eff-score-card .esl { font-size: 0.7857rem; color: var(--text-3); margin-top: 2px; }
 
-/* ─── Prompt Optimizer ─────────────────────────────── */
-.opt-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.opt-pane { display: flex; flex-direction: column; gap: 8px; }
-.opt-pane label { font-size: 0.7857rem; font-weight: 700; color: var(--text-2); }
-.opt-textarea {
-  flex: 1; min-height: 160px; padding: 10px 12px;
-  border: 1.5px solid var(--border); border-radius: var(--radius);
-  font-size: 0.8571rem; font-family: inherit; resize: vertical; outline: none;
-  transition: border-color 0.2s; background: var(--surface); color: var(--text);
-}
-.opt-textarea:focus { border-color: var(--tl); }
-.opt-run-btn {
-  padding: 9px 18px; background: var(--tl); color: white; border: none;
-  border-radius: var(--radius); font-size: 0.8571rem; font-weight: 800; cursor: pointer;
-  align-self: flex-start; transition: background 0.2s;
-}
-.opt-run-btn:hover { background: var(--tl-dark); }
-.opt-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
-.opt-stat-chip { padding: 4px 10px; border-radius: 12px; font-size: 0.7857rem; font-weight: 700; }
-
-/* ─── Multi-turn Scenario Builder ──────────────────── */
-.scenario-layout { display: grid; grid-template-columns: 1fr 1.6fr; gap: 18px; }
-.scenario-turns-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; }
-.scenario-turn-item {
-  padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--radius);
-  display: flex; gap: 8px; align-items: flex-start;
-}
-.scenario-turn-num { font-size: 0.7857rem; font-weight: 800; color: var(--tl); flex-shrink: 0; padding-top: 2px; }
-.scenario-turn-input {
-  flex: 1; border: none; background: transparent; font-size: 0.7857rem; resize: none;
-  outline: none; font-family: inherit; color: var(--text); min-height: 36px;
-}
-.scenario-turn-del { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 0.9286rem; padding: 0 3px; }
-.scenario-turn-del:hover { color: var(--red); }
-.scenario-add-btn {
-  padding: 6px 12px; border: 1.5px dashed var(--tl); border-radius: var(--radius);
-  background: var(--tl-bg); color: var(--tl); font-size: 0.8571rem; font-weight: 700;
-  cursor: pointer; transition: all 0.15s; width: 100%;
-}
-.scenario-add-btn:hover { background: var(--tl); color: white; }
-.scenario-model-sel { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-.scenario-model-sel label { font-size: 0.7857rem; font-weight: 700; color: var(--text-2); }
-.scenario-model-sel select {
-  padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius);
-  font-size: 0.8571rem; outline: none; background: var(--surface); color: var(--text);
-}
-.scenario-run-btn {
-  width: 100%; padding: 10px; background: var(--tl); color: white; border: none;
-  border-radius: var(--radius); font-size: 0.9286rem; font-weight: 800; cursor: pointer;
-  margin-top: 10px; transition: background 0.2s;
-}
-.scenario-run-btn:hover { background: var(--tl-dark); }
-.scenario-results { margin-top: 12px; }
-.scenario-result-table { width: 100%; border-collapse: collapse; font-size: 0.7857rem; }
-.scenario-result-table th { padding: 6px 8px; background: var(--tl); color: white; font-size: 0.7857rem; font-weight: 800; text-align: left; }
-.scenario-result-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
-.scenario-result-table tr:nth-child(even) td { background: var(--bg); }
-
-/* ─── A/B Test Mode ─────────────────────────────────── */
-.ab-config { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-.ab-field { display: flex; flex-direction: column; gap: 5px; }
-.ab-field label { font-size: 0.7857rem; font-weight: 700; color: var(--text-2); }
-.ab-field select, .ab-field input, .ab-field textarea {
-  padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius);
-  font-size: 0.8571rem; outline: none; transition: border-color 0.2s; background: var(--surface); color: var(--text);
-  font-family: inherit;
-}
-.ab-field textarea { min-height: 80px; resize: vertical; }
-.ab-field select:focus, .ab-field input:focus, .ab-field textarea:focus { border-color: var(--tl); }
-.ab-run-btn {
-  grid-column: 1 / -1; padding: 10px; background: var(--tl); color: white;
-  border: none; border-radius: var(--radius); font-size: 0.9286rem; font-weight: 800;
-  cursor: pointer; transition: background 0.2s;
-}
-.ab-run-btn:hover { background: var(--tl-dark); }
-.ab-results-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 12px; margin-top: 4px; }
-.ab-run-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 0.7857rem; }
-.ab-run-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.ab-run-card-title { font-weight: 800; font-size: 0.8571rem; }
-.ab-run-body { color: var(--text-2); line-height: 1.55; white-space: pre-wrap; max-height: 120px; overflow-y: auto; }
-.ab-summary { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
-.ab-sum-card { background: var(--bg); border-radius: var(--radius); padding: 10px; text-align: center; }
-.ab-sum-card .asv { font-size: 1.0714rem; font-weight: 900; color: var(--tl); }
-.ab-sum-card .asl { font-size: 0.7857rem; color: var(--text-3); margin-top: 2px; }
-
 /* ─── Efficiency score in col header ──────────────── */
 .eff-header-row { display: flex; align-items: center; gap: 6px; padding: 5px 14px; background: rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.15); }
 .eff-header-row .ehl { font-size: 0.7857rem; opacity: 0.8; }
@@ -137,12 +20,36 @@
 
 /* ─── Header utility buttons ───────────────────────── */
 
-/* dark mode for v6 */
-body.dark .rec-card { background: #1A1A1A; border-color: #2A2A2A; }
-body.dark .rec-card.top { background: #021A0C; border-color: var(--tl); }
-body.dark .rec-card.second { background: #0A1528; border-color: var(--blue); }
-body.dark .rec-card.third { background: #0A2018; border-color: var(--green); }
-body.dark .ab-run-card { background: #1A1A1A; border-color: #333; }
-body.dark .scenario-turn-item { background: #1A1A1A; border-color: #333; }
-body.dark .scenario-turn-input { color: #E8E8E8; }
+/* ─── Prompt optimizer ───────────────────────────── */
+.opt-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); }
+.opt-textarea { min-height: 200px; }
+.opt-actions { margin-top: 12px; }
+@media (max-width: 600px) { .opt-layout { grid-template-columns: minmax(0, 1fr); } .opt-textarea { min-height: 140px; } }
 
+/* ─── Scenario builder ───────────────────────────── */
+.scenario-turns-list { display: grid; gap: 8px; margin-bottom: 12px; }
+.scenario-turn-item { display: grid; grid-template-columns: 24px minmax(0, 1fr) 32px; align-items: start; gap: 8px; }
+.scenario-turn-num { padding-top: 8px; color: var(--muted); text-align: right; }
+.scenario-turn-input {
+  min-height: var(--control-height); padding: 6px 12px;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--control); border-radius: var(--radius-control);
+  line-height: 1.45; resize: vertical;
+  transition: border-color var(--duration);
+}
+.scenario-turn-input:hover { border-color: var(--muted); }
+.scenario-turn-input:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; border-color: var(--text); }
+.scenario-turn-del { margin-top: 2px; }
+.scenario-model + .scenario-model { margin-top: 28px; }
+.scenario-model .tl-h { margin-bottom: 12px; }
+.scenario-model .tl-kpis { margin-bottom: 16px; }
+
+/* ─── A/B test ───────────────────────────────────── */
+.ab-runs { border-top: 1px solid var(--border); }
+.ab-run-head { width: 100%; text-align: left; transition: background var(--duration); }
+.ab-run-head:hover { background: var(--ground); }
+.ab-run-head:focus-visible { outline-offset: -2px; }
+.ab-chev { display: inline-flex; justify-content: flex-end; color: var(--muted); }
+.ab-chev svg { width: 16px; height: 16px; transition: transform 200ms var(--ease); }
+.ab-run-head[aria-expanded="true"] .ab-chev svg { transform: rotate(180deg); }
+.ab-run-body { margin: 0; padding: 8px 8px 16px 40px; color: var(--muted); line-height: 1.55; white-space: pre-wrap; }

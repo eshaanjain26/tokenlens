@@ -1,36 +1,29 @@
-/* ─── History Overlay ─────────────────────────────── */
+/* ─── History and cost projection ────────────────── */
+.hm-session {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px;
+  width: 100%; min-height: var(--row-height);
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  transition: background var(--duration);
+}
+.hm-session:hover { background: var(--ground); }
+.hm-session:focus-visible { outline-offset: -2px; }
+.hs-title { grid-column: 1; }
+.hs-meta { grid-column: 2; grid-row: 1; color: var(--muted); font-size: 0.8125rem; }
+.hs-models { grid-column: 1 / -1; overflow: hidden; color: var(--muted); font-size: 0.8125rem; text-overflow: ellipsis; white-space: nowrap; }
 
-.hm-empty { text-align: center; padding: 30px; color: var(--text-3); font-size: 0.9286rem; }
-.hm-session { padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius);
-  margin-bottom: 8px; cursor: pointer; transition: all 0.12s; }
-.hm-session:hover { border-color: var(--tl); background: var(--tl-bg); }
-.hm-session .hs-title { font-size: 0.8571rem; font-weight: 700; color: var(--text); }
-.hm-session .hs-meta { font-size: 0.7857rem; color: var(--text-3); margin-top: 2px; }
-.hm-session .hs-models { font-size: 0.7857rem; color: var(--text-2); margin-top: 4px; }
-.hm-actions { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--border); flex-shrink: 0; }
-.hm-clear-btn { flex: 1; padding: 7px; border: 1.5px solid var(--border); border-radius: var(--radius);
-  background: var(--surface); cursor: pointer; font-size: 0.7857rem; font-weight: 700;
-  color: var(--red); transition: all 0.12s; }
-.hm-clear-btn:hover { border-color: var(--red); background: var(--red-bg); }
-
-/* ─── Cost Projection Modal ───────────────────────── */
-
-.pm-input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-.pm-input-row label { font-size: 0.8571rem; font-weight: 700; color: var(--text-2); white-space: nowrap; }
-.pm-input-row input { width: 120px; padding: 7px 10px; border: 1.5px solid var(--border);
-  border-radius: var(--radius); font-size: 0.9286rem; font-weight: 700; outline: none;
-  transition: border-color 0.2s; background: var(--surface); color: var(--text); }
-.pm-input-row input:focus { border-color: var(--tl); }
-.pm-table { width: 100%; border-collapse: collapse; font-size: 0.8571rem; }
-.pm-table th { padding: 8px 10px; background: var(--tl); color: white; font-size: 0.7857rem; font-weight: 800; text-align: left; }
-.pm-table th:first-child { border-radius: 6px 0 0 0; } .pm-table th:last-child { border-radius: 0 6px 0 0; }
-.pm-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-.pm-table tr:nth-child(even) td { background: var(--bg); }
-.pm-table .best { color: var(--green); font-weight: 800; }
-.pm-table .worst { color: var(--red); font-weight: 700; }
-
-/* ─── Provider Chips ──────────────────────────────── */
-
-/* ─── Templates & Projection buttons in prompt bar ── */
+#proj-table-wrap[data-period="d"] .tl-row { --w: var(--wd); }
+#proj-table-wrap[data-period="m"] .tl-row { --w: var(--wm); }
+#proj-table-wrap[data-period="y"] .tl-row { --w: var(--wy); }
+#proj-table-wrap .tl-cell.p-d, #proj-table-wrap .tl-cell.p-m, #proj-table-wrap .tl-cell.p-y { color: var(--muted); }
+#proj-table-wrap[data-period="d"] .tl-cell.p-d,
+#proj-table-wrap[data-period="m"] .tl-cell.p-m,
+#proj-table-wrap[data-period="y"] .tl-cell.p-y { color: var(--text); }
+#proj-table-wrap .tl-row.head .tl-cell { color: var(--muted); }
+#proj-table-wrap[data-period="d"] .tl-row.head .tl-cell.p-d,
+#proj-table-wrap[data-period="m"] .tl-row.head .tl-cell.p-m,
+#proj-table-wrap[data-period="y"] .tl-row.head .tl-cell.p-y { color: var(--text); }
+#proj-table-wrap .tl-row.best .hl { color: var(--data); }
 
 

@@ -1,39 +1,9 @@
-/* ─── Smart Finder modal ─────────────────────────── */
-
-.finder-body { padding: 22px 24px; overflow-y: auto; flex: 1; }
-.finder-sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-.finder-slider { display: flex; flex-direction: column; gap: 5px; }
-.finder-slider label { font-size: 0.7857rem; font-weight: 700; color: var(--text-2); display: flex; justify-content: space-between; }
-.finder-slider label span { color: var(--tl); font-weight: 900; }
-.finder-slider input[type=range] { width: 100%; accent-color: var(--tl); }
-.finder-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-.finder-chip { padding: 4px 11px; border-radius: 20px; font-size: 0.7857rem; font-weight: 700; border: 1.5px solid var(--tl-border); background: white; color: var(--text-2); cursor: pointer; transition: all 0.15s; }
-.finder-chip.on { background: var(--tl); color: white; border-color: var(--tl); }
-#finder-results { display: flex; flex-direction: column; gap: 9px; }
-.finder-result {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
-  padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--border);
-  background: white; transition: border-color 0.15s;
+/* ─── Smart model finder ─────────────────────────── */
+.finder-sliders { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 32px; }
+.finder-chip { text-transform: none; }
+.finder-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.finder-add[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+@media (max-width: 600px) {
+  .finder-sliders { grid-template-columns: minmax(0, 1fr); }
+  .finder-filters { max-width: 100%; }
 }
-.finder-result:hover { border-color: var(--tl-border); }
-.finder-result.gold { border-color: var(--tl); background: var(--tl-bg); }
-.finder-rank { font-size: 1.4286rem; width: 28px; text-align: center; }
-.finder-info {}
-.finder-model { font-size: 0.8571rem; font-weight: 900; color: var(--text); }
-.finder-pills { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
-.finder-pill { font-size: 0.7857rem; font-weight: 700; padding: 2px 6px; border-radius: 3px; }
-.finder-pill.green { background: var(--green-bg); color: var(--green); }
-.finder-pill.blue { background: var(--blue-bg); color: var(--blue); }
-.finder-pill.amber { background: var(--amber-bg); color: var(--amber); }
-.finder-pill.tl { background: var(--tl-bg); color: var(--tl); }
-.finder-score { text-align: right; }
-.finder-score-val { font-size: 1.2857rem; font-weight: 900; color: var(--tl); }
-.finder-score-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 4px; overflow: hidden; }
-.finder-score-fill { height: 100%; background: var(--tl); border-radius: 2px; }
-.finder-add-btn { display: block; margin-top: 4px; font-size: 0.7857rem; font-weight: 700; color: var(--tl); border: none; background: none; cursor: pointer; padding: 0; }
-.finder-add-btn:hover { text-decoration: underline; }
-
-body.dark .finder-result { background: #1A1A1A; border-color: #2A2A2A; }
-body.dark .finder-result.gold { background: #021A0C; border-color: var(--tl); }
-body.dark .finder-chip { background: #1A1A1A; }
-

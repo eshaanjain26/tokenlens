@@ -3,39 +3,16 @@
 
 /* ── Enhancement 2: Turn Annotations ─────────────── */
 
-
 /* ── Enhancement 4: Response Rating ──────────────── */
 
 /* ── Enhancement 5: Session Notes ────────────────── */
 
-/* ── Enhancement 6: Webhook / Slack Alerts ────────── */
 
-.wh-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
-.wh-head h2 { flex:1;font-size:1.1429rem;font-weight:800;margin:0; }
-.wh-body { padding:18px 20px; }
-.wh-endpoint { border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px; }
-.wh-endpoint.active { border-color:var(--tl);background:var(--tl-bg); }
-.wh-endpoint-icon { font-size:1.5714rem;flex-shrink:0; }
-.wh-endpoint-info { flex:1; }
-.wh-endpoint-name { font-size:0.9286rem;font-weight:800;color:var(--text); }
-.wh-endpoint-url { font-size:0.7857rem;font-family:monospace;color:var(--text-2);margin-top:2px;word-break:break-all; }
-.wh-trigger-chips { display:flex;gap:4px;flex-wrap:wrap;margin-top:6px; }
-.wh-trigger-chip { font-size:0.7857rem;font-weight:700;padding:2px 7px;border-radius:8px;background:var(--tl-bg);color:var(--tl);border:1px solid var(--tl-border); }
-.wh-toggle { appearance:none;width:28px;height:16px;background:var(--border);border-radius:8px;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;margin-top:2px; }
-.wh-toggle:checked { background:var(--tl); }
-.wh-toggle::after { content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left 0.2s; }
-.wh-toggle:checked::after { left:14px; }
-.wh-add-form { border:1.5px dashed var(--border);border-radius:10px;padding:14px;margin-top:10px; }
-.wh-add-form h4 { font-size:0.8571rem;font-weight:800;margin:0 0 10px; }
-.wh-form-row { display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap; }
-.wh-form-row label { font-size:0.7857rem;font-weight:700;color:var(--text-2);white-space:nowrap;min-width:64px; }
-.wh-form-row input, .wh-form-row select { flex:1;padding:6px 9px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8571rem;background:var(--surface-2);color:var(--text);outline:none; }
-.wh-form-row input:focus, .wh-form-row select:focus { border-color:var(--tl); }
-.wh-test-result { font-size:0.7857rem;padding:6px 10px;border-radius:6px;margin-top:8px;display:none; }
-.wh-test-result.success { background:#E3F9EE;color:#054D29;display:block; }
-.wh-test-result.fail { background:#FFEAEA;color:#8B0000;display:block; }
-.wh-log { margin-top:16px; }
-.wh-log h3 { font-size:0.7857rem;font-weight:800;color:var(--tl);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px; }
-.wh-log-entry { font-size:0.7857rem;padding:4px 8px;border-radius:5px;margin-bottom:3px;display:flex;gap:8px; }
-.wh-log-entry.ok { background:#E3F9EE;color:#054D29; }
-.wh-log-entry.fail { background:#FFEAEA;color:#8B0000; }
+/* ── Bookmarks, forecast, webhooks ───────────────── */
+.bk-prompt { color: var(--muted); font-size: 0.875rem; line-height: 1.45; }
+.wh-url { overflow-wrap: anywhere; }
+.wh-test-result { margin-top: 6px; font-size: 0.8125rem; }
+.wh-test-result:empty { display: none; }
+.wh-test-result.success { color: var(--positive); }
+.wh-test-result.fail { color: var(--negative); }
+.wh-test-result.pending { color: var(--muted); }

@@ -83,9 +83,9 @@ window.COMPRESS = (function() {
     });
     if (bestScore >= 0.6 && bestMatch) {
       cacheEl.classList.add('visible');
-      cacheEl.innerHTML = '♻️ <strong>Semantic Cache Hit</strong> (' + Math.round(bestScore*100) + '% similarity)<br>'
+      cacheEl.innerHTML = '<strong>Semantic cache hit</strong> (' + Math.round(bestScore*100) + '% similarity)<br>'
         + 'Similar prompt found: "' + (bestMatch.prompt||'').slice(0,80) + '…"<br>'
-        + '<span style="font-size:10px;color:#6A5200">Consider reusing the cached response instead of sending again.</span>';
+        + '<span>Consider reusing the cached response instead of sending again.</span>';
     } else {
       cacheEl.classList.remove('visible');
     }

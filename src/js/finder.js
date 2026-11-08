@@ -6,8 +6,28 @@ window.FINDER = (function() {
   function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   var _providerFilter = null;
 
+  var SLIDERS = ['cost', 'eco', 'speed', 'ctx'];
+  var _last = [];
+
+  function _restore() {
+    try {
+      var saved = JSON.parse(TLUI.store('finder') || 'null');
+      if (!saved) return;
+      SLIDERS.forEach(function(k) {
+        var el = document.getElementById('fs-' + k), v = document.getElementById('fs-' + k + '-val');
+        if (el && typeof saved[k] === 'number') { el.value = saved[k]; if (v) v.textContent = saved[k]; }
+      });
+    } catch (e) {}
+  }
+  function _persist() {
+    var o = {};
+    SLIDERS.forEach(function(k) { o[k] = parseInt(document.getElementById('fs-' + k).value, 10); });
+    TLUI.store('finder', JSON.stringify(o));
+  }
+
   function open() {
     document.getElementById('finder-overlay').classList.add('open');
+    _restore();
     run();
   }
   function close() {
@@ -15,17 +35,20 @@ window.FINDER = (function() {
   }
   function chipAll() {
     _providerFilter = null;
-    document.querySelectorAll('.finder-chip').forEach(function(c){ c.classList.remove('on'); });
-    document.getElementById('fchip-all').classList.add('on');
+    _markChip('fchip-all');
     run();
   }
   function chipProvider(prov) {
     _providerFilter = prov;
-    document.querySelectorAll('.finder-chip').forEach(function(c){ c.classList.remove('on'); });
-    var el = document.getElementById('fchip-'+prov);
-    if (el) el.classList.add('on');
+    _markChip('fchip-' + prov);
     run();
   }
+  function _markChip(id) {
+    document.querySelectorAll('.finder-chip').forEach(function(c){ c.classList.remove('on'); c.setAttribute('aria-pressed', 'false'); });
+    var el = document.getElementById(id);
+    if (el) { el.classList.add('on'); el.setAttribute('aria-pressed', 'true'); }
+  }
+  function _chipId(prov) { return prov === 'mistralai' ? 'fchip-mistral' : 'fchip-' + prov; }
 
   function _norm(val, min, max) {
     if (max === min) return 0.5;
@@ -35,7 +58,7 @@ window.FINDER = (function() {
   function run() {
     var allModels = STATE.getModels ? STATE.getModels() : [];
     if (!allModels || !allModels.length) {
-      document.getElementById('finder-results').innerHTML = '<p style="color:var(--text-3);font-size:13px">No models loaded yet.</p>';
+      document.getElementById('finder-results').innerHTML = TLUI.empty('No models loaded yet. Pricing loads when the app connects.');
       return;
     }
 
@@ -50,7 +73,7 @@ window.FINDER = (function() {
     }).slice(0, 300); // cap at 300 for perf
 
     if (!candidates.length) {
-      document.getElementById('finder-results').innerHTML = '<p style="color:var(--text-3);font-size:13px">No models match this filter.</p>';
+      document.getElementById('finder-results').innerHTML = TLUI.empty('No models match this provider filter.');
       return;
     }
 
@@ -99,40 +122,52 @@ window.FINDER = (function() {
     rows.sort(function(a, b){ return b.score - a.score; });
     var top = rows.slice(0, 8);
 
-    var html = '<div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">'
-      + 'Top Matches ('+candidates.length+' models scored)</div>';
-
-    top.forEach(function(r, ri) {
+    _persist();
+    var maxScore = top[0] ? Math.max(top[0].score, 1e-9) : 1;
+    var rowsData = top.map(function(r, ri) {
       var pIn  = parseFloat(r.m.pricing && r.m.pricing.prompt     || 0) * 1e6;
       var pOut = parseFloat(r.m.pricing && r.m.pricing.completion || 0) * 1e6;
       var ctx  = r.m.context_length || 0;
       var pct  = Math.round(r.score * 100);
-      var barColor = ri === 0 ? '#0A6B3C' : ri === 1 ? '#0072A3' : ri === 2 ? '#B85C00' : '#8AA89A';
-      var medal = ri === 0 ? '🥇' : ri === 1 ? '🥈' : ri === 2 ? '🥉' : (ri+1)+'.';
-      html += '<div class="finder-result'+(ri===0?' gold':'')+'">'
-        + '<div class="finder-rank">'+medal+'</div>'
-        + '<div class="finder-info">'
-        +   '<div style="font-size:13px;font-weight:800;color:var(--text)">'+esc(r.m.name||r.m.id)+'</div>'
-        +   '<div style="font-size:11px;color:var(--text-2);margin-top:2px">'
-        +     (pIn?'$'+pIn.toFixed(2)+'/Mtok in · $'+pOut.toFixed(2)+'/Mtok out':'Free/Unknown')
-        +     (ctx?' · '+Math.round(ctx/1000)+'K ctx':'')
-        +   '</div>'
-        +   '<div class="finder-pills">'
-        +     (pIn < 0.5 ? '<span class="finder-pill" style="background:#E3F9EE;color:#0A7A48">💰 Budget</span>' : '')
-        +     (r.eco < 0.01 ? '<span class="finder-pill" style="background:#E3F9EE;color:#0A7A48">🌱 Eco</span>' : '')
-        +     (r.speed >= 80 ? '<span class="finder-pill" style="background:#E3F3FB;color:#0072A3">⚡ Fast</span>' : '')
-        +     (ctx >= 100000 ? '<span class="finder-pill" style="background:#FFF3E8;color:#B85C00">📄 Long ctx</span>' : '')
-        +   '</div>'
-        + '</div>'
-        + '<div class="finder-score">'
-        +   '<div class="finder-score-val">'+pct+'</div>'
-        +   '<div style="font-size:9px;color:var(--text-3)">score</div>'
-        +   '<div class="finder-score-bar"><div class="finder-score-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>'
-        + '</div>'
-        + '</div>';
+      var tags = [];
+      if (pIn < 0.5) tags.push(TLUI.pill('Budget'));
+      if (r.eco < 0.01) tags.push(TLUI.pill('Low carbon'));
+      if (r.speed >= 80) tags.push(TLUI.pill('Fast'));
+      if (ctx >= 100000) tags.push(TLUI.pill('Long context'));
+      var on = STATE.isActive(r.m.id);
+      return {
+        cls: ri === 0 ? 'best' : '',
+        sort: [ri + 1, r.m.name || r.m.id, pIn, ctx, pct],
+        cells: [
+          '<span class="mute">' + (ri + 1) + '</span>',
+          '<div class="wrap-cell"><div class="tl-name hl">' + esc(r.m.name || r.m.id) + '</div><div class="finder-tags">' + tags.join('') + '</div></div>',
+          pIn ? '$' + pIn.toFixed(2) + ' <span class="mute">in</span><br>$' + pOut.toFixed(2) + ' <span class="mute">out</span>' : '<span class="mute">Free or unknown</span>',
+          ctx ? Math.round(ctx / 1000) + 'K' : '<span class="mute">n/a</span>',
+          '<span class="hl">' + pct + '</span>',
+          '<button type="button" class="tl-btn secondary sm finder-add" data-id="' + esc(r.m.id) + '" onclick="FINDER.add(this)"' + (on ? ' aria-pressed="true"' : '') + '>' + (on ? 'Added' : 'Add') + '</button>'
+        ]
+      };
     });
+    _last = top.map(function(r, i) { return (i + 1) + '. ' + (r.m.name || r.m.id) + ' (' + Math.round(r.score * 100) + ')'; });
+    document.getElementById('finder-results').innerHTML =
+      '<div class="tl-block-head"><div><h3 class="tl-h">Top matches</h3><p class="tl-sub">' + candidates.length + ' models scored. Prices are USD per million tokens.</p></div></div>'
+      + TLUI.ledger({
+          label: 'Top matching models', cols: '24px minmax(0,1fr) 110px 64px 56px 72px', colsSm: '20px minmax(0,1fr) 48px 64px', min: 0,
+          head: [{label: '#'}, {label: 'Model', sort: true}, {label: 'Price', num: true, sort: true, cls: 'hide-sm'}, {label: 'Context', num: true, sort: true, cls: 'hide-sm'}, {label: 'Score', num: true, sort: true}, {label: ''}],
+          rows: rowsData
+        });
+  }
 
-    document.getElementById('finder-results').innerHTML = html;
+  function add(btn) {
+    var id = btn.dataset.id;
+    if (!STATE.isActive(id)) APP.toggleModel(id);
+    var on = STATE.isActive(id);
+    btn.textContent = on ? 'Added' : 'Add';
+    if (on) btn.setAttribute('aria-pressed', 'true'); else btn.removeAttribute('aria-pressed');
+  }
+  function copy() {
+    if (!_last.length) { TOAST.warning('Nothing to copy yet.'); return; }
+    TLUI.copy('Model finder ranking\n' + _last.join('\n'), 'Ranking copied.');
   }
 
   document.addEventListener('keydown', function(e) {
@@ -142,6 +177,6 @@ window.FINDER = (function() {
     }
   });
 
-  return { open: open, close: close, run: run, chipAll: chipAll, chipProvider: chipProvider };
+  return { open: open, close: close, run: run, chipAll: chipAll, chipProvider: chipProvider, add: add, copy: copy };
 })();
 

@@ -11,13 +11,12 @@ window.USAGE = (function() {
   var _metric = 'cost';
 
   var METRICS = {
-    cost:   { label: 'Cost',   color: '#D97706' },
-    tokens: { label: 'Tokens', color: '#2563EB' },
-    co2:    { label: 'CO₂',    color: '#16A34A' },
-    water:  { label: 'Water',  color: '#0891B2' },
-    power:  { label: 'Power',  color: '#7C3AED' }
+    cost:   { label: 'Cost' },
+    tokens: { label: 'Tokens' },
+    co2:    { label: 'CO\u2082' },
+    water:  { label: 'Water' },
+    power:  { label: 'Power' }
   };
-  var COLORS = { fresh: '#2563EB', cached: '#16A34A', write: '#7C3AED', out: '#D97706' };
 
   function fmtTok(n) {
     n = n || 0;
@@ -27,7 +26,7 @@ window.USAGE = (function() {
   }
   function pct(a, b) { return b > 0 ? (a / b) * 100 : 0; }
   function clampPct(p) { return Math.max(0, Math.min(100, p)); }
-  function barCls(p) { return p >= 100 ? 'bad' : p >= 70 ? 'warn' : 'ok'; }
+  function barCls(p) { return p >= 100 ? 'bad' : p >= 70 ? 'warn' : ''; }
 
   // ── Aggregate session data for the chosen scope ──
   function gather(scope) {
@@ -76,51 +75,37 @@ window.USAGE = (function() {
   }
 
   // ── Small HTML builders ──
-  function limitRow(label, rightTxt, p, cls, sub) {
+  function limitRow(label, rightTxt, p, tone, sub) {
     return '<div class="ux-limit">'
-      + '<div class="ux-limit-top"><span>' + esc(label) + '</span><span class="ux-pct ' + cls + '">' + rightTxt + '</span></div>'
-      + '<div class="ux-track"><div class="ux-fill ' + cls + '" style="width:' + clampPct(p).toFixed(1) + '%"></div></div>'
-      + (sub ? '<div class="ux-sub">' + sub + '</div>' : '')
+      + '<div class="ux-limit-top"><span>' + esc(label) + '</span><span class="ux-pct">' + rightTxt + '</span></div>'
+      + TLUI.meter(clampPct(p), tone)
+      + (sub ? '<div class="tl-hint">' + sub + '</div>' : '')
       + '</div>';
   }
-  function stat(label, val, cls) {
-    return '<div class="ux-stat"><div class="ux-stat-l">' + label + '</div><div class="ux-stat-v ' + (cls || '') + '">' + val + '</div></div>';
-  }
-  function bdRow(label, color, tokens, maxTokens, costTxt, note) {
-    return '<div class="ux-bd-row">'
-      + '<div class="ux-bd-name"><i style="background:' + color + '"></i>' + label + (note ? '<em>' + note + '</em>' : '') + '</div>'
-      + '<div class="ux-bd-bar"><div style="width:' + clampPct(pct(tokens, maxTokens)).toFixed(1) + '%;background:' + color + '"></div></div>'
-      + '<div class="ux-bd-val">' + fmtTok(tokens) + '</div>'
-      + '<div class="ux-bd-cost">' + costTxt + '</div>'
-      + '</div>';
-  }
-  function saveTile(icon, label, now, was, saved, fmt) {
+  function saveKpi(label, now, was, saved, fmt) {
     var p = was > 0 ? (saved / was) * 100 : 0;
-    return '<div class="ux-tile">'
-      + '<div class="ux-tile-l">' + icon + ' ' + label + '</div>'
-      + '<div class="ux-tile-v">' + fmt(now) + '</div>'
-      + '<div class="ux-tile-s">' + (saved > 1e-12 ? '<b>−' + p.toFixed(0) + '%</b> vs ' + fmt(was) : 'no cache effect') + '</div>'
-      + '</div>';
+    return [label, fmt(now), { sub: saved > 1e-12 ? '<b>' + p.toFixed(0) + '% lower</b> than ' + fmt(was) + ' without caching' : 'No cache effect' }];
   }
 
   // ── Main render ──
   function render() {
     var body = document.getElementById('usage-body');
     if (!body) return;
+    var ae = document.activeElement, fk = ae && ae.dataset ? ae.dataset.fk : null;
     var g   = STATE.globalTotals();
     var sim = !API.hasKey();
     var a   = gather(_scope);
     if (_scope !== 'all' && !a.models.length) { _scope = 'all'; a = gather('all'); }
 
+    var lede = '<p class="tl-lede">Spend, tokens, caching and footprint for this session, updated after every prompt.' + (sim ? ' ' + TLUI.pill('Simulated spend') : '') + '</p>';
+
     if (!g.turns) {
-      body.innerHTML = '<div class="ux-empty"><div style="font-size:34px">📊</div>'
-        + '<p><b>No usage yet.</b></p>'
-        + '<p>Select models, then send a prompt. Simulate mode works without an API key and fills this panel with estimated tokens, cost, CO₂, water and power.</p></div>'
-        + cacheControls(a, true);
+      body.innerHTML = lede + TLUI.empty('<b>No usage yet.</b><br>Select models and send a prompt. Simulate mode works without an API key and fills this panel with estimated tokens, cost, CO₂, water and power.')
+        + TLUI.block('Prompt caching', null, cacheControls(a, true));
+      _restoreFocus(body, fk);
       return;
     }
 
-    // Limits
     var cap = BUDGET.getCap();
     var bp  = pct(g.cost, cap);
     var ctxPct = 0, ctxName = '';
@@ -133,84 +118,93 @@ window.USAGE = (function() {
     var hit = pct(g.cached, g.tokensIn);
     var limits =
         limitRow('Session budget', Math.min(bp, 999).toFixed(bp < 10 ? 1 : 0) + '%', bp, barCls(bp),
-                 CALC.fmtCost(g.cost) + ' of ' + CALC.fmtCost(cap) + (sim ? ' · simulated spend' : ''))
+                 CALC.fmtCost(g.cost) + ' of ' + CALC.fmtCost(cap) + (sim ? ' (simulated spend)' : ''))
       + limitRow('Context window', ctxPct.toFixed(ctxPct < 10 ? 1 : 0) + '%', ctxPct, barCls(ctxPct),
-                 'fullest: ' + esc(ctxName) + ' · history is re-sent every turn')
-      + limitRow('Cache hit rate', CACHE.isEnabled() ? hit.toFixed(0) + '%' : 'off', CACHE.isEnabled() ? hit : 0, 'info',
+                 'Fullest: ' + esc(ctxName) + '. History is re-sent every turn.')
+      + limitRow('Cache hit rate', CACHE.isEnabled() ? hit.toFixed(0) + '%' : 'Off', CACHE.isEnabled() ? hit : 0, 'data',
                  fmtTok(g.cached) + ' of ' + fmtTok(g.tokensIn) + ' input tokens served from cache');
 
-    // This session
     var saved = Math.max(0, g.costNoCache - g.cost);
-    var stats = '<div class="ux-stats">'
-      + stat('Cost', CALC.fmtCost(g.cost))
-      + stat('Cache saved', saved > 1e-12 ? CALC.fmtCost(saved) : '—', saved > 1e-12 ? 'ok' : '')
-      + stat('Turns', g.turns)
-      + stat('Models', STATE.getActiveModels().filter(function(m){ var s=STATE.getSession(m.id); return s && s.turns.length; }).length)
-      + stat('Tokens', fmtTok(g.tokensIn + g.tokensOut))
-      + stat('Mode', sim ? 'Simulated' : 'Live API', sim ? 'warn' : 'ok')
-      + '</div>';
+    var active = STATE.getActiveModels().filter(function(m){ var s=STATE.getSession(m.id); return s && s.turns.length; }).length;
+    var stats = TLUI.kpis([
+        ['Cost', CALC.fmtCost(g.cost), { money: true }],
+        ['Cache saved', saved > 1e-12 ? CALC.fmtCost(saved) : '—', { money: true, tone: saved > 1e-12 ? 'pos' : '' }],
+        ['Tokens', fmtTok(g.tokensIn + g.tokensOut)]
+      ])
+      + '<dl class="tl-dl" style="margin-top:12px"><div><dt>Turns</dt><dd>' + g.turns + '</dd></div><div><dt>Models</dt><dd>' + active + '</dd></div>'
+      + '<div><dt>Mode</dt><dd>' + (sim ? 'Simulated' : 'Live API') + '</dd></div></dl>';
 
-    // Breakdown
     var scopeOpts = '<option value="all"' + (_scope === 'all' ? ' selected' : '') + '>All models</option>'
       + STATE.getActiveModels().filter(function(m){ var s=STATE.getSession(m.id); return s && s.turns.length; }).map(function(m) {
           return '<option value="' + esc(m.id) + '"' + (_scope === m.id ? ' selected' : '') + '>' + esc(m.name || m.id) + '</option>';
         }).join('');
-    var maxTok = Math.max(a.fresh, a.cached, a.write, a.tout, 1);
     var p = a.parts;
-    var breakdown =
-        bdRow('Input (fresh)', COLORS.fresh, a.fresh,  maxTok, CALC.fmtCost(p.fresh))
-      + bdRow('Cache read',    COLORS.cached, a.cached, maxTok, CALC.fmtCost(p.cached), CACHE.isEnabled() ? '' : 'off')
-      + bdRow('Cache write',   COLORS.write,  a.write,  maxTok, CALC.fmtCost(p.write))
-      + bdRow('Output',        COLORS.out,    a.tout,   maxTok, CALC.fmtCost(p.out));
+    var maxTok = Math.max(a.fresh, a.cached, a.write, a.tout, 1);
+    function bdRow(label, tokens, costTxt, note) {
+      return { w: pct(tokens, maxTok) / 100, cells: [esc(label) + (note ? ' ' + TLUI.pill(note) : ''), fmtTok(tokens), costTxt] };
+    }
+    var breakdown = TLUI.ledger({
+      label: 'Token and cost breakdown', cols: 'minmax(0,1fr) 84px 104px', min: 0,
+      head: [{ label: 'Part' }, { label: 'Tokens', num: true }, { label: 'Cost', num: true }],
+      rows: [
+        bdRow('Input (fresh)', a.fresh, CALC.fmtCost(p.fresh)),
+        bdRow('Cache read', a.cached, CALC.fmtCost(p.cached), CACHE.isEnabled() ? '' : 'Off'),
+        bdRow('Cache write', a.write, CALC.fmtCost(p.write)),
+        bdRow('Output', a.tout, CALC.fmtCost(p.out))
+      ]
+    });
 
-    // Caching impact
     var sv = Math.max(0, a.costNC - a.cost);
     var impact = '<div class="ux-impact">'
-      + '<div class="ux-cmp"><div class="ux-cmp-row"><span>Without caching</span><b>' + CALC.fmtCost(a.costNC) + '</b></div>'
-      + '<div class="ux-track"><div class="ux-fill gray" style="width:100%"></div></div></div>'
-      + '<div class="ux-cmp"><div class="ux-cmp-row"><span>With caching</span><b>' + CALC.fmtCost(a.cost) + '</b></div>'
-      + '<div class="ux-track"><div class="ux-fill ok" style="width:' + clampPct(pct(a.cost, a.costNC || 1)).toFixed(1) + '%"></div></div></div>'
-      + '<div class="ux-saved">' + (sv > 1e-12
-          ? '💾 Saved <b>' + CALC.fmtCost(sv) + '</b> (' + pct(sv, a.costNC).toFixed(1) + '%) on ' + fmtTok(a.cached) + ' cached input tokens'
+      + '<div><div class="ux-limit-top"><span>Without caching</span><span class="ux-pct">' + CALC.fmtCost(a.costNC) + '</span></div>' + TLUI.meter(100, 'grey') + '</div>'
+      + '<div><div class="ux-limit-top"><span>With caching</span><span class="ux-pct">' + CALC.fmtCost(a.cost) + '</span></div>' + TLUI.meter(clampPct(pct(a.cost, a.costNC || 1)), 'data') + '</div>'
+      + '<p class="tl-note ' + (sv > 1e-12 ? 'pos' : '') + '">' + (sv > 1e-12
+          ? 'Saved <b>' + CALC.fmtCost(sv) + '</b> (' + pct(sv, a.costNC).toFixed(1) + '%) on ' + fmtTok(a.cached) + ' cached input tokens.'
           : 'No cache savings on this selection yet. Savings start on turn 2, for models that support prompt caching.')
-      + '</div></div>';
+      + '</p></div>';
 
-    // Footprint
-    var foot = '<div class="ux-tiles">'
-      + saveTile('🌱', 'CO₂',   a.co2,   a.co2NC,   a.co2NC - a.co2,     CALC.fmtCO2)
-      + saveTile('💧', 'Water', a.water, a.waterNC, a.waterNC - a.water, CALC.fmtWater)
-      + saveTile('⚡', 'Power', a.power, a.powerNC, a.powerNC - a.power, CALC.fmtPower)
-      + '</div>'
-      + '<div class="ux-equiv">≈ ' + (a.co2 / 404).toFixed(a.co2 / 404 < 0.01 ? 4 : 3) + ' km driven · '
-      + (a.water * 1000 / 250).toFixed(2) + ' glasses of water · '
-      + (a.power / 12).toFixed(3) + ' phone charges</div>';
+    var foot = TLUI.kpis([
+        saveKpi('CO₂', a.co2, a.co2NC, a.co2NC - a.co2, CALC.fmtCO2),
+        saveKpi('Water', a.water, a.waterNC, a.waterNC - a.water, CALC.fmtWater),
+        saveKpi('Power', a.power, a.powerNC, a.powerNC - a.power, CALC.fmtPower)
+      ])
+      + '<p class="tl-hint" style="margin-top:12px">About ' + (a.co2 / 404).toFixed(a.co2 / 404 < 0.01 ? 4 : 3) + ' km driven, '
+      + (a.water * 1000 / 250).toFixed(2) + ' glasses of water, ' + (a.power / 12).toFixed(3) + ' phone charges.</p>';
 
-    // Ranking
     var maxRow = 0;
     a.rows.forEach(function(r) { maxRow = Math.max(maxRow, metricValue(_metric, r)); });
     var ranked = a.rows.slice().sort(function(x, y) { return metricValue(_metric, y) - metricValue(_metric, x); }).slice(0, 8);
-    var metricChips = Object.keys(METRICS).map(function(k) {
-      return '<button class="ux-chip' + (k === _metric ? ' on' : '') + '" onclick="USAGE.setMetric(\'' + k + '\')">' + METRICS[k].label + '</button>';
-    }).join('');
-    var rank = '<div class="ux-chips">' + metricChips + '</div>'
-      + ranked.map(function(r) {
-          var v = metricValue(_metric, r);
-          return '<div class="ux-rank"><span class="ux-rank-n" title="' + esc(r.m.id) + '">' + esc((r.m.name || r.m.id).slice(0, 26)) + '</span>'
-            + '<div class="ux-rank-bar"><div style="width:' + clampPct(pct(v, maxRow)).toFixed(1) + '%;background:' + METRICS[_metric].color + '"></div></div>'
-            + '<span class="ux-rank-v">' + fmtMetric(_metric, v) + '</span></div>';
-        }).join('');
+    var metricChips = '<div class="tl-seg" role="group" aria-label="Rank by">' + Object.keys(METRICS).map(function(k) {
+      return '<button type="button" data-fk="metric-' + k + '" aria-pressed="' + (k === _metric) + '" onclick="USAGE.setMetric(\'' + k + '\')">' + METRICS[k].label + '</button>';
+    }).join('') + '</div>';
+    var rank = TLUI.ledger({
+      label: 'Models ranked by ' + METRICS[_metric].label, cols: 'minmax(0,1fr) 110px', min: 0,
+      head: [{ label: 'Model' }, { label: METRICS[_metric].label, num: true }],
+      rows: ranked.map(function(r, i) {
+        var v = metricValue(_metric, r);
+        return { w: pct(v, maxRow) / 100, cls: i === 0 ? 'best' : '', cells: ['<span class="tl-name hl" title="' + esc(r.m.id) + '">' + esc(r.m.name || r.m.id) + '</span>', fmtMetric(_metric, v)] };
+      })
+    });
 
-    body.innerHTML =
-        '<div class="ux-sec">' + limits + '</div>'
-      + '<div class="ux-sec"><div class="ux-h">This session</div>' + stats + '</div>'
-      + '<div class="ux-sec"><div class="ux-h">Breakdown<select class="ux-sel" onchange="USAGE.setScope(this.value)" aria-label="Scope">' + scopeOpts + '</select></div>'
-      +   '<div class="ux-bd-head"><span></span><span></span><span>Tokens</span><span>Cost</span></div>' + breakdown + '</div>'
-      + '<div class="ux-sec"><div class="ux-h">Caching impact</div>' + impact + cacheControls(a, false) + '</div>'
-      + '<div class="ux-sec"><div class="ux-h">Footprint</div>' + foot + '</div>'
-      + '<div class="ux-sec"><div class="ux-h">What&#39;s driving your usage</div>' + rank + '</div>'
-      + '<div class="ux-tip"><b>Tip</b><span>' + tip(g, ctxPct, saved) + '</span></div>'
-      + '<div class="ux-actions"><button class="ux-btn" onclick="USAGE.copy()">Copy summary</button>'
-      + '<button class="ux-btn" onclick="USAGE.toAnalytics()">Open Analytics</button></div>';
+    body.innerHTML = lede
+      + TLUI.block('Limits', 'How close this session is to its budget, context and cache ceilings.', limits)
+      + TLUI.block('This session', null, stats)
+      + TLUI.block('Breakdown', 'Where tokens and cost went.', breakdown, '<select class="tl-select ux-sel" data-fk="scope" onchange="USAGE.setScope(this.value)" aria-label="Scope">' + scopeOpts + '</select>')
+      + TLUI.block('Caching impact', null, impact + cacheControls(a, false))
+      + TLUI.block('Footprint', 'Estimated impact, with the saving from caching.', foot)
+      + TLUI.block('What is driving your usage', 'Top models by the metric you pick.', rank, metricChips)
+      + '<section class="tl-block"><p class="tl-note"><b>Tip.</b> ' + tip(g, ctxPct, saved) + '</p></section>'
+      + '<div class="tl-actions" style="margin-top:24px"><button type="button" class="tl-btn secondary" onclick="USAGE.copy()"><span class="ic" data-icon="copy"></span>Copy summary</button>'
+      + '<button type="button" class="tl-btn secondary" onclick="USAGE.toAnalytics()">Open Analytics</button></div>';
+    if (window.TL_HYDRATE_ICONS) TL_HYDRATE_ICONS(body);
+    _restoreFocus(body, fk);
+    if (_fresh) { _fresh = false; TLUI.countUp(body); }
+  }
+  var _fresh = false;
+  function _restoreFocus(body, fk) {
+    if (!fk) return;
+    var el = body.querySelector('[data-fk="' + fk + '"]');
+    if (el) el.focus({ preventScroll: true });
   }
 
   function cacheControls(a, empty) {
@@ -218,17 +212,16 @@ window.USAGE = (function() {
     var first = (a.models && a.models[0]) || STATE.getActiveModels()[0];
     var t = first ? CALC.cacheTerms(first) : null;
     var termTxt = t ? (t.supported
-        ? 'Cache read ' + t.read.toFixed(2) + '× input price · write ' + t.write.toFixed(2) + '× (' + t.source + ')'
+        ? 'Cache read costs ' + t.read.toFixed(2) + 'x the input price and a write ' + t.write.toFixed(2) + 'x (' + t.source + ').'
         : esc(first.name || first.id) + ' has no prompt caching, so no savings apply.')
       : 'Pick a model to see its cache pricing.';
     return '<div class="ux-cache">'
-      + '<label class="ux-switch"><input type="checkbox" ' + (on ? 'checked' : '') + ' onchange="USAGE.setCache(this.checked)"><span></span>'
-      + '<b>Prompt caching</b></label>'
-      + '<div class="ux-hit"><span>Assumed hit rate</span>'
-      + '<input type="range" min="0" max="100" step="5" value="' + CACHE.getHitRate() + '" ' + (on ? '' : 'disabled ') + 'oninput="USAGE.setHit(this.value)" onchange="USAGE.refresh()" aria-label="Cache hit rate">'
+      + '<label class="tl-toggle"><input type="checkbox" class="tl-switch" data-fk="cache" ' + (on ? 'checked' : '') + ' onchange="USAGE.setCache(this.checked)"><b>Prompt caching</b></label>'
+      + '<div class="ux-hit"><label class="tl-label" for="ux-hit-range">Assumed hit rate</label>'
+      + '<input class="tl-range" id="ux-hit-range" data-fk="hit" type="range" min="0" max="100" step="5" value="' + CACHE.getHitRate() + '" ' + (on ? '' : 'disabled ') + 'oninput="USAGE.setHit(this.value)" onchange="USAGE.refresh()">'
       + '<b id="ux-hit-v">' + CACHE.getHitRate() + '%</b></div>'
-      + '<div class="ux-sub">' + termTxt + '<br>Changes apply to new turns. Past turns keep their numbers. Energy for a cached token is assumed at '
-      + Math.round(CALC.CACHE_ENERGY_FACTOR * 100) + '% of a fresh one.</div>'
+      + '<p class="tl-hint">' + termTxt + ' Changes apply to new turns; past turns keep their numbers. Energy for a cached token is assumed at '
+      + Math.round(CALC.CACHE_ENERGY_FACTOR * 100) + '% of a fresh one.</p>'
       + '</div>';
   }
 
@@ -261,6 +254,7 @@ window.USAGE = (function() {
     if (!ov) return;
     ov.classList.add('open');
     _open = true;
+    _fresh = true;
     render();
   }
   function close() {

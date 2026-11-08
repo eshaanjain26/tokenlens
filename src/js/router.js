@@ -56,60 +56,60 @@ window.ROUTER = (function() {
     return reasons.join(', ');
   }
 
-  function analyze() {
+  var _text = '';
+  function analyze(quiet) {
     var inp = document.getElementById('router-input');
     var text = inp ? (inp.value || '').trim() : '';
     var res = document.getElementById('router-results');
+    var cp = document.getElementById('router-copy');
     if (!res) return;
-    if (!text) { res.innerHTML = '<p style="color:var(--text-2);font-size:12px">Enter a prompt above to analyze.</p>'; return; }
+    if (cp) cp.hidden = true;
+    if (!text) { res.innerHTML = quiet === true ? '' : '<div class="tl-block">' + TLUI.empty('Enter a prompt above to analyze it.') + '</div>'; return; }
 
     var complexity = _complexity(text);
     var tokens = Math.ceil(text.length / 4);
     var models = STATE.getActiveModels ? STATE.getActiveModels() : [];
-    if (!models.length) { res.innerHTML = '<p style="color:var(--text-2);font-size:12px">Select at least one model in the sidebar first.</p>'; return; }
+    if (!models.length) { res.innerHTML = '<div class="tl-block">' + TLUI.empty('Select at least one model in the sidebar first.') + '</div>'; return; }
 
     var scored = models.map(function(m) {
       return { m: m, score: _score(m, complexity, tokens) };
     }).sort(function(a,b){ return b.score - a.score; }).slice(0,3);
 
-    var medals = ['🥇','🥈','🥉'];
-    var complexLabels = { simple:'Simple query', moderate:'Moderate complexity', complex:'Complex / long-form' };
-    var complexClasses = { simple:'simple', moderate:'moderate', complex:'complex' };
-
-    var html = '<span class="router-complexity ' + complexClasses[complexity] + '">🧠 Detected: ' + complexLabels[complexity] + '</span>';
-
-    scored.forEach(function(r, i) {
+    var complexLabels = { simple:'Simple query', moderate:'Moderate complexity', complex:'Complex or long-form' };
+    var rows = scored.map(function(r, i) {
       var pIn = r.m.pricing ? parseFloat(r.m.pricing.prompt) * 1e6 : null;
       var estCost = pIn ? '$' + (pIn * tokens / 1e6 * 1000).toFixed(4) : 'n/a';
       var conf = Math.round(r.score * 100);
-      var reason = _reason(r.m, complexity, r.score);
-      html += '<div class="router-rec-card">'
-        + '<div class="router-rank">' + medals[i] + '</div>'
-        + '<div class="router-rec-info">'
-        +   '<div class="router-rec-name">' + esc(r.m.name || r.m.id) + '</div>'
-        +   '<div class="router-rec-reason">Recommended because: ' + esc(reason) + '</div>'
-        +   '<div class="router-rec-meta">'
-        +     '<span class="router-meta-chip">~' + esc(estCost) + '/1K prompts</span>'
-        +     (r.m.context_length ? '<span class="router-meta-chip">' + Math.round(r.m.context_length/1000) + 'K ctx</span>' : '')
-        +   '</div>'
-        + '</div>'
-        + '<div class="router-conf"><div class="router-conf-pct">' + conf + '%</div><div style="font-size:9px;color:var(--text-3)">confidence</div></div>'
-        + '</div>';
+      return {
+        cls: i === 0 ? 'best' : '',
+        w: r.score,
+        sort: [i + 1, r.m.name || r.m.id, estCost, conf],
+        cells: [
+          '<span class="mute">' + (i + 1) + '</span>',
+          '<div class="wrap-cell"><div class="tl-name hl">' + esc(r.m.name || r.m.id) + '</div><div class="tl-meta">' + esc(_reason(r.m, complexity, r.score)) + (r.m.context_length ? ' · ' + Math.round(r.m.context_length/1000) + 'K context' : '') + '</div></div>',
+          esc(estCost),
+          '<span class="hl">' + conf + '%</span>'
+        ]
+      };
     });
+    var topName = scored[0] ? scored[0].m.name || scored[0].m.id : 'the top model';
+    _text = 'Smart route: ' + complexLabels[complexity] + ' (~' + tokens + ' input tokens)\nBest fit: ' + topName + ' (' + Math.round(scored[0].score * 100) + '% confidence)';
 
-    // Routing reasoning
-    var topName = scored[0] ? esc(scored[0].m.name || scored[0].m.id) : 'the top model';
-    html += '<div class="router-reasoning">'
-      + '<h4>🔍 Routing Reasoning</h4>'
-      + '<p>Your prompt was classified as <strong>' + complexLabels[complexity] + '</strong> (~' + tokens + ' input tokens). '
-      + 'The engine weighted cost efficiency (40%), context window fit (35%), and carbon footprint proxy (25%). '
-      + (complexity === 'complex' ? 'Complex prompts require larger context windows, which down-scored smaller models. ' : '')
+    res.innerHTML = '<div class="tl-block"><div class="tl-block-head"><div><h3 class="tl-h">Recommended models</h3>'
+      + '<p class="tl-sub rt-sum">Detected ' + TLUI.pill(complexLabels[complexity]) + ' about ' + tokens.toLocaleString() + ' input tokens.</p></div></div>'
+      + TLUI.ledger({
+          label: 'Routing recommendations', cols: '24px minmax(0,1fr) 120px 88px', colsSm: '20px minmax(0,1fr) 64px', min: 0,
+          head: [{label: '#'}, {label: 'Model'}, {label: 'Est. cost / 1K prompts', num: true, cls: 'hide-sm'}, {label: 'Confidence', num: true}],
+          rows: rows
+        })
+      + '<p class="rt-why">The prompt was classified as <b>' + complexLabels[complexity] + '</b>. The engine weighted cost efficiency (40%), context window fit (35%) and a carbon footprint proxy (25%). '
+      + (complexity === 'complex' ? 'Complex prompts need larger context windows, which down-scored smaller models. ' : '')
       + (complexity === 'simple' ? 'Simple prompts benefit most from low-cost, fast models. ' : '')
-      + '<strong>' + topName + '</strong> scored highest on the combined routing matrix.</p>'
-      + '</div>';
-
-    res.innerHTML = html;
+      + '<b>' + esc(topName) + '</b> scored highest on the combined routing matrix.</p></div>';
+    if (cp) cp.hidden = false;
   }
+  var live = TLUI.debounce(function() { analyze(true); }, 300);
+  function copy() { if (_text) TLUI.copy(_text, 'Routing result copied.'); }
 
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
@@ -118,6 +118,6 @@ window.ROUTER = (function() {
     }
   });
 
-  return { open: open, close: close, analyze: analyze };
+  return { open: open, close: close, analyze: analyze, live: live, copy: copy };
 })();
 

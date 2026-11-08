@@ -6,6 +6,7 @@ window.ESG = (function() {
     var ov = document.getElementById('esg-overlay');
     if (ov) ov.classList.add('open');
     _render();
+    TLUI.countUp(document.getElementById('esg-body'));
   }
   function close() {
     var ov = document.getElementById('esg-overlay');
@@ -19,55 +20,54 @@ window.ESG = (function() {
     var models = STATE.getActiveModels ? STATE.getActiveModels() : [];
     var now = new Date().toISOString().slice(0,10);
 
-    var kpiHtml = '<div class="esg-section"><h3>📊 Executive Summary</h3>'
-      + '<div class="esg-kpi-row">'
-      + '<div class="esg-kpi"><div class="esg-kpi-val">' + (totals.turns||0) + '</div><div class="esg-kpi-lbl">API Turns</div></div>'
-      + '<div class="esg-kpi"><div class="esg-kpi-val">' + esc(CALC.fmtCO2 ? CALC.fmtCO2(totals.co2) : (totals.co2||0).toFixed(2)+'g') + '</div><div class="esg-kpi-lbl">CO₂ Emitted</div></div>'
-      + '<div class="esg-kpi"><div class="esg-kpi-val">' + esc(CALC.fmtWater ? CALC.fmtWater(totals.water) : (totals.water||0).toFixed(2)+'L') + '</div><div class="esg-kpi-lbl">Water Used</div></div>'
-      + '<div class="esg-kpi"><div class="esg-kpi-val">' + esc(CALC.fmtPower ? CALC.fmtPower(totals.power) : (totals.power||0).toFixed(4)+'kWh') + '</div><div class="esg-kpi-lbl">Energy</div></div>'
-      + '</div></div>';
+    var kpiHtml = '<p class="esg-meta">Generated ' + now + ' by TokenLens. Figures are estimates.</p>'
+      + TLUI.block('Executive summary', 'Totals across every active model this session.', TLUI.kpis([
+          ['API turns', String(totals.turns || 0)],
+          ['CO₂ emitted', esc(CALC.fmtCO2 ? CALC.fmtCO2(totals.co2) : (totals.co2||0).toFixed(2)+'g')],
+          ['Water used', esc(CALC.fmtWater ? CALC.fmtWater(totals.water) : (totals.water||0).toFixed(2)+'L')],
+          ['Energy', esc(CALC.fmtPower ? CALC.fmtPower(totals.power) : (totals.power||0).toFixed(4)+'kWh')]
+        ]));
 
-    var rows = models.map(function(m) {
+    var data = models.map(function(m) {
       var sess = STATE.getSession ? STATE.getSession(m.id) : null;
       var turns = sess && sess.turns ? sess.turns : [];
       var mCo2=0, mWater=0, mPower=0, mCost=0;
       turns.forEach(function(t){ mCo2+=t.co2||0; mWater+=t.water||0; mPower+=t.power||0; mCost+=t.cost||0; });
-      return '<tr>'
-        + '<td>' + esc(m.name||m.id) + '</td>'
-        + '<td>' + turns.length + '</td>'
-        + '<td>' + esc(CALC.fmtCO2 ? CALC.fmtCO2(mCo2) : mCo2.toFixed(3)+'g') + '</td>'
-        + '<td>' + esc(CALC.fmtWater ? CALC.fmtWater(mWater) : mWater.toFixed(4)+'L') + '</td>'
-        + '<td>' + esc(CALC.fmtPower ? CALC.fmtPower(mPower) : mPower.toFixed(5)+'kWh') + '</td>'
-        + '<td>' + esc(CALC.fmtCost ? CALC.fmtCost(mCost) : '$'+mCost.toFixed(4)) + '</td>'
-        + '</tr>';
-    }).join('');
+      return { m: m, n: turns.length, co2: mCo2, water: mWater, power: mPower, cost: mCost };
+    });
+    var maxCo2 = Math.max.apply(null, data.map(function(d){ return d.co2; }).concat([1e-12]));
+    var rows = data.map(function(d) {
+      var name = d.m.name || d.m.id;
+      return {
+        w: d.co2 / maxCo2,
+        sort: [name, d.n, d.co2, d.water, d.power, d.cost],
+        cells: [
+          '<span class="tl-name">' + esc(name) + '</span>', String(d.n),
+          esc(CALC.fmtCO2 ? CALC.fmtCO2(d.co2) : d.co2.toFixed(3)+'g'),
+          esc(CALC.fmtWater ? CALC.fmtWater(d.water) : d.water.toFixed(4)+'L'),
+          esc(CALC.fmtPower ? CALC.fmtPower(d.power) : d.power.toFixed(5)+'kWh'),
+          esc(CALC.fmtCost ? CALC.fmtCost(d.cost) : '$'+d.cost.toFixed(4))
+        ]
+      };
+    });
+    var tableHtml = TLUI.block('Per-model breakdown', 'The grey bar shows each model’s share of the highest CO₂ total.',
+      rows.length ? TLUI.ledger({
+        label: 'Per-model footprint', cols: 'minmax(0,1.4fr) 56px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', min: 640,
+        head: [{label:'Model', sort:true}, {label:'Turns', num:true, sort:true}, {label:'CO₂', num:true, sort:true}, {label:'Water', num:true, sort:true}, {label:'Energy', num:true, sort:true}, {label:'Cost', num:true, sort:true}],
+        rows: rows
+      }) : TLUI.empty('No session data yet. Select models and send a prompt to populate this report.'));
 
-    var tableHtml = '<div class="esg-section"><h3>🤖 Per-Model Breakdown</h3>'
-      + '<table class="esg-table"><thead><tr><th>Model</th><th>Turns</th><th>CO₂</th><th>Water</th><th>Energy</th><th>Cost</th></tr></thead>'
-      + '<tbody>' + (rows || '<tr><td colspan="6" style="color:var(--text-3)">No session data yet</td></tr>') + '</tbody></table></div>';
+    var methHtml = TLUI.block('Methodology', null,
+      '<p class="esg-text">CO₂ is based on <b>Luccioni et al. (2023)</b> energy-per-token estimates multiplied by regional grid carbon intensity (global average 436 gCO₂/kWh). '
+      + 'Water use comes from <b>Li et al. (2023)</b> on-site water consumption ratios for data centers. '
+      + 'Power figures use model-size-based draw estimates (0.001 to 0.01 kWh per 1M tokens). '
+      + 'All figures are estimates; real values vary by provider infrastructure and location.</p>');
 
-    var methHtml = '<div class="esg-section"><h3>📖 Methodology</h3>'
-      + '<div class="esg-methodology">CO₂ calculations based on <strong>Luccioni et al. (2023)</strong> energy-per-token estimates × regional grid carbon intensity (global avg 436 gCO₂/kWh). '
-      + 'Water usage derived from <strong>Li et al. (2023)</strong> on-site water consumption ratios for data centers. '
-      + 'Power figures use model-size-based power draw estimates (0.001–0.01 kWh/1M tokens). '
-      + 'All figures are estimates; actual values vary by provider infrastructure and location.</div></div>';
+    var fwHtml = TLUI.block('Compliance frameworks', null,
+      '<div class="esg-fw">' + ['GHG Protocol Scope 3', 'CDP Climate Disclosure', 'GRI 305 Emissions', 'ISO 14064-1', 'TCFD'].map(function(f){ return TLUI.pill(f); }).join('') + '</div>'
+      + '<p class="esg-text">AI API usage falls under <b>GHG Protocol Scope 3, Category 1</b> (purchased goods and services) or Category 11 (use of sold products). Include it in your annual CDP submission under IT and data infrastructure.</p>');
 
-    var fwHtml = '<div class="esg-section"><h3>✅ Compliance Frameworks</h3>'
-      + '<div class="esg-framework">'
-      + '<span class="esg-fw-chip">GHG Protocol — Scope 3</span>'
-      + '<span class="esg-fw-chip">CDP Climate Disclosure</span>'
-      + '<span class="esg-fw-chip">GRI 305 — Emissions</span>'
-      + '<span class="esg-fw-chip">ISO 14064-1</span>'
-      + '<span class="esg-fw-chip">TCFD</span>'
-      + '</div>'
-      + '<p style="font-size:11px;color:var(--text-2);margin-top:8px">AI API usage falls under <strong>GHG Protocol Scope 3, Category 1</strong> (Purchased Goods &amp; Services) or Category 11 (Use of Sold Products). Include in your annual CDP submission under IT &amp; Data Infrastructure.</p></div>';
-
-    var exportHtml = '<div class="esg-export-row">'
-      + '<button class="esg-export-btn" onclick="ESG.downloadJSON()">📄 Download JSON</button>'
-      + '<button class="esg-export-btn" onclick="ESG.printReport()">🖨️ Print Report</button>'
-      + '</div>';
-
-    bodyEl.innerHTML = kpiHtml + tableHtml + methHtml + fwHtml + exportHtml;
+    bodyEl.innerHTML = kpiHtml + tableHtml + methHtml + fwHtml;
   }
 
   function downloadJSON() {
@@ -92,12 +92,16 @@ window.ESG = (function() {
     var uri = 'data:application/json;charset=utf-8,' + encodeURIComponent(blob);
     var a = document.createElement('a');
     a.href = uri; a.download = 'tokenlens-esg-report.json'; a.click();
+    if (window.TOAST) TOAST.success('Saved tokenlens-esg-report.json.');
   }
 
   function printReport() {
+    var wasDark = document.body.classList.contains('dark');
     document.body.classList.add('printing-report');
+    document.body.classList.remove('dark');
     function _cleanup() {
       document.body.classList.remove('printing-report');
+      if (wasDark) document.body.classList.add('dark');
       window.removeEventListener('afterprint', _cleanup);
     }
     window.addEventListener('afterprint', _cleanup);

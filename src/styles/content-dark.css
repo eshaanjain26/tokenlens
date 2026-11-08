@@ -1,7 +1,2 @@
 /* Page-specific dark overrides still using literal colours. Superseded when the content restyle lands. */
 
-body.dark .pm-table tr:nth-child(even) td { background: #111;}
-
-body.dark .hm-session { background: #1A1A1A; border-color: #333;}
-
-body.dark .hm-session:hover { background: #0A2C18; border-color: var(--tl);}

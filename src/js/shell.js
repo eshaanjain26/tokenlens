@@ -181,14 +181,16 @@
     if (!dd || !btn) return;
     new MutationObserver(function() {
       if (dd.classList.contains('open')) {
-        var first = dd.querySelector('.tools-item');
+        var search = dd.querySelector('#tools-search');
+        var first = search && window.matchMedia('(pointer: fine)').matches ? search : dd.querySelector('.tools-item');
         if (first) first.focus({ preventScroll: true });
       } else if (dd.contains(document.activeElement)) {
         btn.focus({ preventScroll: true });
       }
     }).observe(dd, { attributes: true, attributeFilter: ['class'] });
     dd.addEventListener('keydown', function(e) {
-      var items = Array.prototype.slice.call(dd.querySelectorAll('.tools-item'));
+      if (e.target && e.target.id === 'tools-search') return;
+      var items = Array.prototype.slice.call(dd.querySelectorAll('.tools-item:not([hidden])'));
       var i = items.indexOf(document.activeElement);
       if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }

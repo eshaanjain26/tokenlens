@@ -1,120 +1,15 @@
-/* ── Enterprise: RBAC & Key Vault ───────────────── */
+/* ─── Key vault, Shadow AI, Policy ────────────────── */
+.rbac-tabs { margin-bottom: 20px; }
+.rbac-panel { display: none; }
+.rbac-panel.active { display: block; }
+.rbac-budget { display: grid; gap: 6px; min-width: 0; font-size: 0.8125rem; color: var(--muted); }
+.rbac-actions { display: flex; justify-content: flex-end; gap: 2px; }
+.rbac-actions .tl-icon-btn[data-armed="1"] { width: auto; padding: 0 8px; background: var(--negative); color: var(--accent-ink); font-size: 0.8125rem; }
 
-.rbac-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
-.rbac-head h2 { flex:1;font-size:1.1429rem;font-weight:800;color:var(--text);margin:0; }
-.rbac-body { padding:18px 20px; }
-.rbac-tabs { display:flex;gap:2px;margin-bottom:18px;border-bottom:2px solid var(--border); }
-.rbac-tab { padding:7px 16px;font-size:0.8571rem;font-weight:700;color:var(--text-2);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px; }
-.rbac-tab.active { color:var(--tl);border-bottom-color:var(--tl); }
-.rbac-panel { display:none; }
-.rbac-panel.active { display:block; }
-.rbac-section { margin-bottom:20px; }
-.rbac-section h3 { font-size:0.8571rem;font-weight:800;color:var(--tl);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px; }
-.rbac-table { width:100%;border-collapse:collapse;font-size:0.8571rem; }
-.rbac-table th { text-align:left;font-size:0.7857rem;font-weight:800;text-transform:uppercase;padding:6px 10px;border-bottom:2px solid var(--border);color:var(--text-2); }
-.rbac-table td { padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle; }
-.rbac-table tr:last-child td { border-bottom:none; }
-.rbac-role-badge { font-size:0.7857rem;font-weight:700;padding:2px 7px;border-radius:10px; }
-.rbac-role-badge.admin { background:#FFEAEA;color:#C82020; }
-.rbac-role-badge.manager { background:#FFF3E8;color:#B45309; }
-.rbac-role-badge.developer { background:#E3F9EE;color:#0A7A48; }
-.rbac-role-badge.readonly { background:var(--surface-2);color:var(--text-2); }
-.rbac-add-row { display:flex;gap:8px;margin-top:10px;flex-wrap:wrap; }
-.rbac-add-row input, .rbac-add-row select { padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.8571rem;background:var(--surface-2);color:var(--text);outline:none; }
-.rbac-add-row input:focus, .rbac-add-row select:focus { border-color:var(--tl); }
-.rbac-add-btn { padding:6px 14px;background:var(--tl);color:#fff;border:none;border-radius:7px;font-size:0.8571rem;font-weight:700;cursor:pointer;white-space:nowrap; }
-.vault-card { border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px; }
-.vault-card.active-key { border-color:var(--tl);background:var(--tl-bg); }
-.vault-provider-icon { font-size:1.7143rem;flex-shrink:0; }
-.vault-info { flex:1; }
-.vault-name { font-size:0.9286rem;font-weight:800;color:var(--text); }
-.vault-key { font-size:0.7857rem;font-family:monospace;color:var(--text-2);margin-top:2px; }
-.vault-meta { font-size:0.7857rem;color:var(--text-3);margin-top:2px; }
-.vault-budget-bar { margin-top:5px; }
-.vault-budget-track { height:4px;background:var(--border);border-radius:2px;overflow:hidden; }
-.vault-budget-fill { height:100%;border-radius:2px;background:var(--tl-light); }
-.vault-budget-fill.warn { background:#F59E0B; }
-.vault-budget-fill.danger { background:#EF4444; }
-.vault-actions { display:flex;gap:6px;flex-shrink:0; }
-.vault-action-btn { padding:4px 9px;border-radius:6px;font-size:0.7857rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text-2); }
-.vault-action-btn:hover { border-color:var(--tl);color:var(--tl); }
-.vault-add-form { border:1.5px dashed var(--border);border-radius:10px;padding:14px;margin-top:10px; }
-.vault-add-form h4 { font-size:0.8571rem;font-weight:800;color:var(--text);margin:0 0 10px; }
-.vault-form-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
-.vault-form-grid label { font-size:0.7857rem;font-weight:700;color:var(--text-2);display:block;margin-bottom:3px; }
-.vault-form-grid input, .vault-form-grid select { width:100%;padding:6px 9px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8571rem;background:var(--surface-2);color:var(--text);outline:none;box-sizing:border-box; }
-.vault-form-grid input:focus, .vault-form-grid select:focus { border-color:var(--tl); }
-.project-row { display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;margin-bottom:6px; }
-.project-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
-.project-info { flex:1; }
-.project-name { font-size:0.9286rem;font-weight:800;color:var(--text); }
-.project-meta { font-size:0.7857rem;color:var(--text-2);margin-top:1px; }
-.project-budget-chip { font-size:0.7857rem;font-weight:700;padding:2px 8px;border-radius:8px;background:var(--tl-bg);color:var(--tl);border:1px solid var(--tl-border); }
+.shadow-alerts { margin-bottom: 24px; }
+#shadow-traffic[data-risk="high"] .tl-row:not(.head):not([data-risk="high"]),
+#shadow-traffic[data-risk="medium"] .tl-row:not(.head):not([data-risk="medium"]),
+#shadow-traffic[data-risk="low"] .tl-row:not(.head):not([data-risk="low"]) { display: none; }
 
-/* ── Enterprise: Shadow AI Discovery ────────────── */
-
-.shadow-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
-.shadow-head h2 { flex:1;font-size:1.1429rem;font-weight:800;color:var(--text);margin:0; }
-.shadow-body { padding:18px 20px; }
-.shadow-alert { display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:9px;margin-bottom:12px;font-size:0.8571rem; }
-.shadow-alert.critical { background:#FFEAEA;border:1.5px solid #F5A0A0;color:#8B0000; }
-.shadow-alert.warning { background:#FFFBE6;border:1.5px solid #FFD166;color:#6A5200; }
-.shadow-alert.info { background:#E3F9EE;border:1.5px solid var(--tl-border);color:#054D29; }
-.shadow-alert-icon { font-size:1.2857rem;flex-shrink:0; }
-.shadow-alert-body strong { display:block;font-size:0.8571rem;margin-bottom:2px; }
-.shadow-kpis { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px; }
-.shadow-kpi { border:1.5px solid var(--border);border-radius:9px;padding:10px 8px;text-align:center; }
-.shadow-kpi-val { font-size:1.4286rem;font-weight:900;color:var(--tl); }
-.shadow-kpi-val.danger { color:#EF4444; }
-.shadow-kpi-val.warn { color:#F59E0B; }
-.shadow-kpi-lbl { font-size:0.7857rem;font-weight:700;color:var(--text-2);margin-top:2px; }
-.shadow-table { width:100%;border-collapse:collapse;font-size:0.7857rem;margin-bottom:16px; }
-.shadow-table th { text-align:left;font-size:0.7857rem;font-weight:800;text-transform:uppercase;padding:6px 8px;border-bottom:2px solid var(--border);color:var(--text-2); }
-.shadow-table td { padding:7px 8px;border-bottom:1px solid var(--border);color:var(--text); }
-.risk-chip { display:inline-block;font-size:0.7857rem;font-weight:700;padding:2px 7px;border-radius:8px; }
-.risk-chip.high { background:#FFEAEA;color:#C82020; }
-.risk-chip.medium { background:#FFFBE6;color:#8A6800; }
-.risk-chip.low { background:#E3F9EE;color:#0A7A48; }
-.shadow-pii-row { display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:5px;font-size:0.7857rem;border:1px solid var(--border); }
-.shadow-pii-icon { font-size:1.1429rem; }
-.shadow-pii-info { flex:1; }
-.shadow-pii-count { font-size:1rem;font-weight:900;color:#EF4444; }
-.shadow-leakage-bar { margin-top:12px; }
-.shadow-leakage-label { font-size:0.7857rem;font-weight:700;color:var(--text-2);margin-bottom:4px; }
-.shadow-leakage-track { height:10px;background:var(--border);border-radius:5px;overflow:hidden;position:relative; }
-.shadow-leakage-fill { height:100%;border-radius:5px;background:linear-gradient(90deg,#22C55E,#F59E0B,#EF4444); }
-
-/* ── Enterprise: Policy Enforcement ─────────────── */
-
-.policy-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
-.policy-head h2 { flex:1;font-size:1.1429rem;font-weight:800;color:var(--text);margin:0; }
-.policy-body { padding:18px 20px; }
-.policy-rule { border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px; }
-.policy-rule.enabled { border-color:var(--tl);background:var(--tl-bg); }
-.policy-rule.triggered { border-color:#F59E0B;background:#FFFBE6; }
-.policy-rule-toggle { margin-top:2px;cursor:pointer;flex-shrink:0; }
-.policy-rule-body { flex:1; }
-.policy-rule-name { font-size:0.9286rem;font-weight:800;color:var(--text); }
-.policy-rule-desc { font-size:0.7857rem;color:var(--text-2);margin-top:3px;line-height:1.4; }
-.policy-rule-meta { display:flex;gap:6px;margin-top:6px;flex-wrap:wrap; }
-.policy-meta-chip { font-size:0.7857rem;font-weight:700;padding:2px 7px;border-radius:8px;background:var(--surface-2);color:var(--text-2); }
-.policy-meta-chip.action { background:#E3F9EE;color:#0A7A48; }
-.policy-meta-chip.trigger { background:#FFF3E8;color:#B45309; }
-.policy-trigger-count { font-size:1.4286rem;font-weight:900;color:var(--tl);text-align:right;flex-shrink:0; }
-.policy-trigger-lbl { font-size:0.7857rem;font-weight:700;color:var(--text-3);text-align:right; }
-.policy-builder { border:1.5px dashed var(--border);border-radius:10px;padding:14px;margin-top:14px; }
-.policy-builder h4 { font-size:0.8571rem;font-weight:800;color:var(--text);margin:0 0 12px; }
-.policy-builder-row { display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap; }
-.policy-builder-row label { font-size:0.7857rem;font-weight:700;color:var(--text-2);white-space:nowrap; }
-.policy-builder-row select, .policy-builder-row input { padding:5px 9px;border:1.5px solid var(--border);border-radius:6px;font-size:0.8571rem;background:var(--surface-2);color:var(--text);outline:none; }
-.policy-builder-row select:focus, .policy-builder-row input:focus { border-color:var(--tl); }
-.policy-save-btn { padding:7px 18px;background:var(--tl);color:#fff;border:none;border-radius:7px;font-size:0.8571rem;font-weight:700;cursor:pointer;margin-top:4px; }
-.policy-log { margin-top:16px; }
-.policy-log h3 { font-size:0.8571rem;font-weight:800;color:var(--tl);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px; }
-.policy-log-entry { font-size:0.7857rem;padding:5px 8px;border-radius:6px;margin-bottom:4px;display:flex;gap:8px;align-items:center; }
-.policy-log-entry.block { background:#FFEAEA;color:#8B0000; }
-.policy-log-entry.route { background:#E3F9EE;color:#054D29; }
-.policy-log-entry.warn { background:#FFFBE6;color:#6A5200; }
-.policy-log-time { font-size:0.7857rem;font-weight:700;opacity:0.6;white-space:nowrap; }
-.policy-log-msg { flex:1; }
-
+.tl-row.off .tl-cell { color: var(--muted); }
+.policy-if b { font-weight: 500; color: var(--text); }

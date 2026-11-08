@@ -1,5 +1,7 @@
 /* ─── Print styles ──────────────────────────────── */
 @media print {
+  @page { margin: 1.5cm 2cm; }
+
   #header, #sidebar, #sidebar-overlay, #bottom-nav, #notes-fab, #prompt-bar, #freshness-bar, #onboarding-overlay, #about-overlay,
   #toast-container, .header-tabs, .currency-toggle, .tools-wrap, #dark-toggle,
   #proj-btn, .op-toggle, .bench-page-sub { display: none !important; }
@@ -14,20 +16,33 @@
   .bench-grid { grid-template-columns: 1fr !important; }
   .bench-card { break-inside: avoid; border: 1px solid #ddd !important; }
   .bench-table { font-size: 9pt !important; }
-  @page { margin: 1.5cm 2cm; }
 
-  /* Scope printing to the ESG report only, so window.print() from
-     ESG.printReport() doesn't also print the Compare/Benchmarks tab
-     content sitting underneath the modal. */
-  body.printing-report #app { display: none !important; }
+  /* Print only the ESG report. ESG.printReport() adds body.printing-report
+     and switches to the light theme for the duration of the print. */
+  body.printing-report #app { display: none; }
+  body.printing-report .tl-overlay:not(#esg-overlay) { display: none; }
   body.printing-report #esg-overlay {
-    position: static !important; display: block !important;
-    background: none !important; inset: auto; z-index: auto;
+    position: static; display: block;
+    width: auto; height: auto; padding: 0;
+    background: none;
   }
   body.printing-report #esg-modal {
-    width: 100% !important; max-width: 100% !important; max-height: none !important;
-    overflow: visible !important; box-shadow: none !important; border-radius: 0;
+    display: block;
+    width: 100%; max-width: 100%; max-height: none;
+    overflow: visible;
+    border: 0; border-radius: 0; box-shadow: none;
   }
-  body.printing-report .esg-export-row { display: none !important; }
+  body.printing-report #esg-modal > .tl-head { position: static; padding-inline: 0; border-bottom: 1px solid var(--border); }
+  body.printing-report #esg-modal > .tl-head h2 { font-size: 20pt; }
+  body.printing-report #esg-modal > .tl-head .tl-head-actions,
+  body.printing-report #esg-modal > .tl-head .tl-close { display: none; }
+  body.printing-report #esg-modal .tl-body { padding: 12pt 0 0; }
+  body.printing-report #esg-modal .tl-block,
+  body.printing-report #esg-modal .tl-row { break-inside: avoid; }
+  body.printing-report #esg-modal .tl-scroll { overflow: visible; }
+  body.printing-report #esg-modal .tl-ledger { min-width: 0; }
+  body.printing-report #esg-modal .tl-row.bar::before { display: none; }
+  body.printing-report #esg-modal .tl-th { color: inherit; }
+  body.printing-report #esg-modal .tl-th::after { content: none; }
+  body.printing-report #esg-modal .tl-kpi-v { animation: none; }
 }
-

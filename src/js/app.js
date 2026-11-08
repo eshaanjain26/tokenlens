@@ -121,16 +121,16 @@ window.APP = (function() {
     var hist = STATE.loadHistory();
     if (!listEl) return;
     if (!hist.length) {
-      listEl.innerHTML = '<div class="hm-empty">No sessions saved yet.<br>Sessions are auto-saved after each prompt.</div>';
+      listEl.innerHTML = TLUI.empty('<b>No sessions saved yet.</b><br>Sessions are saved automatically after each prompt.');
     } else {
       listEl.innerHTML = hist.map(function(entry, i) {
         var date = new Date(entry.date).toLocaleString();
         var modelNames = entry.models.map(function(m){return m.name||m.id.split('/').pop();}).join(', ');
-        return '<div class="hm-session" onclick="APP.restoreSession('+i+')">'
-          +'<div class="hs-title">'+(entry.turns)+' turn'+(entry.turns!==1?'s':'')+' · '+CALC.fmtCost(entry.totalCost||0)+'</div>'
-          +'<div class="hs-meta">'+date+'</div>'
-          +'<div class="hs-models">'+modelNames+'</div>'
-          +'</div>';
+        return '<button type="button" class="hm-session" onclick="APP.restoreSession('+i+')">'
+          +'<span class="hs-title">'+(entry.turns)+' turn'+(entry.turns!==1?'s':'')+' · '+CALC.fmtCost(entry.totalCost||0)+'</span>'
+          +'<span class="hs-meta">'+date+'</span>'
+          +'<span class="hs-models">'+esc(modelNames)+'</span>'
+          +'</button>';
       }).join('');
     }
     document.getElementById('history-overlay').classList.add('open');
@@ -173,25 +173,41 @@ window.APP = (function() {
     var costPerRun = models.map(function(m){ return CALC.cost(m, inTok, outTok); });
     var minCost = Math.min.apply(null, costPerRun);
     var maxCost = Math.max.apply(null, costPerRun);
+    var maxYear = Math.max.apply(null, costPerRun.map(function(c){ return c * runs * 365; }).concat([1e-12]));
     var rows = models.map(function(m, i) {
       var cpr = costPerRun[i];
       var daily = cpr * runs;
       var monthly = daily * 30;
       var yearly = daily * 365;
-      var isBest = cpr === minCost;
-      var isWorst = cpr === maxCost;
-      var cls = isBest && models.length > 1 ? ' class="best"' : isWorst && models.length > 1 ? ' class="worst"' : '';
+      var isBest = cpr === minCost && models.length > 1;
       var sname = m.name || m.id.split('/').pop();
-      return '<tr><td><strong>'+esc(sname)+'</strong></td>'
-        +'<td'+cls+'>'+CALC.fmtCost(cpr)+'</td>'
-        +'<td'+cls+'>'+CALC.fmtCost(daily)+'</td>'
-        +'<td'+cls+'>'+CALC.fmtCost(monthly)+'</td>'
-        +'<td'+cls+'>'+CALC.fmtCost(yearly)+(isBest&&models.length>1?' ✅':'')+'</td></tr>';
+      return '<div class="tl-row bar' + (isBest ? ' best' : '') + '" role="row" style="--i:'+i+';--wd:'+(Math.max(0,daily)/(maxYear/365)*100).toFixed(1)+'%;--wm:'+(Math.max(0,monthly)/(maxYear/365*30)*100).toFixed(1)+'%;--wy:'+(Math.max(0,yearly)/maxYear*100).toFixed(1)+'%"'
+        +' data-s0="'+esc(sname)+'" data-s1="'+cpr+'" data-s2="'+daily+'" data-s3="'+monthly+'" data-s4="'+yearly+'"'
+        +' data-copy="'+esc(sname)+'\t'+CALC.fmtCost(cpr)+'\t'+CALC.fmtCost(daily)+'\t'+CALC.fmtCost(monthly)+'\t'+CALC.fmtCost(yearly)+'">'
+        +'<div class="tl-cell" role="cell"><span class="tl-name">'+esc(sname)+'</span></div>'
+        +'<div class="tl-cell num" role="cell">'+CALC.fmtCost(cpr)+'</div>'
+        +'<div class="tl-cell num p-d" role="cell">'+CALC.fmtCost(daily)+'</div>'
+        +'<div class="tl-cell num p-m" role="cell">'+CALC.fmtCost(monthly)+'</div>'
+        +'<div class="tl-cell num p-y" role="cell"><span class="hl">'+CALC.fmtCost(yearly)+'</span></div>'
+        +'</div>';
     }).join('');
-    wrap.innerHTML = '<table class="pm-table"><thead><tr>'
-      +'<th>Model</th><th>Per Run</th><th>Daily ('+runs.toLocaleString()+'×)</th><th>Monthly</th><th>Yearly</th>'
-      +'</tr></thead><tbody>'+rows+'</tbody></table>'
-      +'<p style="font-size:10px;color:var(--text-3);margin-top:9px">Based on '+inTok.toLocaleString()+' input + '+outTok.toLocaleString()+' output tokens per run.</p>';
+    wrap.innerHTML = '<div class="tl-scroll"><div class="tl-ledger pm-ledger" role="table" aria-label="Projected cost per model" style="--cols:minmax(0,1.4fr) 92px 92px 100px 104px;--cols-sm:minmax(0,1fr) 92px 104px;--min:0px">'
+      +'<div class="tl-row head" role="row">'
+      +'<div class="tl-cell" role="columnheader" aria-sort="none"><button type="button" class="tl-th" data-sort="0">Model</button></div>'
+      +'<div class="tl-cell num hide-sm" role="columnheader" aria-sort="none"><button type="button" class="tl-th" data-sort="1">Per run</button></div>'
+      +'<div class="tl-cell num p-d" role="columnheader" aria-sort="none"><button type="button" class="tl-th" data-sort="2">Day</button></div>'
+      +'<div class="tl-cell num p-m" role="columnheader" aria-sort="none"><button type="button" class="tl-th" data-sort="3">Month</button></div>'
+      +'<div class="tl-cell num p-y" role="columnheader" aria-sort="none"><button type="button" class="tl-th" data-sort="4">Year</button></div>'
+      +'</div><div class="tl-rows">'+rows+'</div></div></div>'
+      +'<p class="tl-hint" style="margin-top:12px">'+runs.toLocaleString()+' runs a day at '+inTok.toLocaleString()+' input and '+outTok.toLocaleString()+' output tokens each. The bar behind a row shows its share of the most expensive model for the highlighted period.</p>';
+  }
+
+  function copyProjection() {
+    var rowsEl = document.querySelectorAll('#proj-table-wrap .tl-row[data-copy]');
+    if (!rowsEl.length) { TOAST.warning('Select a model first to project costs.'); return; }
+    var lines = ['Model\tPer run\tDaily\tMonthly\tYearly'];
+    rowsEl.forEach(function(r){ lines.push(r.dataset.copy); });
+    TLUI.copy(lines.join('\n'), 'Projection table copied.');
   }
 
   // ── Templates dropdown ─────────────────────────────────
@@ -470,7 +486,7 @@ window.APP = (function() {
   }
 
   return {init, toggleModel, toggleDark, toggleSidebarCollapse, shareURL, openHistory, closeHistory, restoreSession, clearHistory,
-          openProjection, closeProjection, updateProjection, toggleTemplates, applyTemplate, setProviderFilter,
+          openProjection, closeProjection, updateProjection, copyProjection, toggleTemplates, applyTemplate, setProviderFilter,
           toggleSidebar, railExpand, closeRail, exportCSV, exportJSON, _renderModelList: renderModelList};
 })();
 
