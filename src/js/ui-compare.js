@@ -14,7 +14,7 @@ window.UI_COMPARE = (function() {
     var area   = document.getElementById('columns-area');
     var models = STATE.getActiveModels();
     if (!models.length) {
-      area.innerHTML='<div class="no-models-msg"><div class="big">🤖</div><h3>Select models from the sidebar</h3><p style="font-size:13px">Choose up to 10 models to compare side-by-side</p></div>';
+      area.innerHTML='<div class="no-models-msg"><div class="big">'+TL_ICON('layers')+'</div><h3>Select models to compare</h3><p>Choose up to 10 models from the model panel to compare side by side.</p></div>';
       _colEls = {};
       return;
     }
@@ -221,7 +221,7 @@ window.UI_COMPARE = (function() {
     var models = STATE.getActiveModels();
     if (!models.length) { TOAST.warning('Select at least one model from the sidebar first.'); return; }
     var btn = document.getElementById('send-btn');
-    btn.disabled=true; btn.textContent='⏳ Sending…';
+    btn.disabled=true; btn.textContent='Sending…';
     var iLabel = TOKEN_ENGINE.intentLabel(promptText);
     var promises = models.map(async function(model) {
       var s           = STATE.getSession(model.id);
@@ -321,7 +321,7 @@ window.UI_COMPARE = (function() {
     // silently refresh analytics panel if it's visible
     var anPanel = document.getElementById('analytics-panel');
     if (anPanel && anPanel.classList.contains('active')) UI_ANALYTICS.render();
-    btn.disabled=false; btn.textContent = API.hasKey() ? 'Send ▶' : 'Simulate ▶';
+    btn.disabled=false; btn.textContent = API.hasKey() ? 'Send' : 'Simulate';
     document.getElementById('prompt-input').value='';
     updateLivePreview('');
   }

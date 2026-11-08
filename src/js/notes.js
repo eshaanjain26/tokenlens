@@ -51,7 +51,7 @@ window.NOTES = (function() {
     setTimeout(function() {
       if (!document.getElementById('notes-fab')) {
         var fab = document.createElement('button');
-        fab.id = 'notes-fab'; fab.title = 'Session Notes'; fab.innerHTML = '📝';
+        fab.id = 'notes-fab'; fab.title = 'Session Notes'; fab.innerHTML = window.TL_ICON('note'); fab.setAttribute('aria-label', 'Session notes');
         fab.onclick = function() { NOTES.toggle(); };
         document.body.appendChild(fab);
       }

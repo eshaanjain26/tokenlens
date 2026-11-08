@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="TokenLens — Real-time LLM cost, token, CO₂, water and power intelligence across 500+ models. Research-backed environmental metrics. Side-by-side model comparison.">
-<meta name="theme-color" content="#0A6B3C">
+<meta name="theme-color" content="#f8f8f8">
 <meta property="og:type" content="website">
 <meta property="og:title" content="TokenLens — LLM cost, caching and sustainability intelligence">
 <meta property="og:description" content="Compare LLM cost, tokens, prompt-caching savings, CO₂, water and power side by side. Runs in your browser, no signup, no backend.">
@@ -12,7 +12,7 @@
 <title>TokenLens — LLM Cost Intelligence Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23052E1C'/><circle cx='16' cy='16' r='7' fill='none' stroke='%2329B76A' stroke-width='2'/><circle cx='16' cy='7' r='1.8' fill='%2329B76A'/><circle cx='23.1' cy='11.5' r='1.8' fill='%2329B76A'/><circle cx='23.1' cy='20.5' r='1.8' fill='%2329B76A'/><circle cx='16' cy='25' r='1.8' fill='%2329B76A'/><circle cx='8.9' cy='20.5' r='1.8' fill='%2329B76A'/><circle cx='8.9' cy='11.5' r='1.8' fill='%2329B76A'/><circle cx='16' cy='16' r='2.5' fill='white'/></svg>">
 </head>
 <body>
@@ -21,44 +21,44 @@
 <div id="toast-container" role="status" aria-live="polite" aria-atomic="false"></div>
 
 <!-- ── First-Run Onboarding ─────────────────────── -->
-<div id="onboarding-overlay" role="dialog" aria-modal="true" aria-label="Welcome to TokenLens">
-  <div class="onboard-modal">
-    <div class="onboard-logo">⚡</div>
-    <div class="onboard-title">Welcome to TokenLens</div>
-    <div class="onboard-subtitle">Research-backed LLM cost, token and environmental intelligence across 500+ models</div>
+<div id="onboarding-overlay" class="tl-overlay open" role="dialog" aria-modal="true" aria-labelledby="onboard-title">
+  <div class="onboard-modal tl-dialog">
+    <div class="onboard-logo"><span class="ic" data-icon="coins"></span></div>
+    <h2 class="onboard-title" id="onboard-title">Welcome to TokenLens</h2>
+    <p class="onboard-subtitle">Research-backed LLM cost, token and environmental intelligence across 500+ models.</p>
     <div class="onboard-steps">
       <div class="onboard-step">
-        <div class="onboard-step-icon">🤖</div>
-        <div class="onboard-step-title">1. Select Models</div>
-        <div class="onboard-step-desc">Choose up to 10 models from the sidebar to compare side-by-side.</div>
+        <div class="onboard-step-icon"><span class="ic" data-icon="layers"></span></div>
+        <div class="onboard-step-title">1. Select models</div>
+        <div class="onboard-step-desc">Choose up to 10 models to compare side by side.</div>
       </div>
       <div class="onboard-step">
-        <div class="onboard-step-icon">📝</div>
-        <div class="onboard-step-title">2. Enter a Prompt</div>
+        <div class="onboard-step-icon"><span class="ic" data-icon="note"></span></div>
+        <div class="onboard-step-title">2. Enter a prompt</div>
         <div class="onboard-step-desc">Type any prompt to simulate token counts, cost, CO₂ and water impact.</div>
       </div>
       <div class="onboard-step">
-        <div class="onboard-step-icon">📊</div>
-        <div class="onboard-step-title">3. Compare & Analyze</div>
+        <div class="onboard-step-icon"><span class="ic" data-icon="usage"></span></div>
+        <div class="onboard-step-title">3. Compare and analyze</div>
         <div class="onboard-step-desc">View per-model metrics, benchmarks and the radar chart.</div>
       </div>
       <div class="onboard-step">
-        <div class="onboard-step-icon">🔧</div>
-        <div class="onboard-step-title">4. Use Tools</div>
-        <div class="onboard-step-desc">Recommend, Optimize, Scenario Builder and A/B Test under the Tools menu.</div>
+        <div class="onboard-step-icon"><span class="ic" data-icon="tools"></span></div>
+        <div class="onboard-step-title">4. Use tools</div>
+        <div class="onboard-step-desc">Recommend, Optimize, Scenario Builder and A/B Test live under the Tools menu.</div>
       </div>
     </div>
-    <div class="onboard-disclaimer">⚠️ <strong>Accuracy notice:</strong> Environmental metrics (CO₂, water, power) are research-derived estimates based on Luccioni et al. 2023 and provider sustainability reports. Pricing is fetched live from OpenRouter. All figures should be treated as directional benchmarks, not audited measurements.</div>
-    <button class="onboard-start-btn" onclick="TOAST._closeOnboarding()" aria-label="Dismiss welcome screen and start using TokenLens">Get Started →</button>
+    <div class="onboard-disclaimer"><strong>Accuracy notice:</strong> Environmental metrics (CO₂, water, power) are research-derived estimates based on Luccioni et al. 2023 and provider sustainability reports. Pricing is fetched live from OpenRouter. Treat all figures as directional benchmarks, not audited measurements.</div>
+    <button class="onboard-start-btn" onclick="TOAST._closeOnboarding()" aria-label="Dismiss welcome screen and start using TokenLens">Get started</button>
   </div>
 </div>
 
 <!-- ── About / Methodology Panel ────────────────── -->
-<div id="about-overlay" onclick="if(event.target===this)TOAST._closeAbout()" role="dialog" aria-modal="true" aria-label="About TokenLens">
-  <div id="about-modal">
+<div id="about-overlay" class="tl-overlay tl-overlay--drawer" onclick="if(event.target===this)TOAST._closeAbout()" role="dialog" aria-modal="true" aria-label="About TokenLens">
+  <div id="about-modal" class="tl-dialog">
     <div class="about-head">
-      <h2>⚡ About TokenLens</h2>
-      <button class="about-close" onclick="TOAST._closeAbout()" aria-label="Close about panel">✕</button>
+      <h2>About TokenLens</h2>
+      <button class="tl-close" onclick="TOAST._closeAbout()" aria-label="Close about panel"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="about-section">
       <h3>What is TokenLens?</h3>
@@ -83,12 +83,12 @@
     <div class="about-section">
       <h3>Key Research Sources</h3>
       <p>
-        <span class="about-badge">📄 Luccioni et al. 2023</span>
-        <span class="about-badge">💧 Li et al. 2023</span>
-        <span class="about-badge">📊 de Vries 2023</span>
-        <span class="about-badge">🏢 Google Env 2023</span>
-        <span class="about-badge">🏢 Microsoft Sust. 2023</span>
-        <span class="about-badge">🏢 AWS Sust. 2023</span>
+        <span class="about-badge">Luccioni et al. 2023</span>
+        <span class="about-badge">Li et al. 2023</span>
+        <span class="about-badge">de Vries 2023</span>
+        <span class="about-badge">Google Env 2023</span>
+        <span class="about-badge">Microsoft Sust. 2023</span>
+        <span class="about-badge">AWS Sust. 2023</span>
       </p>
       <p style="margin-top:8px">Full citations are available in the Benchmarks → Research Citations section.</p>
     </div>
@@ -108,105 +108,113 @@
 <div id="app">
 
   <header id="header" role="banner">
-    <div class="logo-mark" aria-hidden="true">
-      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="10" cy="10" r="4.5" stroke="white" stroke-width="1.5"/>
-        <circle cx="10" cy="4" r="1.2" fill="white"/>
-        <circle cx="14.8" cy="7" r="1.2" fill="white"/>
-        <circle cx="14.8" cy="13" r="1.2" fill="white"/>
-        <circle cx="10" cy="16" r="1.2" fill="white"/>
-        <circle cx="5.2" cy="13" r="1.2" fill="white"/>
-        <circle cx="5.2" cy="7" r="1.2" fill="white"/>
-        <circle cx="10" cy="10" r="1.8" fill="white"/>
-      </svg>
-    </div>
-    <div class="logo-text" aria-label="TokenLens — LLM Cost Intelligence Platform">
-      <div class="logo-name">Token<span>Lens</span></div>
-      <div style="font-size:9px;opacity:0.55;letter-spacing:0.5px;margin-top:1px">SUSTAINABILITY INTELLIGENCE</div>
-    </div>
-    <div class="tagline">Cost · Carbon · Water · Power · 500+ Models</div>
-    <div class="spacer"></div>
-    <div class="header-tabs" role="tablist" aria-label="Main navigation">
-      <button class="tab-btn active" data-tab="compare" role="tab" aria-selected="true">⚡ Compare</button>
-      <button class="tab-btn" data-tab="benchmarks" role="tab" aria-selected="false">📊 Benchmarks</button>
-      <button class="tab-btn" data-tab="howitworks" role="tab" aria-selected="false">🔬 How It Works</button>
-      <button class="tab-btn" data-tab="analytics" role="tab" aria-selected="false">📈 Analytics</button>
-    </div>
-    <div class="currency-toggle" aria-label="Currency selector">
-      <button class="cur-btn active" data-cur="USD" aria-pressed="true">$</button>
-      <button class="cur-btn" data-cur="EUR" aria-pressed="false">€</button>
-      <button class="cur-btn" data-cur="GBP" aria-pressed="false">£</button>
-      <button class="cur-btn" data-cur="INR" aria-pressed="false">₹</button>
-    </div>
-    <button id="usage-pill" class="usage-pill" onclick="USAGE.open()" aria-label="Open usage and impact panel" title="Usage, caching and footprint">
-      <span aria-hidden="true">📊</span><span id="usage-pill-txt">Usage</span>
-    </button>
-    <!-- Tools dropdown -->
-    <div class="tools-wrap">
-      <button id="tools-btn" onclick="TOAST._toggleTools()" aria-haspopup="true" aria-expanded="false" aria-label="Open tools menu">
-        🔧 Tools ▾
-      </button>
-      <div id="tools-dropdown" role="menu" aria-label="Analysis tools">
-        <button class="tools-item" onclick="USAGE.open();TOAST._closeTools()" role="menuitem">📊 Usage &amp; Caching</button>
-        <button class="tools-item" onclick="FINDER.open();TOAST._closeTools()" role="menuitem">🔍 Smart Model Finder</button>
-        <div class="tools-divider"></div>
-        <button class="tools-item" onclick="V6.openModal('rec');TOAST._closeTools()" role="menuitem">🎯 Model Recommender</button>
-        <button class="tools-item" onclick="V6.openModal('optimizer');TOAST._closeTools()" role="menuitem">✂️ Prompt Optimizer</button>
-        <button class="tools-item" onclick="V6.openModal('scenario');TOAST._closeTools()" role="menuitem">🔀 Scenario Builder</button>
-        <button class="tools-item" onclick="V6.openModal('abtest');TOAST._closeTools()" role="menuitem">🔬 A/B Test Mode</button>
-        <div class="tools-divider"></div>
-        <button class="tools-item" onclick="APP.openHistory();TOAST._closeTools()" role="menuitem">🕘 Session History</button>
-        <button class="tools-item" onclick="APP.shareURL();TOAST._closeTools()" role="menuitem">🔗 Share URL</button>
-        <div class="tools-divider"></div>
-        <button class="tools-item" onclick="TOAST._openAbout();TOAST._closeTools()" role="menuitem">ℹ️ About &amp; Methodology</button>
-        <div class="tools-divider"></div>
-        <button class="tools-item" onclick="APP.exportCSV();TOAST._closeTools()" role="menuitem">📥 Export CSV</button>
-        <button class="tools-item" onclick="APP.exportJSON();TOAST._closeTools()" role="menuitem">📄 Export JSON</button>
-        <div class="tools-divider"></div>
-        <button class="tools-item" onclick="ROUTER.open();TOAST._closeTools()" role="menuitem">🎯 Smart Route</button>
-        <button class="tools-item" onclick="FINECALC.open();TOAST._closeTools()" role="menuitem">📈 Fine-Tune ROI</button>
-        <button class="tools-item" onclick="ESG.open();TOAST._closeTools()" role="menuitem">📋 ESG Report</button>
-        <button class="tools-item" onclick="LIVEBENCH.open();TOAST._closeTools()" role="menuitem">⚡ Live Bench</button>
-        <div class="tools-divider"></div>
-        <button class="tools-item" onclick="RBAC.open();TOAST._closeTools()" role="menuitem">🔐 Key Vault &amp; Teams</button>
-        <button class="tools-item" onclick="SHADOW.open();TOAST._closeTools()" role="menuitem">🕵️ Shadow AI Discovery</button>
-        <button class="tools-item" onclick="POLICY.open();TOAST._closeTools()" role="menuitem">🛡️ Policy Enforcement</button>
-        <div class="tools-divider"></div>
-        <button class="tools-item" onclick="FORECAST.open();TOAST._closeTools()" role="menuitem">📉 Cost Forecast</button>
-        <button class="tools-item" onclick="BOOKMARKS.open();TOAST._closeTools()" role="menuitem">🔖 Bookmarked Turns</button>
-        <button class="tools-item" onclick="WEBHOOKS.open();TOAST._closeTools()" role="menuitem">🔔 Alert Webhooks</button>
-        <button class="tools-item" onclick="NOTES.open();TOAST._closeTools()" role="menuitem">📝 Session Notes</button>
+    <div class="logo">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="10" cy="4" r="1.2" fill="currentColor"/>
+          <circle cx="14.8" cy="7" r="1.2" fill="currentColor"/>
+          <circle cx="14.8" cy="13" r="1.2" fill="currentColor"/>
+          <circle cx="10" cy="16" r="1.2" fill="currentColor"/>
+          <circle cx="5.2" cy="13" r="1.2" fill="currentColor"/>
+          <circle cx="5.2" cy="7" r="1.2" fill="currentColor"/>
+          <circle cx="10" cy="10" r="1.8" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="logo-text" aria-label="TokenLens, LLM cost intelligence">
+        <div class="logo-name">Token<span>Lens</span></div>
       </div>
     </div>
-    <button id="mobile-menu-btn" onclick="APP.toggleSidebar()" aria-label="Open model selector" aria-expanded="false">☰ Models</button>
-    <button id="dark-toggle" onclick="APP.toggleDark()" title="Toggle dark/light mode" aria-label="Toggle dark mode">
-      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </button>
+    <div class="header-tabs" role="tablist" aria-label="Main navigation">
+      <button class="tab-btn active" data-tab="compare" role="tab" aria-selected="true">Compare</button>
+      <button class="tab-btn" data-tab="benchmarks" role="tab" aria-selected="false">Benchmarks</button>
+      <button class="tab-btn" data-tab="howitworks" role="tab" aria-selected="false">How it works</button>
+      <button class="tab-btn" data-tab="analytics" role="tab" aria-selected="false">Analytics</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="header-actions">
+      <div class="currency-toggle">
+        <label class="sr-only" for="currency-select">Currency</label>
+        <select id="currency-select" onchange="document.querySelector('.cur-btn[data-cur=' + this.value + ']').click()">
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+          <option value="INR">INR</option>
+        </select>
+        <span class="currency-legacy" hidden>
+          <button class="cur-btn active" data-cur="USD" aria-pressed="true" tabindex="-1">$</button>
+          <button class="cur-btn" data-cur="EUR" aria-pressed="false" tabindex="-1">€</button>
+          <button class="cur-btn" data-cur="GBP" aria-pressed="false" tabindex="-1">£</button>
+          <button class="cur-btn" data-cur="INR" aria-pressed="false" tabindex="-1">₹</button>
+        </span>
+      </div>
+      <button id="usage-pill" class="usage-pill" onclick="USAGE.open()" aria-label="Open usage and impact panel" title="Usage, caching and footprint">
+        <span class="ic" data-icon="usage"></span><span id="usage-pill-txt">Usage</span>
+      </button>
+      <div class="tools-wrap">
+        <button id="tools-btn" onclick="TOAST._toggleTools()" aria-haspopup="true" aria-expanded="false" aria-controls="tools-dropdown" aria-label="Open tools menu">
+          <span class="ic" data-icon="tools"></span><span class="tools-label">Tools</span><span class="ic tools-caret" data-icon="chevronDown"></span>
+        </button>
+        <div id="tools-dropdown" role="menu" aria-label="Analysis tools">
+          <button class="tools-item" onclick="USAGE.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="usage"></span>Usage &amp; caching</button>
+          <button class="tools-item" onclick="FINDER.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="search"></span>Smart model finder</button>
+          <div class="tools-divider" role="separator"></div>
+          <button class="tools-item" onclick="V6.openModal('rec');TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="target"></span>Model recommender</button>
+          <button class="tools-item" onclick="V6.openModal('optimizer');TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="scissors"></span>Prompt optimizer</button>
+          <button class="tools-item" onclick="V6.openModal('scenario');TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="shuffle"></span>Scenario builder</button>
+          <button class="tools-item" onclick="V6.openModal('abtest');TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="flask"></span>A/B test mode</button>
+          <div class="tools-divider" role="separator"></div>
+          <button class="tools-item" onclick="APP.openHistory();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="clock"></span>Session history</button>
+          <button class="tools-item" onclick="APP.shareURL();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="link"></span>Share URL</button>
+          <div class="tools-divider" role="separator"></div>
+          <button class="tools-item" onclick="TOAST._openAbout();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="info"></span>About &amp; methodology</button>
+          <div class="tools-divider" role="separator"></div>
+          <button class="tools-item" onclick="APP.exportCSV();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="download"></span>Export CSV</button>
+          <button class="tools-item" onclick="APP.exportJSON();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="file"></span>Export JSON</button>
+          <div class="tools-divider" role="separator"></div>
+          <button class="tools-item" onclick="ROUTER.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="route"></span>Smart route</button>
+          <button class="tools-item" onclick="FINECALC.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="trendUp"></span>Fine-tune ROI</button>
+          <button class="tools-item" onclick="ESG.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="clipboard"></span>ESG report</button>
+          <button class="tools-item" onclick="LIVEBENCH.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="zap"></span>Live bench</button>
+          <div class="tools-divider" role="separator"></div>
+          <button class="tools-item" onclick="RBAC.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="lock"></span>Key vault &amp; teams</button>
+          <button class="tools-item" onclick="SHADOW.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="eye"></span>Shadow AI discovery</button>
+          <button class="tools-item" onclick="POLICY.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="shield"></span>Policy enforcement</button>
+          <div class="tools-divider" role="separator"></div>
+          <button class="tools-item" onclick="FORECAST.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="trendDown"></span>Cost forecast</button>
+          <button class="tools-item" onclick="BOOKMARKS.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="bookmark"></span>Bookmarked turns</button>
+          <button class="tools-item" onclick="WEBHOOKS.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="bell"></span>Alert webhooks</button>
+          <button class="tools-item" onclick="NOTES.open();TOAST._closeTools()" role="menuitem"><span class="ic" data-icon="note"></span>Session notes</button>
+        </div>
+      </div>
+      <button id="dark-toggle" onclick="APP.toggleDark()" title="Toggle dark or light mode" aria-label="Toggle dark mode">
+        <span class="ic icon-moon" data-icon="moon"></span>
+        <span class="ic icon-sun" data-icon="sun"></span>
+      </button>
+    </div>
   </header>
-  <!-- Mobile sidebar overlay -->
-  <div id="sidebar-overlay" onclick="APP.toggleSidebar()"></div>
+  <div id="sidebar-overlay" onclick="APP.closeRail()"></div>
 
   <!-- History Overlay -->
-  <div id="history-overlay" onclick="if(event.target===this)APP.closeHistory()">
-    <div id="history-modal">
+  <div id="history-overlay" class="tl-overlay" onclick="if(event.target===this)APP.closeHistory()">
+    <div id="history-modal" class="tl-dialog">
       <div class="hm-head">
-        <h3>🕘 Session History</h3>
-        <button class="hm-close" onclick="APP.closeHistory()">✕ Close</button>
+        <h3>Session history</h3>
+        <button class="tl-close" onclick="APP.closeHistory()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
       </div>
       <div class="hm-body" id="history-list"></div>
       <div class="hm-actions">
-        <button class="hm-clear-btn" onclick="APP.clearHistory()">🗑 Clear All History</button>
+        <button class="hm-clear-btn" onclick="APP.clearHistory()">Clear all history</button>
       </div>
     </div>
   </div>
 
   <!-- Cost Projection Modal -->
-  <div id="projection-overlay" onclick="if(event.target===this)APP.closeProjection()">
-    <div id="projection-modal">
+  <div id="projection-overlay" class="tl-overlay" onclick="if(event.target===this)APP.closeProjection()">
+    <div id="projection-modal" class="tl-dialog">
       <div class="pm-head">
-        <h3>📊 Cost Projection</h3>
-        <button class="hm-close" onclick="APP.closeProjection()">✕ Close</button>
+        <h3>Cost projection</h3>
+        <button class="tl-close" onclick="APP.closeProjection()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
       </div>
       <div class="pm-body">
         <div class="pm-input-row">
@@ -223,9 +231,9 @@
   </div>
 
   <!-- Model Recommender Modal -->
-  <div class="v6-overlay" id="rec-overlay" onclick="if(event.target===this)V6.closeModal('rec')">
-    <div class="v6-modal">
-      <div class="v6-head"><h3>🎯 Model Recommendation Engine</h3><button class="v6-close" onclick="V6.closeModal('rec')">✕</button></div>
+  <div class="v6-overlay tl-overlay" id="rec-overlay" onclick="if(event.target===this)V6.closeModal('rec')">
+    <div class="v6-modal tl-dialog">
+      <div class="v6-head"><h3>Model recommendation engine</h3><button class="tl-close v6-close" onclick="V6.closeModal('rec')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
       <div class="v6-body">
         <div class="rec-form">
           <div class="rec-field"><label>Primary task type</label>
@@ -272,7 +280,7 @@
               <option value="medium" selected>Moderate (prefer lower CO₂)</option>
               <option value="high">High (minimize environmental impact)</option>
             </select></div>
-          <button class="rec-run-btn" onclick="V6.runRecommender()">🎯 Find My Best Models</button>
+          <button class="rec-run-btn" onclick="V6.runRecommender()">Find my best models</button>
         </div>
         <div id="rec-results"></div>
       </div>
@@ -280,16 +288,16 @@
   </div>
 
   <!-- Prompt Optimizer Modal -->
-  <div class="v6-overlay" id="optimizer-overlay" onclick="if(event.target===this)V6.closeModal('optimizer')">
-    <div class="v6-modal wide">
-      <div class="v6-head"><h3>✂️ Prompt Optimizer</h3><button class="v6-close" onclick="V6.closeModal('optimizer')">✕</button></div>
+  <div class="v6-overlay tl-overlay" id="optimizer-overlay" onclick="if(event.target===this)V6.closeModal('optimizer')">
+    <div class="v6-modal tl-dialog wide">
+      <div class="v6-head"><h3>Prompt optimizer</h3><button class="tl-close v6-close" onclick="V6.closeModal('optimizer')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
       <div class="v6-body">
         <p style="font-size:11px;color:var(--text-2);margin-bottom:14px">Paste a verbose prompt and get a compressed version achieving the same intent at fewer tokens. Savings are calculated for all active models.</p>
         <div class="opt-layout">
           <div class="opt-pane">
             <label>📥 Original prompt</label>
             <textarea class="opt-textarea" id="opt-original" placeholder="Paste your verbose prompt here…"></textarea>
-            <button class="opt-run-btn" onclick="V6.runOptimizer()">✂️ Optimize →</button>
+            <button class="opt-run-btn" onclick="V6.runOptimizer()">Optimize</button>
             <div class="opt-stats" id="opt-orig-stats"></div>
           </div>
           <div class="opt-pane">
@@ -305,9 +313,9 @@
   </div>
 
   <!-- Multi-turn Scenario Builder Modal -->
-  <div class="v6-overlay" id="scenario-overlay" onclick="if(event.target===this)V6.closeModal('scenario')">
-    <div class="v6-modal wide">
-      <div class="v6-head"><h3>🔀 Multi-turn Scenario Builder</h3><button class="v6-close" onclick="V6.closeModal('scenario')">✕</button></div>
+  <div class="v6-overlay tl-overlay" id="scenario-overlay" onclick="if(event.target===this)V6.closeModal('scenario')">
+    <div class="v6-modal tl-dialog wide">
+      <div class="v6-head"><h3>Multi-turn scenario builder</h3><button class="tl-close v6-close" onclick="V6.closeModal('scenario')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
       <div class="v6-body">
         <p style="font-size:11px;color:var(--text-2);margin-bottom:14px">Design a conversation flow, pick models, and project total cost + tokens before running it.</p>
         <div class="scenario-layout">
@@ -323,7 +331,7 @@
               <select id="scenario-model-b" style="margin-top:6px"><option value="">— Model B (optional) —</option></select>
               <select id="scenario-model-c" style="margin-top:6px"><option value="">— Model C (optional) —</option></select>
             </div>
-            <button class="scenario-run-btn" onclick="V6.runScenario()">▶ Project Costs</button>
+            <button class="scenario-run-btn" onclick="V6.runScenario()">Project costs</button>
             <div class="scenario-results" id="scenario-results"></div>
           </div>
         </div>
@@ -332,9 +340,9 @@
   </div>
 
   <!-- A/B Test Mode Modal -->
-  <div class="v6-overlay" id="abtest-overlay" onclick="if(event.target===this)V6.closeModal('abtest')">
-    <div class="v6-modal wide">
-      <div class="v6-head"><h3>🔬 A/B Test Mode</h3><button class="v6-close" onclick="V6.closeModal('abtest')">✕</button></div>
+  <div class="v6-overlay tl-overlay" id="abtest-overlay" onclick="if(event.target===this)V6.closeModal('abtest')">
+    <div class="v6-modal tl-dialog wide">
+      <div class="v6-head"><h3>A/B test mode</h3><button class="tl-close v6-close" onclick="V6.closeModal('abtest')" aria-label="Close"><span class="ic" data-icon="x"></span></button></div>
       <div class="v6-body">
         <p style="font-size:11px;color:var(--text-2);margin-bottom:14px">Run the same prompt multiple times per model to measure output variance — length, cost, and consistency.</p>
         <div class="ab-config">
@@ -344,7 +352,7 @@
             <select id="ab-runs"><option value="3">3 runs</option><option value="5" selected>5 runs</option><option value="10">10 runs</option></select></div>
           <div class="ab-field" style="grid-column:1/-1"><label>Prompt to test</label>
             <textarea id="ab-prompt">Explain the difference between supervised and unsupervised machine learning in 2-3 sentences.</textarea></div>
-          <button class="ab-run-btn" onclick="V6.runABTest()">🔬 Run A/B Test</button>
+          <button class="ab-run-btn" onclick="V6.runABTest()">Run A/B test</button>
         </div>
         <div id="ab-results"></div>
       </div>
@@ -352,19 +360,23 @@
   </div>
 
   <div id="main">
-    <aside id="sidebar">
-      <button id="sidebar-collapse-btn" onclick="APP.toggleSidebarCollapse()" title="Collapse sidebar" aria-label="Collapse sidebar">◀</button>
-      <div class="sidebar-section">
-        <h3>🔑 OpenRouter API Key</h3>
-        <div class="api-key-wrap">
-          <input type="password" id="api-key-input" placeholder="sk-or-v1-...">
-        </div>
-        <div id="api-key-status" class="api-key-status idle">⚫ No key — simulated responses shown</div>
+    <aside id="sidebar" aria-label="Models and session">
+      <div class="rail-head">
+        <h2 class="rail-title" id="rail-title">Models <span class="rail-count">(<span data-models-count>0</span>)</span></h2>
+        <button id="sidebar-collapse-btn" onclick="APP.toggleSidebarCollapse()" title="Collapse sidebar" aria-label="Collapse sidebar" aria-expanded="true"><span class="ic" data-icon="panelLeft"></span></button>
+        <button class="rail-close tl-close" onclick="APP.toggleSidebar()" aria-label="Close model selector"><span class="ic" data-icon="x"></span></button>
       </div>
-
-      <div class="sidebar-section">
-        <h3>🤖 Select Models (max 10)</h3>
-        <input class="model-search" id="model-search" placeholder="Search models… (⌘K)" aria-label="Search and filter models">
+      <div class="rail-strip">
+        <button id="rail-btn-models" class="rail-icon" onclick="APP.railExpand('rail-models')" aria-label="Models, expand panel" title="Models"><span class="ic" data-icon="layers"></span><span class="rail-badge" data-models-count>0</span></button>
+        <button class="rail-icon" onclick="APP.railExpand('rail-key')" aria-label="API key, expand panel" title="API key"><span class="ic" data-icon="key"></span></button>
+        <button class="rail-icon" onclick="APP.railExpand('rail-session')" aria-label="Session totals, expand panel" title="Session totals"><span class="ic" data-icon="usage"></span></button>
+        <button class="rail-icon" onclick="APP.railExpand('rail-budget')" aria-label="Session budget, expand panel" title="Session budget"><span class="ic" data-icon="wallet"></span></button>
+        <button class="rail-icon" onclick="APP.railExpand('rail-green')" aria-label="Green routing, expand panel" title="Green routing"><span class="ic" data-icon="leaf"></span></button>
+      </div>
+      <div class="rail-body">
+      <div class="sidebar-section" id="rail-models">
+        <h3>Select models <span class="h3-note">max 10</span></h3>
+        <input class="model-search" id="model-search" type="search" placeholder="Search models" aria-label="Search and filter models">
         <div class="provider-chips" id="provider-chips">
           <button class="pchip active" data-prov="">All</button>
           <button class="pchip" data-prov="openai">OpenAI</button>
@@ -377,52 +389,51 @@
         </div>
         <div class="model-list-scroll" id="model-list"></div>
         <div class="model-count" id="model-count">0 of 10 selected</div>
-        <div id="max-model-tip">⚠️ Max 10 reached — deselect a model to add another.</div>
+        <div id="max-model-tip">Max 10 reached. Deselect a model to add another.</div>
       </div>
 
-      <div class="sidebar-section">
-        <h3>📈 Session Totals</h3>
+      <div class="sidebar-section" id="rail-key">
+        <h3>OpenRouter API key</h3>
+        <div class="api-key-wrap">
+          <input type="password" id="api-key-input" placeholder="sk-or-v1-..." autocomplete="off" aria-label="OpenRouter API key">
+        </div>
+        <div id="api-key-status" class="api-key-status idle">No key. Simulated responses shown.</div>
+      </div>
+
+      <div class="sidebar-section" id="rail-session">
+        <h3>Session totals</h3>
         <div class="stat-grid">
           <div class="stat-card"><div class="sv" id="sess-turns">0</div><div class="sl">Turns</div></div>
-          <div class="stat-card"><div class="sv" id="sess-cost">$0.00</div><div class="sl">Total Cost</div></div>
-          <div class="stat-card"><div class="sv" id="sess-co2">0g</div><div class="sl">🌱 CO₂</div></div>
-          <div class="stat-card"><div class="sv" id="sess-water">0mL</div><div class="sl">💧 Water</div></div>
-          <div class="stat-card" style="grid-column:span 2"><div class="sv" id="sess-power" style="color:var(--amber)">0mWh</div><div class="sl">⚡ Power</div></div>
-          <div class="stat-card"><div class="sv" id="sess-tokens">0</div><div class="sl">🪙 Tokens</div></div>
-          <div class="stat-card"><div class="sv" id="sess-saved" style="color:var(--green)">—</div><div class="sl">💾 Cache saved</div></div>
-          <button class="ux-open-btn" style="grid-column:span 2" onclick="USAGE.open()">📊 Open usage details</button>
+          <div class="stat-card"><div class="sv money" id="sess-cost">$0.00</div><div class="sl">Total cost</div></div>
+          <div class="stat-card"><div class="sv" id="sess-co2">0g</div><div class="sl">CO₂</div></div>
+          <div class="stat-card"><div class="sv" id="sess-water">0mL</div><div class="sl">Water</div></div>
+          <div class="stat-card"><div class="sv" id="sess-power">0mWh</div><div class="sl">Power</div></div>
+          <div class="stat-card"><div class="sv" id="sess-tokens">0</div><div class="sl">Tokens</div></div>
+          <div class="stat-card"><div class="sv money" id="sess-saved">—</div><div class="sl">Cache saved</div></div>
+          <button class="ux-open-btn" onclick="USAGE.open()">Open usage details</button>
         </div>
       </div>
 
-      <div class="sidebar-section">
-        <h3>💰 Session Budget</h3>
+      <div class="sidebar-section" id="rail-budget">
+        <h3>Session budget</h3>
         <div class="budget-wrap">
-          <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
-            <span style="font-size:11px;color:var(--text-2);white-space:nowrap">Cap $</span>
-            <input id="budget-input" type="number" min="0.01" step="0.01" value="1.00"
-              style="flex:1;padding:5px 8px;border:1.5px solid var(--tl-border);border-radius:6px;font-size:12px;outline:none;color:var(--text)"
-              oninput="BUDGET.update()" />
+          <div class="budget-cap-row">
+            <label for="budget-input" class="budget-cap-label">Cap $</label>
+            <input id="budget-input" type="number" min="0.01" step="0.01" value="1.00" oninput="BUDGET.update()" />
           </div>
           <div class="budget-bar-track"><div class="budget-bar-fill" id="budget-fill" style="width:0%"></div></div>
           <div class="budget-row">
-            <span style="font-size:11px;color:var(--text-2)" id="budget-used">$0.0000 used</span>
-            <span style="font-size:11px;color:var(--text-3)" id="budget-cap-lbl">of $1.00</span>
+            <span id="budget-used">$0.0000 used</span>
+            <span id="budget-cap-lbl">of $1.00</span>
           </div>
         </div>
       </div>
 
-      <div class="sidebar-section">
-        <h3>💡 Optimization Tips</h3>
-        <div class="tip">🎯 <strong>Be specific:</strong> Precise prompts cut unnecessary output tokens 30–60%.</div>
-        <div class="tip">🔄 <strong>New threads save money:</strong> Every turn multiplies input cost — restart often.</div>
-        <div class="tip">🏃 <strong>Use mini/flash:</strong> Handle 80% of tasks at 1/10 the cost of frontiers.</div>
-      </div>
-
-      <div class="sidebar-section">
-        <h3>🌿 Green Routing</h3>
+      <div class="sidebar-section" id="rail-green">
+        <h3>Green routing</h3>
         <div class="green-section">
           <div class="green-toggle-row">
-            <label for="green-only-toggle">Green Only (≥70% renewable)</label>
+            <label for="green-only-toggle">Green only (≥70% renewable)</label>
             <input type="checkbox" id="green-only-toggle" class="green-toggle" onchange="GREEN.onToggle()">
           </div>
           <div class="green-region-row">
@@ -438,16 +449,24 @@
         </div>
       </div>
 
-      <div class="sidebar-section">
-        <h3>📋 Quick Templates</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-          <button class="template-btn" style="font-size:10px;padding:5px 6px" data-prompt="Explain quantum entanglement in simple terms.">💡 Explain</button>
-          <button class="template-btn" style="font-size:10px;padding:5px 6px" data-prompt="Write a Python function that finds all prime numbers up to n using the Sieve of Eratosthenes.">💻 Code</button>
-          <button class="template-btn" style="font-size:10px;padding:5px 6px" data-prompt="Summarize the following text in 3 concise bullet points: [paste your text here]">📌 Summarize</button>
-          <button class="template-btn" style="font-size:10px;padding:5px 6px" data-prompt="Write a comprehensive 1000-word essay on the impact of artificial intelligence on modern healthcare.">📝 Essay</button>
-          <button class="template-btn" style="font-size:10px;padding:5px 6px" data-prompt="Step by step, how do I set up a production-ready Next.js app with TypeScript, Tailwind CSS, and PostgreSQL?">📚 Tutorial</button>
-          <button class="template-btn" style="font-size:10px;padding:5px 6px" data-prompt="Compare GPT-4o vs Claude Sonnet 4 vs Gemini 2.5 Pro for coding tasks. Which performs best and why?">⚖️ Compare</button>
+      <div class="sidebar-section" id="rail-tips">
+        <h3>Optimization tips</h3>
+        <div class="tip"><strong>Be specific.</strong> Precise prompts cut unnecessary output tokens 30–60%.</div>
+        <div class="tip"><strong>New threads save money.</strong> Every turn multiplies input cost, so restart often.</div>
+        <div class="tip"><strong>Use mini or flash.</strong> They handle 80% of tasks at one tenth the cost of frontier models.</div>
+      </div>
+
+      <div class="sidebar-section" id="rail-templates">
+        <h3>Quick templates</h3>
+        <div class="template-grid">
+          <button class="template-btn" data-prompt="Explain quantum entanglement in simple terms.">Explain</button>
+          <button class="template-btn" data-prompt="Write a Python function that finds all prime numbers up to n using the Sieve of Eratosthenes.">Code</button>
+          <button class="template-btn" data-prompt="Summarize the following text in 3 concise bullet points: [paste your text here]">Summarize</button>
+          <button class="template-btn" data-prompt="Write a comprehensive 1000-word essay on the impact of artificial intelligence on modern healthcare.">Essay</button>
+          <button class="template-btn" data-prompt="Step by step, how do I set up a production-ready Next.js app with TypeScript, Tailwind CSS, and PostgreSQL?">Tutorial</button>
+          <button class="template-btn" data-prompt="Compare GPT-4o vs Claude Sonnet 4 vs Gemini 2.5 Pro for coding tasks. Which performs best and why?">Compare</button>
         </div>
+      </div>
       </div>
     </aside>
 
@@ -457,57 +476,58 @@
         <div id="prompt-bar">
           <div class="prompt-row">
             <div id="prompt-wrap">
-              <textarea id="prompt-input" placeholder="Type your prompt here… All selected models respond simultaneously. Cmd/Ctrl+Enter to send."></textarea>
+              <label class="sr-only" for="prompt-input">Prompt</label>
+              <textarea id="prompt-input" placeholder="Type your prompt here. All selected models respond simultaneously. Cmd/Ctrl+Enter to send."></textarea>
               <div id="live-preview">
-                <div class="preview-chip tokens">🔤 <span id="prev-in">0</span> input tokens</div>
-            <div class="preview-chip output">⚡ ~<span id="prev-out">0</span> estimated output</div>
+                <div class="preview-chip tokens"><span id="prev-in">0</span> input tokens</div>
+                <div class="preview-chip output">~<span id="prev-out">0</span> estimated output</div>
                 <div class="preview-chip intent"><span id="prev-intent">Start typing to see estimates</span></div>
               </div>
             </div>
-            <button id="compress-btn" class="compress-btn" onclick="COMPRESS.toggle()" title="Compress &amp; cache prompt">✂️</button>
-            <button id="send-btn" class="send-btn">Send ▶</button>
+            <div class="prompt-actions">
+              <button id="mobile-menu-btn" onclick="APP.toggleSidebar()" aria-label="Open model selector" aria-haspopup="dialog" aria-expanded="false"><span class="ic" data-icon="layers"></span><span>Models (<span data-models-count>0</span>)</span></button>
+              <div class="tpl-wrap">
+                <button id="tpl-btn" onclick="APP.toggleTemplates()" aria-haspopup="true"><span class="ic" data-icon="list"></span>Templates<span class="ic" data-icon="chevronDown"></span></button>
+                <div id="tpl-dropdown">
+                  <div class="tpl-item" tabindex="0" onclick="APP.applyTemplate('Review this function for bugs and performance issues:\n\n```\n// paste your code here\n```')"><strong>Code review</strong><span>Analyze code for bugs and performance</span></div>
+                  <div class="tpl-item" tabindex="0" onclick="APP.applyTemplate('Summarize the following in 3 concise bullet points:\n\n[paste your text here]')"><strong>Summarization</strong><span>3-bullet summary of any text</span></div>
+                  <div class="tpl-item" tabindex="0" onclick="APP.applyTemplate('Think step by step: If a store sells apples for $0.50 each and oranges for $0.75 each, and I buy 4 apples and 3 oranges, what is my total? Show all reasoning.')"><strong>Chain of thought</strong><span>Reasoning with full working shown</span></div>
+                  <div class="tpl-item" tabindex="0" onclick="APP.applyTemplate('Write a 500-word essay arguing that renewable energy is economically superior to fossil fuels.')"><strong>Essay writing</strong><span>Long-form persuasive writing</span></div>
+                  <div class="tpl-item" tabindex="0" onclick="APP.applyTemplate(&quot;Translate the following English text to French, Spanish, and German:\n\n'The future of artificial intelligence depends on responsible development and deployment practices.'&quot;)"><strong>Translation</strong><span>3-language parallel translation</span></div>
+                  <div class="tpl-item" tabindex="0" onclick="APP.applyTemplate('Given this dataset, identify trends and anomalies:\nMonth, Revenue, Users\nJan $12k 450\nFeb $15k 520\nMar $11k 480\nApr $18k 610\nMay $22k 790')"><strong>Data analysis</strong><span>Spot trends and outliers in data</span></div>
+                  <div class="tpl-item" tabindex="0" onclick="APP.applyTemplate('Write the opening paragraph of a science fiction story set on a generation ship approaching its destination after 200 years of travel.')"><strong>Creative writing</strong><span>Sci-fi opening paragraph</span></div>
+                  <div class="tpl-item" tabindex="0" onclick="APP.applyTemplate('Explain transformer attention mechanisms to a software engineer who understands ML basics but has not studied transformers in depth.')"><strong>Technical explanation</strong><span>Explain attention mechanisms</span></div>
+                </div>
+              </div>
+              <button id="proj-btn" onclick="APP.openProjection()"><span class="ic" data-icon="coins"></span>Project costs</button>
+              <button id="compress-btn" class="compress-btn" onclick="COMPRESS.toggle()" title="Compress and cache prompt" aria-label="Compress and cache prompt"><span class="ic" data-icon="compress"></span></button>
+              <button id="send-btn" class="send-btn">Simulate</button>
+            </div>
           </div>
           <div id="compress-panel">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <span style="font-size:12px;font-weight:800;color:var(--text)">✂️ Context Compression</span>
+            <div class="compress-head">
+              <span class="compress-title">Context compression</span>
               <span id="compress-savings-lbl" class="compress-savings"></span>
             </div>
             <div class="compress-diff">
               <div class="compress-side">
-                <div class="compress-side-head"><span style="color:#C82020">Original</span><span id="compress-orig-tok" style="color:var(--text-3)">0 tok</span></div>
-                <div id="compress-orig-text" style="font-size:11px;color:var(--text-2);line-height:1.5;white-space:pre-wrap;max-height:100px;overflow:auto"></div>
+                <div class="compress-side-head"><span>Original</span><span id="compress-orig-tok">0 tok</span></div>
+                <div id="compress-orig-text" class="compress-text"></div>
               </div>
               <div class="compress-side">
-                <div class="compress-side-head"><span style="color:var(--tl)">Compressed</span><span id="compress-new-tok" style="color:var(--text-3)">0 tok</span></div>
-                <div id="compress-new-text" style="font-size:11px;color:var(--text-2);line-height:1.5;white-space:pre-wrap;max-height:100px;overflow:auto"></div>
+                <div class="compress-side-head"><span>Compressed</span><span id="compress-new-tok">0 tok</span></div>
+                <div id="compress-new-text" class="compress-text"></div>
               </div>
             </div>
-            <button class="compress-apply-btn" onclick="COMPRESS.apply()">Apply Compressed Version</button>
+            <button class="compress-apply-btn" onclick="COMPRESS.apply()">Apply compressed version</button>
             <div id="compress-cache-hit" class="compress-cache-hit"></div>
           </div>
-          <!-- Quality Scorer Bar -->
           <div id="quality-bar"></div>
-          <div class="prompt-extras">
-            <div class="tpl-wrap">
-              <button id="tpl-btn" onclick="APP.toggleTemplates()">📋 Templates ▾</button>
-              <div id="tpl-dropdown">
-                <div class="tpl-item" onclick="APP.applyTemplate('Review this function for bugs and performance issues:\n\n```\n// paste your code here\n```')"><strong>🔍 Code Review</strong><span>Analyze code for bugs and performance</span></div>
-                <div class="tpl-item" onclick="APP.applyTemplate('Summarize the following in 3 concise bullet points:\n\n[paste your text here]')"><strong>📌 Summarization</strong><span>3-bullet summary of any text</span></div>
-                <div class="tpl-item" onclick="APP.applyTemplate('Think step by step: If a store sells apples for $0.50 each and oranges for $0.75 each, and I buy 4 apples and 3 oranges, what is my total? Show all reasoning.')"><strong>🧠 Chain-of-Thought</strong><span>Reasoning with full working shown</span></div>
-                <div class="tpl-item" onclick="APP.applyTemplate('Write a 500-word essay arguing that renewable energy is economically superior to fossil fuels.')"><strong>📝 Essay Writing</strong><span>Long-form persuasive writing</span></div>
-                <div class="tpl-item" onclick="APP.applyTemplate(&quot;Translate the following English text to French, Spanish, and German:\n\n'The future of artificial intelligence depends on responsible development and deployment practices.'&quot;)"><strong>🌍 Translation</strong><span>3-language parallel translation</span></div>
-                <div class="tpl-item" onclick="APP.applyTemplate('Given this dataset, identify trends and anomalies:\nMonth, Revenue, Users\nJan $12k 450\nFeb $15k 520\nMar $11k 480\nApr $18k 610\nMay $22k 790')"><strong>📊 Data Analysis</strong><span>Spot trends and outliers in data</span></div>
-                <div class="tpl-item" onclick="APP.applyTemplate('Write the opening paragraph of a science fiction story set on a generation ship approaching its destination after 200 years of travel.')"><strong>✍️ Creative Writing</strong><span>Sci-fi opening paragraph</span></div>
-                <div class="tpl-item" onclick="APP.applyTemplate('Explain transformer attention mechanisms to a software engineer who understands ML basics but has not studied transformers in depth.')"><strong>💡 Technical Explanation</strong><span>Explain attention mechanisms</span></div>
-              </div>
-            </div>
-            <button id="proj-btn" onclick="APP.openProjection()">📊 Project Costs</button>
-          </div>
         </div>
-        <!-- ── Latest Responses Panel ─────────────────────── -->
+<!-- ── Latest Responses Panel ─────────────────────── -->
         <div id="output-panel">
           <div class="op-bar">
-            <span class="op-label">💬 Latest Responses</span>
+            <span class="op-label">Latest responses</span>
             <span class="op-meta" id="op-meta"></span>
             <button class="op-toggle" onclick="UI_COMPARE.hideOutputPanel()">✕ Hide</button>
           </div>
@@ -516,15 +536,15 @@
 
         <!-- ── View Toggle ────────────────────────────────── -->
         <div class="view-toggle-bar">
-          <span style="font-size:11px;color:var(--text-3);margin-right:2px">View:</span>
-          <button class="view-toggle-btn active" id="vt-cols" onclick="MATRIX.switchView('cols')">🗂 Columns</button>
-          <button class="view-toggle-btn" id="vt-matrix" onclick="MATRIX.switchView('matrix')">📋 Matrix</button>
+          <span class="view-toggle-label">View</span>
+          <button class="view-toggle-btn active" id="vt-cols" onclick="MATRIX.switchView('cols')"><span class="ic" data-icon="columns"></span>Columns</button>
+          <button class="view-toggle-btn" id="vt-matrix" onclick="MATRIX.switchView('matrix')"><span class="ic" data-icon="table"></span>Matrix</button>
         </div>
 
         <!-- ── Session Verdict Banner ─────────────────────── -->
         <div id="verdict-banner">
           <div class="vb-inner">
-            <div class="vb-title">🏆 Session Verdict — <span id="vb-turns">0</span> turns compared</div>
+            <div class="vb-title">Session verdict: <span id="vb-turns">0</span> turns compared</div>
             <div class="vb-grid" id="vb-grid"></div>
           </div>
         </div>
@@ -537,9 +557,9 @@
 
         <div id="columns-area">
           <div class="no-models-msg" id="no-models-msg">
-            <div class="big">🤖</div>
-            <h3>Select models from the sidebar</h3>
-            <p style="font-size:13px">Choose up to 10 models to compare side-by-side</p>
+            <div class="big"><span class="ic" data-icon="layers"></span></div>
+            <h3>Select models to compare</h3>
+            <p>Choose up to 10 models from the model panel to compare side by side.</p>
           </div>
         </div>
       </div>
@@ -748,32 +768,46 @@
           <div class="an-no-data"><div class="an-nd-icon">🌱</div><p>Run some prompts in the Compare tab, then return here to see your session analytics.</p></div>
         </div>
       </div><!-- end #analytics-panel -->
+
+      <footer id="freshness-bar" role="contentinfo" aria-label="Data freshness information">
+        <span class="fb-item"><strong>Environmental data</strong> Luccioni et al. 2023 and provider sustainability reports 2023. Directional estimates, not audited measurements.</span>
+        <span class="fb-item" data-pricing="true"><strong>Pricing</strong> OpenRouter API</span>
+        <span class="fb-item fb-version">TokenLens v1.0</span>
+      </footer>
     </div>
   </div>
 
+
+  <nav id="bottom-nav" aria-label="Main navigation">
+    <button class="bn-btn active" data-tab="compare" aria-current="page"><span class="ic" data-icon="compare"></span><span class="bn-label">Compare</span></button>
+    <button class="bn-btn" data-tab="benchmarks"><span class="ic" data-icon="benchmarks"></span><span class="bn-label">Benchmarks</span></button>
+    <button class="bn-btn" data-tab="howitworks"><span class="ic" data-icon="howItWorks"></span><span class="bn-label">How it works</span></button>
+    <button class="bn-btn" data-tab="analytics"><span class="ic" data-icon="analytics"></span><span class="bn-label">Analytics</span></button>
+  </nav>
+
   <!-- Calculation Explainer Modal -->
-  <div id="explain-overlay" role="dialog" aria-modal="true" aria-labelledby="explain-modal-title">
-    <div id="explain-modal">
+  <div id="explain-overlay" class="tl-overlay" role="dialog" aria-modal="true" aria-labelledby="explain-modal-title">
+    <div id="explain-modal" class="tl-dialog">
       <div class="expl-head">
         <div>
           <div id="explain-modal-title" style="font-size:15px;font-weight:900"></div>
           <div id="explain-modal-sub" style="font-size:11px;opacity:0.8;margin-top:2px"></div>
         </div>
-        <button class="expl-close" onclick="EXPLAIN.close()" aria-label="Close explainer">✕ Close</button>
+        <button class="tl-close expl-close" onclick="EXPLAIN.close()" aria-label="Close explainer"><span class="ic" data-icon="x"></span></button>
       </div>
       <div class="expl-body" id="explain-modal-body"></div>
     </div>
   </div>
 
   <!-- Smart Model Finder Modal -->
-  <div id="finder-overlay" role="dialog" aria-modal="true" aria-labelledby="finder-title" onclick="if(event.target===this)FINDER.close()">
-    <div id="finder-modal">
+  <div id="finder-overlay" class="tl-overlay" role="dialog" aria-modal="true" aria-labelledby="finder-title" onclick="if(event.target===this)FINDER.close()">
+    <div id="finder-modal" class="tl-dialog">
       <div class="finder-head">
         <div style="flex:1">
-          <h2 id="finder-title" style="font-size:18px;font-weight:900;margin-bottom:4px">🔍 Smart Model Finder</h2>
+          <h2 id="finder-title" style="font-size:18px;font-weight:900;margin-bottom:4px">Smart model finder</h2>
           <p style="font-size:12px;opacity:0.8">Set your priorities — TokenLens scores all loaded models and finds your best match.</p>
         </div>
-        <button class="finder-close" onclick="FINDER.close()" aria-label="Close">✕</button>
+        <button class="tl-close finder-close" onclick="FINDER.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
       </div>
       <div class="finder-body">
         <div class="finder-sliders">
@@ -807,23 +841,16 @@
     </div>
   </div>
 
-  <!-- Data freshness bar -->
-  <div id="freshness-bar" role="contentinfo" aria-label="Data freshness information">
-    <span>🔬</span>
-    <span><strong>Environmental data:</strong> Luccioni et al. 2023, provider sustainability reports 2023 — directional estimates, not audited measurements</span>
-    <span style="margin-left:auto" data-pricing="true">💰 <strong>Pricing:</strong> OpenRouter API</span>
-    <span style="margin-left:16px;opacity:0.7">TokenLens v1.0</span>
   </div>
-</div>
 
 <!-- ── Usage & Impact Panel ───────────────────────── -->
-<div id="usage-overlay" onclick="if(event.target===this)USAGE.close()" role="dialog" aria-modal="true" aria-labelledby="usage-title">
-  <div id="usage-modal">
+<div id="usage-overlay" class="tl-overlay" onclick="if(event.target===this)USAGE.close()" role="dialog" aria-modal="true" aria-labelledby="usage-title">
+  <div id="usage-modal" class="tl-dialog">
     <div class="ux-head">
       <h2 id="usage-title">Usage</h2>
       <div class="ux-head-r">
-        <button class="ux-icon" onclick="USAGE.copy()" title="Copy summary" aria-label="Copy usage summary">⧉</button>
-        <button class="ux-icon" onclick="USAGE.close()" title="Close" aria-label="Close usage panel">✕</button>
+        <button class="tl-close ux-icon" onclick="USAGE.copy()" title="Copy summary" aria-label="Copy usage summary"><span class="ic" data-icon="copy"></span></button>
+        <button class="tl-close ux-icon" onclick="USAGE.close()" title="Close" aria-label="Close usage panel"><span class="ic" data-icon="x"></span></button>
       </div>
     </div>
     <div class="ux-body" id="usage-body"></div>
@@ -831,12 +858,12 @@
 </div>
 
 <!-- ── Feature 1: Smart Route Modal ─────────────── -->
-<div id="router-overlay" onclick="if(event.target===this)ROUTER.close()">
-  <div id="router-modal">
+<div id="router-overlay" class="tl-overlay" onclick="if(event.target===this)ROUTER.close()">
+  <div id="router-modal" class="tl-dialog">
     <div class="router-head">
-      <span style="font-size:22px">🎯</span>
+      <span class="ic head-ic" data-icon="route"></span>
       <h2>Smart Route Engine</h2>
-      <button onclick="ROUTER.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="ROUTER.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="router-body">
       <p style="font-size:12px;color:var(--text-2);margin:0 0 10px">Paste your prompt below. The engine analyzes complexity and routes to the optimal model from your selection.</p>
@@ -848,12 +875,12 @@
 </div>
 
 <!-- ── Feature 3: Fine-Tune ROI Modal ────────────── -->
-<div id="finecalc-overlay" onclick="if(event.target===this)FINECALC.close()">
-  <div id="finecalc-modal">
+<div id="finecalc-overlay" class="tl-overlay" onclick="if(event.target===this)FINECALC.close()">
+  <div id="finecalc-modal" class="tl-dialog">
     <div class="fc-head">
-      <span style="font-size:22px">📈</span>
+      <span class="ic head-ic" data-icon="trendUp"></span>
       <h2>Fine-Tune ROI Calculator</h2>
-      <button onclick="FINECALC.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="FINECALC.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="fc-body">
       <p style="font-size:12px;color:var(--text-2);margin:0 0 14px">Calculate when training a custom open-source model becomes cheaper than paying commercial API rates.</p>
@@ -875,24 +902,24 @@
 </div>
 
 <!-- ── Feature 4: ESG Report Modal ───────────────── -->
-<div id="esg-overlay" onclick="if(event.target===this)ESG.close()">
-  <div id="esg-modal">
+<div id="esg-overlay" class="tl-overlay" onclick="if(event.target===this)ESG.close()">
+  <div id="esg-modal" class="tl-dialog">
     <div class="esg-head">
-      <span style="font-size:22px">📋</span>
+      <span class="ic head-ic" data-icon="clipboard"></span>
       <h2>Audit-Ready ESG Report</h2>
-      <button onclick="ESG.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="ESG.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="esg-body" id="esg-body"></div>
   </div>
 </div>
 
 <!-- ── Feature 6: Live Bench Modal ───────────────── -->
-<div id="livebench-overlay" onclick="if(event.target===this)LIVEBENCH.close()">
-  <div id="livebench-modal">
+<div id="livebench-overlay" class="tl-overlay" onclick="if(event.target===this)LIVEBENCH.close()">
+  <div id="livebench-modal" class="tl-dialog">
     <div class="lb-head">
-      <span style="font-size:22px">⚡</span>
+      <span class="ic head-ic" data-icon="zap"></span>
       <h2>Live Benchmarks<span class="lb-updated" id="lb-updated"></span></h2>
-      <button onclick="LIVEBENCH.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="LIVEBENCH.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="lb-body" id="lb-body">
       <p style="color:var(--text-2);font-size:12px">Select models in the sidebar, then open this panel.</p>
@@ -901,12 +928,12 @@
 </div>
 
 <!-- ── Enterprise: RBAC & Key Vault Modal ──────── -->
-<div id="rbac-overlay" onclick="if(event.target===this)RBAC.close()">
-  <div id="rbac-modal">
+<div id="rbac-overlay" class="tl-overlay" onclick="if(event.target===this)RBAC.close()">
+  <div id="rbac-modal" class="tl-dialog">
     <div class="rbac-head">
-      <span style="font-size:22px">🔐</span>
+      <span class="ic head-ic" data-icon="lock"></span>
       <h2>Key Vault &amp; Team Management</h2>
-      <button onclick="RBAC.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="RBAC.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="rbac-body">
       <div class="rbac-tabs">
@@ -922,12 +949,12 @@
 </div>
 
 <!-- ── Enterprise: Shadow AI Discovery Modal ────── -->
-<div id="shadow-overlay" onclick="if(event.target===this)SHADOW.close()">
-  <div id="shadow-modal">
+<div id="shadow-overlay" class="tl-overlay" onclick="if(event.target===this)SHADOW.close()">
+  <div id="shadow-modal" class="tl-dialog">
     <div class="shadow-head">
-      <span style="font-size:22px">🕵️</span>
+      <span class="ic head-ic" data-icon="eye"></span>
       <h2>Shadow AI Discovery</h2>
-      <button onclick="SHADOW.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="SHADOW.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="shadow-body" id="shadow-body">
       <p style="color:var(--text-2);font-size:12px">Loading traffic data…</p>
@@ -936,12 +963,12 @@
 </div>
 
 <!-- ── Enterprise: Policy Enforcement Modal ──────── -->
-<div id="policy-overlay" onclick="if(event.target===this)POLICY.close()">
-  <div id="policy-modal">
+<div id="policy-overlay" class="tl-overlay" onclick="if(event.target===this)POLICY.close()">
+  <div id="policy-modal" class="tl-dialog">
     <div class="policy-head">
-      <span style="font-size:22px">🛡️</span>
+      <span class="ic head-ic" data-icon="shield"></span>
       <h2>Policy Enforcement Engine</h2>
-      <button onclick="POLICY.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="POLICY.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="policy-body" id="policy-body">
       <p style="color:var(--text-2);font-size:12px">Loading policies…</p>
@@ -950,24 +977,24 @@
 </div>
 
 <!-- ── Enhancement 2: Bookmarks Modal ────────────── -->
-<div id="bookmarks-overlay" onclick="if(event.target===this)BOOKMARKS.close()">
-  <div id="bookmarks-modal">
+<div id="bookmarks-overlay" class="tl-overlay" onclick="if(event.target===this)BOOKMARKS.close()">
+  <div id="bookmarks-modal" class="tl-dialog">
     <div class="bk-head">
-      <span style="font-size:20px">🔖</span>
+      <span class="ic head-ic" data-icon="bookmark"></span>
       <h2>Bookmarked Turns</h2>
-      <button onclick="BOOKMARKS.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="BOOKMARKS.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div id="bookmarks-list"></div>
   </div>
 </div>
 
 <!-- ── Enhancement 3: Cost Forecast Modal ─────────── -->
-<div id="forecast-overlay" onclick="if(event.target===this)FORECAST.close()">
-  <div id="forecast-modal">
+<div id="forecast-overlay" class="tl-overlay" onclick="if(event.target===this)FORECAST.close()">
+  <div id="forecast-modal" class="tl-dialog">
     <div class="fc2-head">
-      <span style="font-size:22px">📉</span>
+      <span class="ic head-ic" data-icon="trendDown"></span>
       <h2>Cost Forecast</h2>
-      <button onclick="FORECAST.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="FORECAST.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="fc2-body" id="forecast-body">
       <p style="color:var(--text-2);font-size:12px">Loading forecast…</p>
@@ -976,14 +1003,14 @@
 </div>
 
 <!-- ── Enhancement 5: Session Notes ──────────────── -->
-<div id="notes-overlay">
-  <div id="notes-panel">
+<div id="notes-overlay" class="tl-overlay">
+  <div id="notes-panel" class="tl-dialog">
     <div class="notes-head">
-      <span style="font-size:16px">📝</span>
+      <span class="ic head-ic" data-icon="note"></span>
       <h3>Session Notes</h3>
-      <button onclick="NOTES.copyAll()" style="background:none;border:none;font-size:11px;font-weight:700;color:var(--tl);cursor:pointer">Copy</button>
-      <button onclick="NOTES.clear()" style="background:none;border:none;font-size:11px;color:var(--text-3);cursor:pointer">Clear</button>
-      <button onclick="NOTES.close()" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-text-btn" onclick="NOTES.copyAll()">Copy</button>
+      <button class="tl-text-btn" onclick="NOTES.clear()">Clear</button>
+      <button class="tl-close" onclick="NOTES.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <textarea id="notes-textarea" placeholder="Jot observations, hypotheses, or action items here…&#10;&#10;• Which model performed best?&#10;• Costs to watch&#10;• Follow-ups needed" oninput="NOTES.onInput()"></textarea>
     <div class="notes-footer">
@@ -994,12 +1021,12 @@
 </div>
 
 <!-- ── Enhancement 6: Webhook Alerts Modal ────────── -->
-<div id="webhooks-overlay" onclick="if(event.target===this)WEBHOOKS.close()">
-  <div id="webhooks-modal">
+<div id="webhooks-overlay" class="tl-overlay" onclick="if(event.target===this)WEBHOOKS.close()">
+  <div id="webhooks-modal" class="tl-dialog">
     <div class="wh-head">
-      <span style="font-size:22px">🔔</span>
+      <span class="ic head-ic" data-icon="bell"></span>
       <h2>Alert Webhooks</h2>
-      <button onclick="WEBHOOKS.close()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-2)">✕</button>
+      <button class="tl-close" onclick="WEBHOOKS.close()" aria-label="Close"><span class="ic" data-icon="x"></span></button>
     </div>
     <div class="wh-body" id="webhooks-body">
       <p style="color:var(--text-2);font-size:12px">Loading webhooks…</p>

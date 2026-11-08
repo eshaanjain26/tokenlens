@@ -12,19 +12,72 @@ window.APP = (function() {
   function toggleDark() {
     _darkMode = !_darkMode;
     document.body.classList.toggle('dark', _darkMode);
-    document.getElementById('dark-toggle').textContent = _darkMode ? '☀️' : '🌙';
+    _syncThemeChrome();
     try { localStorage.setItem('lti_theme_v1', _darkMode ? 'dark' : 'light'); } catch(e){}
   }
 
-  // ── Sidebar collapse ────────────────────────────────────
+  function _syncThemeChrome() {
+    var t = document.getElementById('dark-toggle');
+    if (t) {
+      t.setAttribute('aria-pressed', _darkMode ? 'true' : 'false');
+      t.setAttribute('aria-label', _darkMode ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', _darkMode ? '#0b0b0b' : '#f8f8f8');
+  }
+
+  // ── Model rail ───────────────────────────────────────────
+  // >=1100px: static rail the user can collapse to an icon strip.
+  // 769-1099px: icon strip that expands as an overlay.
+  // <=768px: bottom sheet opened from the Models button.
   var _sidebarCollapsed = false;
-  function toggleSidebarCollapse() {
-    _sidebarCollapsed = !_sidebarCollapsed;
+  var _railMq = window.matchMedia('(min-width: 1100px)');
+  var _sheetMq = window.matchMedia('(max-width: 768px)');
+
+  function _syncRailControls() {
     var sb = document.getElementById('sidebar');
     var btn = document.getElementById('sidebar-collapse-btn');
-    if (sb) sb.classList.toggle('collapsed', _sidebarCollapsed);
-    if (btn) btn.textContent = _sidebarCollapsed ? '▶' : '◀';
-    if (btn) btn.title = _sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    if (!sb || !btn) return;
+    var expanded = _railMq.matches ? !_sidebarCollapsed : sb.classList.contains('rail-open');
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    btn.title = expanded ? 'Collapse sidebar' : 'Expand sidebar';
+    btn.setAttribute('aria-label', btn.title);
+  }
+
+  function toggleSidebarCollapse() {
+    var sb = document.getElementById('sidebar');
+    if (!sb) return;
+    if (_railMq.matches) {
+      _sidebarCollapsed = !_sidebarCollapsed;
+      sb.classList.toggle('collapsed', _sidebarCollapsed);
+    } else {
+      _setRailOverlay(!sb.classList.contains('rail-open'));
+    }
+    _syncRailControls();
+  }
+
+  function _setRailOverlay(open) {
+    var sb = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebar-overlay');
+    if (sb) sb.classList.toggle('rail-open', open);
+    if (overlay) overlay.classList.toggle('visible', open);
+    _syncRailControls();
+  }
+
+  function railExpand(sectionId) {
+    var sb = document.getElementById('sidebar');
+    if (!sb) return;
+    if (_sheetMq.matches) { if (!_sidebarOpen) toggleSidebar(); }
+    else if (_railMq.matches) { _sidebarCollapsed = false; sb.classList.remove('collapsed'); _syncRailControls(); }
+    else _setRailOverlay(true);
+    var target = sectionId && document.getElementById(sectionId);
+    if (target) setTimeout(function(){ target.scrollIntoView({block:'start'}); var f = target.querySelector('input,select,button'); if (f) f.focus({preventScroll:true}); }, 30);
+  }
+
+  function closeRail() {
+    var sb = document.getElementById('sidebar');
+    if (_sidebarOpen) toggleSidebar();
+    if (sb && sb.classList.contains('rail-open')) _setRailOverlay(false);
   }
 
   // ── Shareable URL ──────────────────────────────────────
@@ -169,12 +222,12 @@ window.APP = (function() {
       if (localStorage.getItem('lti_theme_v1') === 'dark') {
         _darkMode = true;
         document.body.classList.add('dark');
-        // SVG toggle handles display via CSS; no textContent needed
       }
     } catch(e) {}
+    _syncThemeChrome();
     // Set initial send button label based on key state
     var _sb = document.getElementById('send-btn');
-    if (_sb) _sb.textContent = API.hasKey() ? 'Send ▶' : 'Simulate ▶';
+    if (_sb) _sb.textContent = API.hasKey() ? 'Send' : 'Simulate';
 
     var models = await API.fetchModels();
     STATE.setModels(models);
@@ -216,12 +269,12 @@ window.APP = (function() {
       var btn = document.getElementById('send-btn');
       if (API.hasKey()) {
         s.className='api-key-status ok';
-        s.textContent='✅ Key set — real model responses enabled';
-        if (btn && !btn.disabled) btn.textContent = 'Send ▶';
+        s.textContent='Key set. Real model responses enabled.';
+        if (btn && !btn.disabled) btn.textContent = 'Send';
       } else {
         s.className='api-key-status idle';
-        s.textContent='⚫ No key — simulated responses shown';
-        if (btn && !btn.disabled) btn.textContent = 'Simulate ▶';
+        s.textContent='No key. Simulated responses shown.';
+        if (btn && !btn.disabled) btn.textContent = 'Simulate';
       }
       if (typeof BUDGET !== 'undefined') BUDGET.update();
     });
@@ -272,7 +325,7 @@ window.APP = (function() {
         closeHistory(); closeProjection();
         V6.closeModal('rec'); V6.closeModal('optimizer');
         V6.closeModal('scenario'); V6.closeModal('abtest');
-        TOAST._closeAbout(); TOAST._closeTools();
+        TOAST._closeAbout(); TOAST._closeTools(); closeRail();
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -328,6 +381,7 @@ window.APP = (function() {
       listEl.innerHTML = '<p style="color:var(--text-2);font-size:12px;padding:8px">No models meet the 70% renewable threshold for the current region. Try a different region or turn off Green Only.</p>';
     }
     countEl.textContent = STATE.activeCount() + ' of 10 selected';
+    document.querySelectorAll('[data-models-count]').forEach(function(el){ el.textContent = STATE.activeCount(); });
     var tipEl = document.getElementById('max-model-tip');
     if (tipEl) tipEl.classList.toggle('visible', atMax);
   }
@@ -347,9 +401,11 @@ window.APP = (function() {
     var sidebar = document.getElementById('sidebar');
     var overlay = document.getElementById('sidebar-overlay');
     var btn = document.getElementById('mobile-menu-btn');
+    if (!_sheetMq.matches && _sidebarOpen) { _sidebarOpen = false; return; }
     if (sidebar) sidebar.classList.toggle('mobile-open', _sidebarOpen);
     if (overlay) overlay.classList.toggle('visible', _sidebarOpen);
     if (btn) btn.setAttribute('aria-expanded', _sidebarOpen ? 'true' : 'false');
+    document.body.classList.toggle('sheet-open', _sidebarOpen);
   }
 
   // ── Export CSV ──────────────────────────────────────────
@@ -415,6 +471,6 @@ window.APP = (function() {
 
   return {init, toggleModel, toggleDark, toggleSidebarCollapse, shareURL, openHistory, closeHistory, restoreSession, clearHistory,
           openProjection, closeProjection, updateProjection, toggleTemplates, applyTemplate, setProviderFilter,
-          toggleSidebar, exportCSV, exportJSON, _renderModelList: renderModelList};
+          toggleSidebar, railExpand, closeRail, exportCSV, exportJSON, _renderModelList: renderModelList};
 })();
 

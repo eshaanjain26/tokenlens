@@ -1,0 +1,48 @@
+#toast-container {
+  position: fixed;
+  right: calc(max(var(--pad), env(safe-area-inset-right)) + 56px);
+  bottom: var(--pad);
+  z-index: var(--z-toast);
+  display: flex; flex-direction: column; gap: 8px;
+  max-width: calc(100vw - 2 * var(--pad));
+  pointer-events: none;
+}
+.toast {
+  display: flex; align-items: flex-start; gap: 10px;
+  min-width: 240px; max-width: 380px;
+  padding: 10px 8px 10px 12px;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius-card);
+  box-shadow: var(--shadow-float);
+  font-size: 0.9375rem; font-weight: 400;
+  pointer-events: auto;
+  animation: toast-in 0.2s var(--ease);
+}
+.toast.info, .toast.success, .toast.warning, .toast.error { background: var(--surface); }
+.toast-icon { display: inline-flex; width: 20px; height: 20px; flex: none; margin-top: 1px; color: var(--muted); }
+.toast.success .toast-icon { color: var(--positive); }
+.toast.warning .toast-icon { color: var(--warning); }
+.toast.error .toast-icon { color: var(--negative); }
+.toast-icon svg { width: 100%; height: 100%; }
+.toast-msg { flex: 1; min-width: 0; line-height: 1.4; }
+.toast-close {
+  flex: none; width: 28px; height: 28px; margin-top: -3px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-control); color: var(--muted); opacity: 1;
+}
+.toast-close:hover { background: var(--raised); color: var(--text); }
+.toast-close svg { width: 16px; height: 16px; }
+@keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+@media (max-width: 768px) {
+  #toast-container {
+    left: max(var(--pad), env(safe-area-inset-left));
+    right: calc(max(var(--pad), env(safe-area-inset-right)) + 56px);
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 12px);
+    max-width: none;
+  }
+  .toast { min-width: 0; max-width: none; width: 100%; }
+}
+@media (pointer: coarse) {
+  .toast-close { min-width: 44px; min-height: 44px; margin: -9px -6px -9px 0; }
+}
