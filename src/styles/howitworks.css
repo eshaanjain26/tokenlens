@@ -46,26 +46,6 @@
 .hiw-result-card { background: white; border-radius: 8px; padding: 12px; text-align: center; border: 1.5px solid var(--border); }
 .hiw-result-card .hrv { font-size: 1.2857rem; font-weight: 900; color: var(--tl); }
 .hiw-result-card .hrl { font-size: 0.7857rem; color: var(--text-3); margin-top: 3px; }
-/* ── Inline calc popover ─────────────────────────── */
-.expl-popover-wrap { position: relative; display: inline-block; }
-.expl-turn-btn { position: relative; }
-.expl-inline-pop {
-  display: none; position: absolute; bottom: calc(100% + 8px); left: 0;
-  width: 310px; background: #0F1F18; color: #E8F5EE;
-  border-radius: 10px; padding: 12px 14px; font-size: 0.7857rem; line-height: 1.7;
-  z-index: 9999; box-shadow: 0 8px 32px rgba(0,0,0,0.45);
-  pointer-events: none;
-}
-.expl-inline-pop::after {
-  content: ''; position: absolute; top: 100%; left: 18px;
-  border: 7px solid transparent; border-top-color: #0F1F18;
-}
-.expl-turn-btn:hover .expl-inline-pop,
-.expl-turn-btn:focus .expl-inline-pop { display: block; }
-.expl-turn-btn { position: relative; overflow: visible; }
-.eip-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
-.eip-label { color: #9EDFC0; font-weight: 700; }
-.eip-val { color: #FFE89A; font-weight: 900; }
 
 body.dark .expl-section { border-color: #2A2A2A; }
 body.dark .expl-kv { background: #222; }
