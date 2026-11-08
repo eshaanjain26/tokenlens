@@ -479,7 +479,7 @@
             <label for="budget-input" class="budget-cap-label">Cap $</label>
             <input id="budget-input" type="number" min="0.01" step="0.01" value="1.00" oninput="BUDGET.update()" />
           </div>
-          <div class="budget-bar-track"><div class="budget-bar-fill" id="budget-fill" style="width:0%"></div></div>
+          <div class="budget-bar-track" id="budget-track" role="progressbar" aria-label="Session budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="budget-bar-fill" id="budget-fill" style="width:0%"></div></div>
           <div class="budget-row">
             <span id="budget-used">$0.0000 used</span>
             <span id="budget-cap-lbl">of $1.00</span>
@@ -583,41 +583,53 @@
           <div id="quality-bar"></div>
         </div>
 <!-- ── Latest Responses Panel ─────────────────────── -->
-        <div id="output-panel">
-          <div class="op-bar">
-            <span class="op-label">Latest responses</span>
-            <span class="op-meta" id="op-meta"></span>
-            <button class="op-toggle" onclick="UI_COMPARE.hideOutputPanel()">✕ Hide</button>
+        <div id="output-panel" class="cmp-section">
+          <div class="sec-head op-bar">
+            <div class="sec-text">
+              <h2 class="op-label">Latest responses</h2>
+              <p class="sec-sub">The newest reply from each model. <span class="op-meta" id="op-meta"></span></p>
+            </div>
+            <button class="op-toggle" onclick="UI_COMPARE.hideOutputPanel()"><span class="ic" data-icon="x"></span>Hide</button>
           </div>
           <div class="op-cards" id="op-cards"></div>
         </div>
 
-        <!-- ── View Toggle ────────────────────────────────── -->
-        <div class="view-toggle-bar">
-          <span class="view-toggle-label">View</span>
-          <button class="view-toggle-btn active" id="vt-cols" onclick="MATRIX.switchView('cols')"><span class="ic" data-icon="columns"></span>Columns</button>
-          <button class="view-toggle-btn" id="vt-matrix" onclick="MATRIX.switchView('matrix')"><span class="ic" data-icon="table"></span>Matrix</button>
-        </div>
-
         <!-- ── Session Verdict Banner ─────────────────────── -->
-        <div id="verdict-banner">
+        <div id="verdict-banner" class="cmp-section">
           <div class="vb-inner">
-            <div class="vb-title">Session verdict: <span id="vb-turns">0</span> turns compared</div>
+            <div class="sec-text vb-title">
+              <h2>Session verdict</h2>
+              <p class="sec-sub">Best model on each measure after <span id="vb-turns">0</span> turns. Select a model name to follow it through the page.</p>
+            </div>
             <div class="vb-grid" id="vb-grid"></div>
           </div>
         </div>
 
         <!-- ── Quality Leaderboard ────────────────────────── -->
-        <div id="quality-leaderboard" style="display:none"></div>
+        <div id="quality-leaderboard" class="cmp-section" style="display:none"></div>
+
+        <!-- ── View Toggle ────────────────────────────────── -->
+        <div class="view-toggle-bar sec-head cmp-section">
+          <div class="sec-text">
+            <h2>Comparison</h2>
+            <p class="sec-sub">Each model's turns side by side, or every turn in one sortable table.</p>
+          </div>
+          <div class="view-toggle-controls">
+            <button type="button" id="hl-clear" class="hl-clear" hidden onclick="COMPARE_UX.clearHighlight()"><span class="hl-clear-name"></span><span class="ic" data-icon="x"></span></button>
+            <div class="view-toggle-group" role="group" aria-label="Comparison view">
+              <button class="view-toggle-btn active" id="vt-cols" aria-pressed="true" onclick="MATRIX.switchView('cols')"><span class="ic" data-icon="columns"></span>Columns</button>
+              <button class="view-toggle-btn" id="vt-matrix" aria-pressed="false" onclick="MATRIX.switchView('matrix')"><span class="ic" data-icon="table"></span>Matrix</button>
+            </div>
+          </div>
+        </div>
 
         <!-- ── Matrix Table view ─────────────────────────── -->
         <div id="matrix-area"></div>
 
         <div id="columns-area">
           <div class="no-models-msg" id="no-models-msg">
-            <div class="big"><span class="ic" data-icon="layers"></span></div>
-            <h3>Select models to compare</h3>
-            <p>Choose up to 10 models from the model panel to compare side by side.</p>
+            <p>Select models from the sidebar to see them side by side.</p>
+            <button type="button" class="empty-action" onclick="UI_COMPARE.pickPopular()">Pick 3 popular models</button>
           </div>
         </div>
       </div>

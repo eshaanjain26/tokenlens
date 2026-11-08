@@ -86,10 +86,6 @@
 .green-prov-bar { flex:2;height:5px;background:var(--border);border-radius:3px;overflow:hidden; }
 .green-prov-fill { height:100%;border-radius:3px;background:var(--tl-light); }
 .green-prov-pct { font-size:0.7857rem;font-weight:800;color:var(--tl);width:28px;text-align:right; }
-.model-item .green-badge { font-size:0.7857rem;font-weight:700;padding:1px 4px;border-radius:4px;margin-left:4px;vertical-align:middle; }
-.model-item .green-badge.high { background:#E3F9EE;color:#0A7A48; }
-.model-item .green-badge.mid { background:#FFF3E8;color:#B85C00; }
-.model-item .green-badge.low { background:#FFEAEA;color:#C82020; }
 
 /* ── Feature 6: Live Benchmarking ───────────────── */
 

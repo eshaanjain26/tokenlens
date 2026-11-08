@@ -57,6 +57,7 @@ import './js/bookmarks.js';
 import './js/forecast.js';
 import './js/ratings.js';
 import './js/notes.js';
+import './js/compare-ux.js';
 import './js/webhooks.js';
 import './js/cache.js';
 import './js/usage.js';

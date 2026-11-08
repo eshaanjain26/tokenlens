@@ -10,14 +10,20 @@ window.BOOKMARKS = (function() {
     if (!_store[k]) _store[k] = { bookmarked: false, note: '' };
     _store[k].bookmarked = !_store[k].bookmarked;
     var btn = document.getElementById('bk-btn-' + modelId.replace(/[^a-z0-9]/gi,'_') + '_' + turnNum);
-    if (btn) btn.classList.toggle('bookmarked', _store[k].bookmarked);
-    if (typeof TOAST !== 'undefined') TOAST.show(_store[k].bookmarked ? '🔖 Bookmarked' : 'Bookmark removed', 'info');
+    if (btn) { btn.classList.toggle('bookmarked', _store[k].bookmarked); btn.setAttribute('aria-pressed', _store[k].bookmarked ? 'true' : 'false'); }
+    if (typeof TOAST !== 'undefined') TOAST.show(_store[k].bookmarked ? 'Bookmarked' : 'Bookmark removed', 'info');
   }
 
   function toggleNote(modelId, turnNum) {
     var id = 'note-wrap-' + modelId.replace(/[^a-z0-9]/gi,'_') + '_' + turnNum;
     var wrap = document.getElementById(id);
-    if (wrap) wrap.classList.toggle('open');
+    if (wrap) {
+      wrap.classList.toggle('open');
+      var nb = document.getElementById('note-btn-' + modelId.replace(/[^a-z0-9]/gi,'_') + '_' + turnNum);
+      if (nb) nb.setAttribute('aria-expanded', wrap.classList.contains('open') ? 'true' : 'false');
+      var ta = document.getElementById('note-input-' + modelId.replace(/[^a-z0-9]/gi,'_') + '_' + turnNum);
+      if (ta && wrap.classList.contains('open')) ta.focus();
+    }
   }
 
   function saveNote(modelId, turnNum) {
@@ -45,7 +51,7 @@ window.BOOKMARKS = (function() {
     if (!el) return;
     var bookmarked = Object.keys(_store).filter(function(k){ return _store[k].bookmarked; });
     if (!bookmarked.length) {
-      el.innerHTML = '<p style="color:var(--text-2);font-size:12px;padding:16px">No bookmarks yet. Click 🔖 on any turn card to bookmark it.</p>';
+      el.innerHTML = '<p style="color:var(--text-2);font-size:12px;padding:16px">No bookmarks yet. Use the bookmark button on any turn to save it here.</p>';
       return;
     }
     var models = STATE.getActiveModels ? STATE.getActiveModels() : [];
@@ -71,13 +77,13 @@ window.BOOKMARKS = (function() {
     var k = _key(modelId, turnNum);
     var bk = _store[k] ? _store[k].bookmarked : false;
     var note = _store[k] ? _store[k].note : '';
-    return '<div class="rating-row" style="margin-top:4px">'
-      + '<button id="bk-btn-' + safeId + '" class="turn-annotation-btn' + (bk?' bookmarked':'') + '" onclick="BOOKMARKS.toggleBookmark(\'' + modelId.replace(/'/g,"\\'") + '\',' + turnNum + ')" title="Bookmark this turn">🔖</button>'
-      + '<button class="turn-annotation-btn" onclick="BOOKMARKS.toggleNote(\'' + modelId.replace(/'/g,"\\'") + '\',' + turnNum + ')" title="Add note">📝</button>'
+    return '<div class="rating-row" role="group" aria-label="Turn notes">'
+      + '<button id="bk-btn-' + safeId + '" class="turn-annotation-btn' + (bk?' bookmarked':'') + '" aria-pressed="' + bk + '" onclick="BOOKMARKS.toggleBookmark(\'' + modelId.replace(/'/g,"\\'") + '\',' + turnNum + ')" title="Bookmark this turn" aria-label="Bookmark this turn">' + TL_ICON('bookmark') + '</button>'
+      + '<button id="note-btn-' + safeId + '" class="turn-annotation-btn" aria-expanded="false" onclick="BOOKMARKS.toggleNote(\'' + modelId.replace(/'/g,"\\'") + '\',' + turnNum + ')" title="Add a note" aria-label="Add a note to this turn">' + TL_ICON('note') + '</button>'
       + '</div>'
       + '<div id="note-wrap-' + safeId + '" class="turn-note-wrap">'
-      +   '<textarea id="note-input-' + safeId + '" class="turn-note-input" rows="2" placeholder="Add a note…" oninput="BOOKMARKS.saveNote(\'' + modelId.replace(/'/g,"\\'") + '\',' + turnNum + ')">' + esc(note) + '</textarea>'
-      +   '<div id="note-saved-' + safeId + '" class="turn-note-saved">✓ Saved</div>'
+      +   '<textarea id="note-input-' + safeId + '" class="turn-note-input" rows="2" placeholder="Add a note…" aria-label="Note for this turn" oninput="BOOKMARKS.saveNote(\'' + modelId.replace(/'/g,"\\'") + '\',' + turnNum + ')">' + esc(note) + '</textarea>'
+      +   '<div id="note-saved-' + safeId + '" class="turn-note-saved" role="status">Saved</div>'
       + '</div>';
   }
 

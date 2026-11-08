@@ -42,11 +42,4 @@
 }
 .expl-equiv-row.amber { background: var(--amber-bg); color: var(--amber); }
 .expl-equiv-row.blue { background: var(--blue-bg); color: var(--blue); }
-.expl-turn-btn {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: var(--tl-bg); color: var(--tl); border: 1.5px solid var(--tl-border);
-  border-radius: 5px; padding: 2px 7px; font-size: 0.7857rem; font-weight: 700;
-  cursor: pointer; transition: all 0.12s;
-}
-.expl-turn-btn:hover { background: var(--tl); color: white; }
 
