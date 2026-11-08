@@ -229,52 +229,6 @@
   font-size: 0.7857rem !important;
   background: var(--brand-soft) !important;
 }
-.finder-score-bar { background: var(--s2) !important; border-radius: var(--r-pill) !important; }
-.finder-score-fill { border-radius: var(--r-pill) !important; }
-.finder-pill {
-  border-radius: var(--r-pill) !important;
-  font-size: 0.7857rem !important;
-  font-weight: 700 !important;
-  padding: 2px 8px !important;
-}
-.finder-result {
-  border: 1px solid var(--s3) !important;
-  border-radius: var(--r) !important;
-  background: var(--s0) !important;
-  transition: box-shadow var(--duration);
-}
-.finder-result:hover { box-shadow: var(--elev-1) !important; }
-.finder-result.top-1 { border-color: var(--brand-border) !important; background: var(--brand-soft) !important; }
-.fs-slider { accent-color: var(--brand) !important; }
-.green-toggle { accent-color: var(--brand) !important; }
-.green-prov-fill { background: var(--brand-light) !important; }
-.green-prov-bar { background: var(--s2) !important; border-radius: var(--r-pill) !important; }
-.vault-card { border-radius: var(--r) !important; }
-.vault-card.active-key { border-color: var(--brand-border) !important; background: var(--brand-soft) !important; }
-.vault-budget-track { border-radius: var(--r-pill) !important; background: var(--s2) !important; }
-.vault-budget-fill { border-radius: var(--r-pill) !important; }
-.vault-action-btn {
-  border-radius: var(--r-sm) !important;
-  font-family: var(--font) !important;
-  font-size: 0.7857rem !important;
-  font-weight: 700 !important;
-  border: 1.5px solid var(--s3) !important;
-  background: var(--s0) !important;
-  color: var(--ink-2) !important;
-  transition: all var(--duration);
-}
-.vault-action-btn:hover { border-color: var(--brand-border) !important; color: var(--brand) !important; background: var(--brand-soft) !important; }
-.project-row { border-radius: var(--r) !important; border: 1px solid var(--s3) !important; transition: box-shadow var(--duration); }
-.project-row:hover { box-shadow: var(--elev-1) !important; }
-.rbac-table th { font-size: 0.7857rem !important; font-weight: 800 !important; letter-spacing: 0.5px !important; text-transform: uppercase !important; color: var(--ink-3) !important; }
-.rbac-table td { font-size: 0.8571rem !important; color: var(--ink) !important; }
-.shadow-kpi { border-radius: var(--r) !important; border: 1px solid var(--s3) !important; }
-.shadow-kpi-val { font-family: var(--font-mono) !important; font-size: 1.5714rem !important; font-weight: 900 !important; }
-.policy-rule { border-radius: var(--r) !important; transition: all var(--duration); }
-.policy-rule.enabled { border-color: var(--brand-border) !important; background: var(--brand-soft) !important; }
-.policy-meta-chip { border-radius: var(--r-sm) !important; font-family: var(--font) !important; }
-.wh-endpoint { border-radius: var(--r) !important; transition: all var(--duration); }
-.wh-endpoint.active { border-color: var(--brand-border) !important; background: var(--brand-soft) !important; }
 .an-hero {
   background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%) !important;
   border-radius: var(--r-lg) !important;
@@ -326,9 +280,9 @@
 #benchmarks-panel img, #analytics-panel svg { max-width: 100%; }
 
 @media (max-width: 768px) {
-  .an-row.cols-2, .an-row.cols-3, .ctx-calc, .equiv-grid, .rec-form, .opt-layout, .scenario-layout, .ab-config,
-  .be-grid, .finder-sliders, .fc-inputs, .vault-form-grid, .expl-grid-2 { grid-template-columns: minmax(0, 1fr) !important; }
-  .ctx-result-row, .ab-summary, .be-results, .fc-kpis, .fc2-kpis, .esg-kpi-row, .shadow-kpis, .eff-score-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .an-row.cols-2, .an-row.cols-3, .ctx-calc, .equiv-grid,
+  .be-grid, .expl-grid-2 { grid-template-columns: minmax(0, 1fr) !important; }
+  .ctx-result-row, .be-results, .eff-score-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .an-hero { margin: 0 0 var(--gap) !important; }
   .an-body { padding: var(--gap) 0 0; }
   .hiw-pipeline { flex-direction: column; align-items: stretch; gap: 8px; }

@@ -12,6 +12,7 @@ window.V6 = (function() {
     if (name === 'scenario') _populateScenarioSelects();
     if (name === 'abtest')   _populateABSelect();
     document.getElementById(name+'-overlay').classList.add('open');
+    if (name === 'rec') runRecommender();
   }
   function closeModal(name) {
     document.getElementById(name+'-overlay').classList.remove('open');
@@ -88,39 +89,45 @@ window.V6 = (function() {
     scored.sort(function(a,b){ return b.score-a.score; });
     var top3 = scored.slice(0,3);
 
-    var rankMeta = ['top','second','third'];
-    var rankEmoji = ['🥇','🥈','🥉'];
-    var html = top3.map(function(item,i){
+    var rows = top3.map(function(item,i){
       var m = item.m; var sc = Math.min(100,item.score).toFixed(0);
       var sname = m.name || m.id.split('/').pop();
       var tps = CHARTS.getTPS(m.id);
       var monthly = CALC.cost(m, avgIn, avgOut) * runsPerMonth;
       var co2pm = DATA.getCO2Rate(m.id) * (avgIn+avgOut)/1e6 * runsPerMonth;
-      var reasons = [];
-      if (tps >= 70) reasons.push('⚡ Fast ('+tps+'tk/s)');
-      if (monthly < budget*0.3) reasons.push('💰 '+Math.round((1-monthly/budget)*100)+'% under budget');
-      if (m.context_length >= 200000) reasons.push('📏 Large context ('+Math.round(m.context_length/1000)+'K)');
-      if (DATA.getCO2Rate(m.id) < 200) reasons.push('🌱 Low CO₂ ('+DATA.getCO2Rate(m.id).toFixed(0)+'g/1M)');
-      return '<div class="rec-card '+rankMeta[i]+'">'
-        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
-          +'<span class="rec-rank">'+rankEmoji[i]+'</span>'
-          +'<span class="rec-model-name">'+esc(sname)+'</span>'
-          +'<span style="margin-left:auto;font-size:12px;font-weight:900;color:var(--tl)">'+sc+'/100</span>'
-        +'</div>'
-        +'<div class="rec-score-bar-wrap">'
-          +'<div class="rec-score-bar"><div class="rec-score-fill" style="width:'+sc+'%;background:'+(i===0?'var(--tl)':i===1?'var(--blue)':'var(--green)')+'"></div></div>'
-        +'</div>'
-        +'<div class="rec-dims">'
-          +'<span class="rec-dim">💰 ~'+CALC.fmtCost(monthly)+'/mo</span>'
-          +'<span class="rec-dim">⚡ ~'+tps+'tk/s</span>'
-          +'<span class="rec-dim">📏 '+Math.round(m.context_length/1000)+'K ctx</span>'
-          +'<span class="rec-dim">🌱 '+co2pm.toFixed(1)+'g CO₂/mo</span>'
-        +'</div>'
-        +(reasons.length ? '<div class="rec-reason">Why: '+reasons.join(' · ')+'</div>' : '')
-      +'</div>';
-    }).join('');
-    setEl('rec-results', html || '<em style="color:var(--text-3);font-size:12px">No matching models found for these constraints.</em>');
+      var meta = ['~'+tps+' tok/s', Math.round(m.context_length/1000)+'K context'];
+      if (tps >= 70) meta.push('fast');
+      if (monthly < budget*0.3) meta.push(Math.round((1-monthly/budget)*100)+'% under budget');
+      if (DATA.getCO2Rate(m.id) < 200) meta.push('low CO₂');
+      return {
+        cls: i === 0 ? 'best' : '',
+        w: sc/100,
+        sort: [i+1, sname, sc, monthly, co2pm],
+        cells: [
+          '<span class="mute">'+(i+1)+'</span>',
+          '<div class="wrap-cell"><div class="tl-name hl">'+esc(sname)+'</div><div class="tl-meta">'+esc(meta.join(' · '))+'</div></div>',
+          '<span class="hl">'+sc+'</span><span class="mute"> / 100</span>',
+          CALC.fmtCost(monthly)+'<span class="mute">/mo</span>',
+          co2pm.toFixed(1)+'<span class="mute"> g/mo</span>'
+        ]
+      };
+    });
+    if (!rows.length) { setEl('rec-results', TLUI.empty('No models match these constraints. Loosen the budget or context window.')); return; }
+    setEl('rec-results',
+      '<div class="tl-block-head"><div><h3 class="tl-h">Best fit</h3><p class="tl-sub">Scored on cost, speed, task fit, context, CO₂ and reliability.</p></div>'
+      + '<button type="button" class="tl-btn secondary sm" onclick="V6.copyRecommendation()"><span class="ic" data-icon="copy"></span>Copy</button></div>'
+      + TLUI.ledger({
+          label: 'Recommended models',
+          cols: '24px minmax(0,1fr) 84px 96px 88px', colsSm: '20px minmax(0,1fr) 64px 80px',
+          min: 0,
+          head: [{label:'#'}, {label:'Model', sort:true}, {label:'Score', num:true, sort:true}, {label:'Est. cost', num:true, sort:true}, {label:'CO₂', num:true, cls:'hide-sm', sort:true}],
+          rows: rows
+        }));
+    _recText = top3.map(function(it,i){ return (i+1)+'. '+(it.m.name||it.m.id)+' ('+Math.min(100,it.score).toFixed(0)+'/100)'; }).join('\n');
+    if (window.TL_HYDRATE_ICONS) TL_HYDRATE_ICONS(document.getElementById('rec-results'));
   }
+  var _recText = '';
+  function copyRecommendation() { if (_recText) TLUI.copy('Model recommendation\n' + _recText, 'Recommendation copied.'); }
 
   // ─────────────────────────────────────────────────
   // 2. PROMPT OPTIMIZER
@@ -162,9 +169,15 @@ window.V6 = (function() {
     [/\n{3,}/g, '\n\n'],
   ];
 
+  function _optReset() {
+    var res = document.getElementById('opt-result'); if (res) res.value = '';
+    setEl('opt-stats-wrap', '');
+    setEl('opt-model-savings', TLUI.empty('Paste a prompt above to see the shorter version and what it saves.'));
+  }
+
   function runOptimizer() {
     var original = (document.getElementById('opt-original')||{}).value||'';
-    if (!original.trim()) return;
+    if (!original.trim()) { _optReset(); return; }
     var optimized = original;
     _optimizerRules.forEach(function(rule){ optimized = optimized.replace(rule[0], rule[1]); });
     optimized = optimized.trim();
@@ -174,28 +187,52 @@ window.V6 = (function() {
     var pct     = origTok > 0 ? ((saving/origTok)*100).toFixed(1) : 0;
     var res = document.getElementById('opt-result');
     if (res) res.value = optimized;
-    setEl('opt-orig-stats', '<span class="opt-stat-chip" style="background:var(--red-bg);color:var(--red)">'+origTok.toLocaleString()+' tokens</span>'
-      +'<span class="opt-stat-chip" style="background:var(--bg);color:var(--text-2)">'+original.length+' chars</span>');
-    setEl('opt-result-stats', '<span class="opt-stat-chip" style="background:var(--green-bg);color:var(--green)">'+optTok.toLocaleString()+' tokens</span>'
-      +'<span class="opt-stat-chip" style="background:var(--bg);color:var(--text-2)">'+optimized.length+' chars</span>');
-    setEl('opt-savings', saving>0 ? '✂️ Saved '+saving+' tokens ('+pct+'% reduction)' : 'Already well optimized!');
-    // Show per-model savings table
+    setEl('opt-stats-wrap', TLUI.kpis([
+      ['Original', origTok.toLocaleString() + ' tokens', {sub: original.length.toLocaleString() + ' characters'}],
+      ['Optimized', optTok.toLocaleString() + ' tokens', {sub: optimized.length.toLocaleString() + ' characters'}],
+      ['Saved', saving > 0 ? saving.toLocaleString() + ' tokens' : 'None', {tone: saving > 0 ? 'pos' : '', sub: saving > 0 ? pct + '% shorter' : 'Already tight, nothing to trim'}]
+    ]));
     var models = STATE.getActiveModels();
     if (models.length) {
-      var rows = models.map(function(m){
+      var data = models.map(function(m){
         var origCost = CALC.cost(m, origTok, TOKEN_ENGINE.predictOutput(original));
         var optCost  = CALC.cost(m, optTok,  TOKEN_ENGINE.predictOutput(optimized));
-        var saved = origCost - optCost;
-        var sname = m.name||m.id.split('/').pop();
-        return '<tr><td><strong>'+esc(sname)+'</strong></td>'
-          +'<td>'+CALC.fmtCost(origCost)+'</td><td>'+CALC.fmtCost(optCost)+'</td>'
-          +'<td style="color:var(--green);font-weight:700">'+CALC.fmtCost(saved)+' ('+pct+'%)</td></tr>';
-      }).join('');
+        return {m: m, o: origCost, n: optCost, saved: origCost - optCost};
+      });
+      var maxSaved = Math.max.apply(null, data.map(function(d){ return Math.abs(d.saved); }).concat([1e-12]));
+      var rows = data.map(function(d){
+        var sname = d.m.name||d.m.id.split('/').pop();
+        return {
+          w: Math.abs(d.saved)/maxSaved,
+          sort: [sname, d.o, d.n, d.saved],
+          cells: ['<span class="tl-name">'+esc(sname)+'</span>', CALC.fmtCost(d.o), CALC.fmtCost(d.n), '<span class="hl">'+CALC.fmtCost(d.saved)+'</span> <span class="mute">('+pct+'%)</span>']
+        };
+      });
       setEl('opt-model-savings',
-        '<table class="bench-table"><thead><tr><th>Model</th><th>Original cost/call</th><th>Optimized cost/call</th><th>Savings/call</th></tr></thead><tbody>'+rows+'</tbody></table>');
+        '<div class="tl-block-head"><div><h3 class="tl-h">Savings per call</h3><p class="tl-sub">Priced for each active model at its current rates.</p></div></div>'
+        + TLUI.ledger({
+            label: 'Savings per model', cols: 'minmax(0,1fr) 96px 96px 150px', colsSm: 'minmax(0,1fr) 84px 110px', min: 0,
+            head: [{label:'Model', sort:true}, {label:'Original', num:true, sort:true, cls:'hide-sm'}, {label:'Optimized', num:true, sort:true}, {label:'Saved', num:true, sort:true}],
+            rows: rows
+          }));
     } else {
-      setEl('opt-model-savings', '<p style="font-size:11px;color:var(--text-3)">Select models in the sidebar to see per-model savings.</p>');
+      setEl('opt-model-savings', TLUI.empty('Select models in the sidebar to see per-model savings.'));
     }
+  }
+  var liveOptimize = TLUI.debounce(runOptimizer, 200);
+  function copyOptimized() {
+    var v = (document.getElementById('opt-result')||{}).value||'';
+    if (!v) { TOAST.warning('Optimize a prompt first.'); return; }
+    TLUI.copy(v, 'Optimized prompt copied.');
+  }
+  function useOptimized() {
+    var v = (document.getElementById('opt-result')||{}).value||'';
+    var ta = document.getElementById('prompt-input');
+    if (!v || !ta) { TOAST.warning('Optimize a prompt first.'); return; }
+    ta.value = v;
+    ta.dispatchEvent(new Event('input'));
+    closeModal('optimizer');
+    TOAST.success('Optimized prompt is in the prompt box.');
   }
 
   // ─────────────────────────────────────────────────
@@ -211,48 +248,70 @@ window.V6 = (function() {
 
   function _populateScenarioSelects() {
     var models = STATE.getModels().slice(0,60);
-    var opts = '<option value="">— select model —</option>'
-      + models.map(function(m){ return '<option value="'+esc(m.id)+'">'+(m.name||m.id.split('/').pop())+'</option>'; }).join('');
+    var opts = '<option value="">Select a model</option>'
+      + models.map(function(m){ return '<option value="'+esc(m.id)+'">'+esc(m.name||m.id.split('/').pop())+'</option>'; }).join('');
     ['scenario-model-a','scenario-model-b','scenario-model-c'].forEach(function(id,i){
       var el = document.getElementById(id); if (!el) return;
-      el.innerHTML = opts;
+      el.innerHTML = i === 0 ? opts : opts.replace('Select a model', 'None');
       if (i===0 && models[0]) el.value = models[0].id;
       if (i===1 && models[1]) el.value = models[1].id;
     });
     _renderScenarioTurns();
+    runScenario(true);
   }
 
   function _renderScenarioTurns() {
     var list = document.getElementById('scenario-turns-list'); if (!list) return;
     list.innerHTML = _scenarioTurns.map(function(t,i){
       return '<div class="scenario-turn-item">'
-        +'<span class="scenario-turn-num">T'+(i+1)+'</span>'
-        +'<textarea class="scenario-turn-input" rows="2" onchange="V6.scenarioUpdateTurn('+i+',this.value)">'+esc(t)+'</textarea>'
-        +'<button class="scenario-turn-del" onclick="V6.scenarioRemoveTurn('+i+')" title="Remove">✕</button>'
+        +'<span class="scenario-turn-num">'+(i+1)+'</span>'
+        +'<textarea class="scenario-turn-input" rows="2" aria-label="Turn '+(i+1)+'" oninput="V6.scenarioUpdateTurn('+i+',this.value)">'+esc(t)+'</textarea>'
+        +'<button type="button" class="tl-icon-btn danger scenario-turn-del" onclick="V6.scenarioRemoveTurn('+i+')" title="Remove turn" aria-label="Remove turn '+(i+1)+'">'+window.TL_ICON('x')+'</button>'
         +'</div>';
     }).join('');
   }
 
   function scenarioAddTurn() {
-    _scenarioTurns.push('New turn — describe what the user says here.');
+    _scenarioTurns.push('New turn: describe what the user says here.');
     _renderScenarioTurns();
+    scenarioRefresh();
+    var items = document.querySelectorAll('.scenario-turn-input');
+    if (items.length) items[items.length-1].focus();
   }
   function scenarioRemoveTurn(i) {
     _scenarioTurns.splice(i,1);
     _renderScenarioTurns();
+    scenarioRefresh();
   }
-  function scenarioUpdateTurn(i,v) { _scenarioTurns[i]=v; }
+  var _scenarioLive = TLUI.debounce(function(){ scenarioRefresh(); }, 250);
+  function scenarioUpdateTurn(i,v) { _scenarioTurns[i]=v; _scenarioLive(); }
+  var _scenarioRan = false, _scenarioText = '';
+  function scenarioRefresh() { if (_scenarioRan) runScenario(true); }
 
-  function runScenario() {
+  function runScenario(quiet) {
     var modelIds = ['scenario-model-a','scenario-model-b','scenario-model-c']
       .map(function(id){ return (document.getElementById(id)||{}).value; })
       .filter(Boolean);
-    if (!modelIds.length) { TOAST.warning('Select at least one model in the Scenario Builder.'); return; }
+    var copyBtn = document.getElementById('scenario-copy');
+    if (!modelIds.length) {
+      if (quiet !== true) TOAST.warning('Select at least one model in the Scenario Builder.');
+      setEl('scenario-results', TLUI.empty('Choose a model and select Project costs.'));
+      if (copyBtn) copyBtn.hidden = true;
+      _scenarioRan = false;
+      return;
+    }
     var models = modelIds.map(function(id){ return STATE.getModels().find(function(m){return m.id===id;}); }).filter(Boolean);
     var turns = _scenarioTurns.filter(function(t){return t.trim();});
+    if (!turns.length) {
+      setEl('scenario-results', TLUI.empty('Add at least one turn with some text.'));
+      if (copyBtn) copyBtn.hidden = true;
+      return;
+    }
+    _scenarioRan = true;
+    var text = [];
 
     var results = models.map(function(m){
-      var ctx=0, totalCost=0, totalIn=0, totalOut=0, totalPower=0, rows='';
+      var ctx=0, totalCost=0, totalIn=0, totalOut=0, totalPower=0, rows=[];
       turns.forEach(function(prompt,i){
         var pTok = TOKEN_ENGINE.count(prompt);
         var inTok = ctx + pTok;
@@ -261,35 +320,42 @@ window.V6 = (function() {
         var pw = CALC.power(m.id, inTok, outTok);
         ctx += pTok + outTok;
         totalCost += c; totalIn += inTok; totalOut += outTok; totalPower += pw;
-        rows += '<tr><td>T'+(i+1)+'</td>'
-          +'<td style="font-size:10px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(prompt.slice(0,60))+'</td>'
-          +'<td>'+inTok.toLocaleString()+'</td><td>'+outTok.toLocaleString()+'</td>'
-          +'<td>'+CALC.fmtCost(c)+'</td><td>'+ctx.toLocaleString()+'</td></tr>';
+        rows.push({ctx: ctx, cells: [String(i+1), esc(prompt.slice(0,60)), inTok.toLocaleString(), outTok.toLocaleString(), CALC.fmtCost(c), ctx.toLocaleString()]});
       });
+      var maxCtx = ctx || 1;
+      rows.forEach(function(r){ r.w = r.ctx / maxCtx; r.cells[1] = '<span class="tl-name">'+r.cells[1]+'</span>'; r.cells[0] = '<span class="mute">'+r.cells[0]+'</span>'; });
       var sname = m.name || m.id.split('/').pop();
-      return '<div style="margin-bottom:16px">'
-        +'<div style="font-size:12px;font-weight:900;color:var(--tl);margin-bottom:6px">'+esc(sname)+'</div>'
-        +'<table class="scenario-result-table"><thead><tr><th>#</th><th>Prompt (truncated)</th><th>Input tok</th><th>Output tok</th><th>Cost</th><th>Ctx total</th></tr></thead>'
-        +'<tbody>'+rows+'</tbody></table>'
-        +'<div style="margin-top:7px;display:flex;gap:12px;font-size:11px;flex-wrap:wrap">'
-          +'<span style="font-weight:700">Total: '+CALC.fmtCost(totalCost)+'</span>'
-          +'<span>In: '+totalIn.toLocaleString()+'</span>'
-          +'<span>Out: '+totalOut.toLocaleString()+'</span>'
-          +'<span>Power: '+CALC.fmtPower(totalPower)+'</span>'
-        +'</div>'
-      +'</div>';
+      text.push(sname + ': ' + CALC.fmtCost(totalCost) + ' total, ' + totalIn.toLocaleString() + ' input and ' + totalOut.toLocaleString() + ' output tokens');
+      return '<div class="scenario-model">'
+        + '<h4 class="tl-h">'+esc(sname)+'</h4>'
+        + TLUI.kpis([
+            ['Total cost', CALC.fmtCost(totalCost), {money:true}],
+            ['Input tokens', totalIn.toLocaleString()],
+            ['Output tokens', totalOut.toLocaleString()],
+            ['Power', CALC.fmtPower(totalPower)]
+          ])
+        + TLUI.ledger({
+            label: 'Turns for '+sname, cols: '28px minmax(0,1fr) 84px 84px 96px 92px', colsSm: '24px minmax(0,1fr) 64px 88px', min: 0,
+            head: [{label:'#'}, {label:'Prompt'}, {label:'Input', num:true, cls:'hide-sm'}, {label:'Output', num:true, cls:'hide-sm'}, {label:'Cost', num:true}, {label:'Context', num:true}],
+            rows: rows
+          })
+        + '</div>';
     });
-    setEl('scenario-results', results.join('<hr style="border:none;border-top:1px solid var(--border);margin:12px 0">'));
+    _scenarioText = 'Scenario projection (' + turns.length + ' turns)\n' + text.join('\n');
+    setEl('scenario-results', '<div class="tl-stagger">' + results.join('') + '</div>');
+    if (copyBtn) copyBtn.hidden = false;
   }
+  function copyScenario() { if (_scenarioText) TLUI.copy(_scenarioText, 'Projection copied.'); }
 
   // ─────────────────────────────────────────────────
   // 4. A/B TEST MODE
   // ─────────────────────────────────────────────────
   function _populateABSelect() {
     var models = STATE.getModels().slice(0,60);
-    var opts = '<option value="">— select model —</option>'
-      + models.map(function(m){ return '<option value="'+esc(m.id)+'">'+(m.name||m.id.split('/').pop())+'</option>'; }).join('');
+    var opts = '<option value="">Select a model</option>'
+      + models.map(function(m){ return '<option value="'+esc(m.id)+'">'+esc(m.name||m.id.split('/').pop())+'</option>'; }).join('');
     var el = document.getElementById('ab-model'); if (el) { el.innerHTML=opts; if(models[0]) el.value=models[0].id; }
+    setEl('ab-results', TLUI.empty('Pick a model and a prompt, then run the test.'));
   }
 
   function runABTest() {
@@ -322,55 +388,55 @@ window.V6 = (function() {
     var maxOut  = Math.max.apply(null,outToks);
     var avgCost = costs.reduce(function(a,b){return a+b;},0)/runs;
     var cv = avgOut > 0 ? (stdDev/avgOut*100).toFixed(1) : '0'; // coefficient of variation
+    var cvn = parseFloat(cv);
+    var rating = cvn<5 ? TLUI.pill('Stable','positive') : cvn<15 ? TLUI.pill('Moderate','warning') : TLUI.pill('High variance','negative');
 
-    var summaryHtml = '<div class="ab-summary">'
-      +'<div class="ab-sum-card"><div class="asv">'+avgOut+'</div><div class="asl">Avg output tokens</div></div>'
-      +'<div class="ab-sum-card"><div class="asv">'+stdDev+'</div><div class="asl">Std deviation (tokens)</div></div>'
-      +'<div class="ab-sum-card"><div class="asv">'+cv+'%</div><div class="asl">Output variance (CV)</div></div>'
-      +'<div class="ab-sum-card"><div class="asv">'+CALC.fmtCost(avgCost)+'</div><div class="asl">Avg cost / run</div></div>'
-      +'<div class="ab-sum-card"><div class="asv">'+minOut+'–'+maxOut+'</div><div class="asl">Output token range</div></div>'
-      +'<div class="ab-sum-card"><div class="asv">'+(parseFloat(cv)<5?'🟢 Stable':parseFloat(cv)<15?'🟡 Moderate':'🔴 High')+'</div><div class="asl">Consistency rating</div></div>'
+    var summaryHtml = TLUI.kpis([
+      ['Average output', avgOut + ' tokens', {sub: 'Range ' + minOut + ' to ' + maxOut}],
+      ['Standard deviation', stdDev + ' tokens'],
+      ['Variance (CV)', cv + '%', {sub: 'Consistency: ' + rating}],
+      ['Average cost per run', CALC.fmtCost(avgCost), {money:true}]
+    ]);
+
+    var runRows = runData.map(function(r,i){
+      return '<div class="ab-run">'
+        +'<button type="button" class="tl-row ab-run-head" style="--cols:28px minmax(0,1fr) 84px 96px 72px 20px;--i:'+i+'" aria-expanded="false" aria-controls="ab-run-'+i+'" onclick="V6.toggleRun(this)">'
+          +'<span class="tl-cell mute">'+(i+1)+'</span>'
+          +'<span class="tl-cell tl-name">'+esc(r.resp.slice(0,70))+'</span>'
+          +'<span class="tl-cell num">'+r.outTok+' tok</span>'
+          +'<span class="tl-cell num">'+CALC.fmtCost(r.cost)+'</span>'
+          +'<span class="tl-cell num mute">~'+r.eta+'s</span>'
+          +'<span class="tl-cell ab-chev">'+window.TL_ICON('chevronDown')+'</span>'
+        +'</button>'
+        +'<div class="tl-collapse" id="ab-run-'+i+'"><div><p class="ab-run-body">'+esc(r.resp)+'</p></div></div>'
       +'</div>';
-
-    // Variance bar chart (SVG)
-    var W=500,H=80,pl=40,pr=10,pt=10,pb=24;
-    var iw=W-pl-pr,ih=H-pt-pb;
-    var maxV=Math.max.apply(null,outToks)||1;
-    var barW=iw/runs*0.65, gap=iw/runs;
-    var bars='',xLabels='';
-    outToks.forEach(function(v,i){
-      var bh=Math.max(2,(v/maxV)*ih);
-      var bx=pl+i*gap+gap*0.175;
-      var by=pt+ih-bh;
-      var color=Math.abs(v-avgOut)>stdDev*1.5?'var(--red)':'var(--tl)';
-      bars+='<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+bh.toFixed(1)+'" fill="'+color+'" rx="2" opacity="0.8"/>';
-      xLabels+='<text x="'+(pl+i*gap+gap/2).toFixed(1)+'" y="'+(H-pb+12)+'" text-anchor="middle" font-size="9" fill="#888">R'+(i+1)+'</text>';
-    });
-    // avg line
-    var avgY=(pt+ih-(avgOut/maxV)*ih).toFixed(1);
-    var svgHtml='<svg width="'+W+'" height="'+H+'" style="max-width:100%;display:block;margin-bottom:10px">'
-      +'<text x="'+pl+'" y="9" font-size="9" fill="#888">Output tokens per run (red = outlier > 1.5σ)</text>'
-      +'<line x1="'+pl+'" y1="'+avgY+'" x2="'+(W-pr)+'" y2="'+avgY+'" stroke="var(--blue)" stroke-dasharray="4,3" stroke-width="1.5"/>'
-      +'<text x="'+(W-pr-2)+'" y="'+(parseFloat(avgY)-3)+'" text-anchor="end" font-size="8" fill="var(--blue)">avg</text>'
-      +bars+xLabels+'</svg>';
-
-    var runCards = '<div class="ab-results-grid">'
-      +runData.map(function(r,i){
-        return '<div class="ab-run-card">'
-          +'<div class="ab-run-card-head">'
-            +'<span class="ab-run-card-title">Run '+(i+1)+'</span>'
-            +'<span style="font-size:10px;color:var(--text-3)">'+r.outTok+' tok · '+CALC.fmtCost(r.cost)+' · ~'+r.eta+'s</span>'
-          +'</div>'
-          +'<div class="ab-run-body">'+esc(r.resp.slice(0,220))+(r.resp.length>220?'…':'')+'</div>'
-        +'</div>';
-      }).join('')+'</div>';
+    }).join('');
 
     setEl('ab-results',
-      '<div style="font-size:12px;font-weight:900;color:var(--tl);margin-bottom:10px">'+runs+' runs · '+esc(sname)+'</div>'
-      +summaryHtml+svgHtml+runCards);
+      '<div class="tl-block-head"><div><h3 class="tl-h">'+runs+' runs on '+esc(sname)+'</h3><p class="tl-sub">Output length per run. Bars flagged in red sit more than 1.5 standard deviations from the average.</p></div></div>'
+      + summaryHtml
+      + '<div class="tl-chart" id="ab-chart" style="margin-top:20px"></div>'
+      + '<div class="tl-block"><div class="tl-block-head"><div><h3 class="tl-h">Responses</h3><p class="tl-sub">Select a run to read its simulated response.</p></div></div>'
+      + '<div class="ab-runs tl-stagger" role="list">' + runRows + '</div></div>');
+    TLUI.barChart(document.getElementById('ab-chart'), {
+      label: 'Output tokens per run',
+      labels: outToks.map(function(v,i){ return 'Run '+(i+1); }),
+      values: outToks,
+      flags: outToks.map(function(v){ return Math.abs(v-avgOut)>stdDev*1.5; }),
+      avg: parseFloat(avgOut),
+      seriesName: 'Output tokens',
+      fmtY: function(v){ return String(Math.round(v)); },
+      extra: function(i){ return [{name:'Cost', value: CALC.fmtCost(runData[i].cost), tone:'grey'}]; }
+    });
+    TLUI.countUp(document.getElementById('ab-results'));
+  }
+  function toggleRun(btn) {
+    var open = btn.getAttribute('aria-expanded') !== 'true';
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    var panel = document.getElementById(btn.getAttribute('aria-controls'));
+    if (panel) panel.classList.toggle('open', open);
   }
 
-  return {openModal, closeModal, runRecommender, runOptimizer, runScenario, scenarioAddTurn, scenarioRemoveTurn, scenarioUpdateTurn, runABTest};
+  return {openModal, closeModal, runRecommender, copyRecommendation, runOptimizer, liveOptimize, copyOptimized, useOptimized,
+          runScenario, scenarioRefresh, copyScenario, scenarioAddTurn, scenarioRemoveTurn, scenarioUpdateTurn, runABTest, toggleRun};
 })();
-
-

@@ -11,7 +11,7 @@ window.BOOKMARKS = (function() {
     _store[k].bookmarked = !_store[k].bookmarked;
     var btn = document.getElementById('bk-btn-' + modelId.replace(/[^a-z0-9]/gi,'_') + '_' + turnNum);
     if (btn) btn.classList.toggle('bookmarked', _store[k].bookmarked);
-    if (typeof TOAST !== 'undefined') TOAST.show(_store[k].bookmarked ? '🔖 Bookmarked' : 'Bookmark removed', 'info');
+    if (typeof TOAST !== 'undefined') TOAST.show(_store[k].bookmarked ? 'Bookmarked.' : 'Bookmark removed.', 'info');
   }
 
   function toggleNote(modelId, turnNum) {
@@ -45,25 +45,30 @@ window.BOOKMARKS = (function() {
     if (!el) return;
     var bookmarked = Object.keys(_store).filter(function(k){ return _store[k].bookmarked; });
     if (!bookmarked.length) {
-      el.innerHTML = '<p style="color:var(--text-2);font-size:12px;padding:16px">No bookmarks yet. Click 🔖 on any turn card to bookmark it.</p>';
+      el.innerHTML = TLUI.empty('No bookmarks yet. Use the bookmark button on any response card to save a turn here.');
       return;
     }
     var models = STATE.getActiveModels ? STATE.getActiveModels() : [];
-    var html = bookmarked.map(function(k) {
+    var rows = bookmarked.map(function(k) {
       var parts = k.split('::');
       var modelId = parts[0], turnNum = parseInt(parts[1]);
       var model = models.filter(function(m){ return m.id===modelId; })[0];
       var sess = STATE.getSession ? STATE.getSession(modelId) : null;
       var turn = sess && sess.turns ? sess.turns.filter(function(t){ return t.turnNum===turnNum; })[0] : null;
       var note = _store[k].note;
-      return '<div class="bk-item">'
-        + '<div class="bk-model">' + esc(model ? (model.name||model.id) : modelId) + '</div>'
-        + '<div class="bk-prompt">' + esc((turn && turn.prompt ? turn.prompt : '(prompt not found)').slice(0,120)) + (turn && turn.prompt && turn.prompt.length > 120 ? '…' : '') + '</div>'
-        + (note ? '<div class="bk-note">"' + esc(note) + '"</div>' : '')
-        + '<div class="bk-meta">Turn ' + turnNum + (turn ? ' · ' + CALC.fmtCost(turn.cost) : '') + '</div>'
-        + '</div>';
-    }).join('');
-    el.innerHTML = html;
+      var prompt = turn && turn.prompt ? turn.prompt : '(prompt not found)';
+      return { cells: [
+        '<div class="tl-name">' + esc(model ? (model.name||model.id) : modelId) + '</div>'
+          + '<div class="bk-prompt">' + esc(prompt.slice(0,160)) + (prompt.length > 160 ? '…' : '') + '</div>'
+          + (note ? '<div class="tl-meta">Note: ' + esc(note) + '</div>' : ''),
+        'Turn ' + turnNum + (turn ? '<div class="tl-meta">' + CALC.fmtCost(turn.cost) + '</div>' : '')
+      ] };
+    });
+    el.innerHTML = TLUI.ledger({
+      label: 'Bookmarked turns', cols: 'minmax(0,1fr) 88px', min: 0,
+      head: [{label:'Turn'}, {label:'Details', num:true}],
+      rows: rows.map(function(r){ r.cells[0] = '<div class="wrap-cell">' + r.cells[0] + '</div>'; return r; })
+    });
   }
 
   function getAnnotationHtml(modelId, turnNum) {

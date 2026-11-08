@@ -59,10 +59,10 @@ window.GREEN = (function() {
     if (!el) return;
     var html = PROVIDERS.map(function(p) {
       var pct = _adjustedPct(p.pct);
-      var color = pct >= 70 ? 'var(--tl-light)' : pct >= 55 ? '#F59E0B' : '#EF4444';
+      var tone = pct >= 85 ? ' top' : pct < 55 ? ' low' : '';
       return '<div class="green-prov-row">'
         + '<span class="green-prov-name">' + p.label + '</span>'
-        + '<div class="green-prov-bar"><div class="green-prov-fill" style="width:' + pct + '%;background:' + color + '"></div></div>'
+        + '<div class="green-prov-bar"><div class="green-prov-fill' + tone + '" style="--p:' + (pct / 100) + '"></div></div>'
         + '<span class="green-prov-pct">' + pct + '%</span>'
         + '</div>';
     }).join('');
@@ -72,7 +72,7 @@ window.GREEN = (function() {
   function getBadgeHtml(m) {
     var pct = getModelRenewable(m);
     var cls = pct >= 70 ? 'high' : pct >= 55 ? 'mid' : 'low';
-    return '<span class="green-badge ' + cls + '">' + pct + '% 🌿</span>';
+    return '<span class="green-badge ' + cls + '" title="Renewable energy share">' + pct + '% green</span>';
   }
 
   // init

@@ -31,7 +31,11 @@ window.POLICY = (function() {
 
   function toggleRule(id) {
     var r = _rules.filter(function(x){ return x.id===id; })[0];
-    if (r) { r.enabled = !r.enabled; _render(); }
+    if (r) {
+      r.enabled = !r.enabled; _render();
+      var cb = document.querySelector('[data-rule="' + id + '"]');
+      if (cb) cb.focus();
+    }
   }
 
   function addRule() {
@@ -43,8 +47,10 @@ window.POLICY = (function() {
     _rules.push({ id:'p'+Date.now(), name:name, desc:desc||trigger, trigger:trigger, action:action, enabled:true, triggered:0, type:'warn' });
     _log.unshift({ ts:new Date().toTimeString().slice(0,5), type:'route', msg:'New policy rule created: "' + name + '"' });
     _render();
-    if (typeof TOAST !== 'undefined') TOAST.show('Policy rule created ✓', 'success');
+    if (typeof TOAST !== 'undefined') TOAST.show('Policy rule created.', 'success');
   }
+
+  function _field(label, ctl, id, full) { return '<div class="tl-field' + (full ? ' full' : '') + '"><label class="tl-label" for="' + id + '">' + label + '</label>' + ctl + '</div>'; }
 
   function _render() {
     var el = document.getElementById('policy-body');
@@ -52,69 +58,65 @@ window.POLICY = (function() {
 
     var totalTriggered = _rules.reduce(function(s,r){ return s+r.triggered; }, 0);
     var enabled = _rules.filter(function(r){ return r.enabled; }).length;
+    var maxT = Math.max.apply(null, _rules.map(function(r){ return r.triggered; }).concat([1]));
 
-    var statsHtml = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">'
-      + '<div class="shadow-kpi"><div class="shadow-kpi-val">' + _rules.length + '</div><div class="shadow-kpi-lbl">Total Rules</div></div>'
-      + '<div class="shadow-kpi"><div class="shadow-kpi-val">' + enabled + '</div><div class="shadow-kpi-lbl">Active</div></div>'
-      + '<div class="shadow-kpi"><div class="shadow-kpi-val">' + totalTriggered + '</div><div class="shadow-kpi-lbl">Triggers Today</div></div>'
-      + '</div>';
+    var statsHtml = TLUI.kpis([['Total rules', String(_rules.length)], ['Active', String(enabled)], ['Triggers today', String(totalTriggered)]]);
 
-    var rulesHtml = _rules.map(function(r) {
-      var enabledCls = r.enabled ? ' enabled' : '';
-      var triggeredCls = r.triggered > 0 && r.enabled ? ' triggered' : '';
-      var typeIcon = { route:'🔀', block:'🚫', warn:'⚠️' };
-      return '<div class="policy-rule' + enabledCls + triggeredCls + '">'
-        + '<input type="checkbox" class="policy-rule-toggle" ' + (r.enabled?'checked':'') + ' onchange="POLICY.toggleRule(\'' + r.id + '\')">'
-        + '<div class="policy-rule-body">'
-        +   '<div class="policy-rule-name">' + (typeIcon[r.type]||'🛡️') + ' ' + esc(r.name) + '</div>'
-        +   '<div class="policy-rule-desc">' + esc(r.desc) + '</div>'
-        +   '<div class="policy-rule-meta">'
-        +     '<span class="policy-meta-chip trigger">IF: ' + esc(r.trigger) + '</span>'
-        +     '<span class="policy-meta-chip action">THEN: ' + esc(r.action) + '</span>'
-        +   '</div>'
-        + '</div>'
-        + '<div><div class="policy-trigger-count">' + r.triggered + '</div><div class="policy-trigger-lbl">triggers</div></div>'
-        + '</div>';
-    }).join('');
+    var ruleRows = _rules.map(function(r) {
+      var typeLabel = { route:'Route', block:'Block', warn:'Warn' }[r.type] || 'Rule';
+      return {
+        cls: r.enabled ? '' : 'off',
+        sort: [null, r.name, r.triggered],
+        cells: [
+          '<input type="checkbox" class="tl-switch" data-rule="' + r.id + '" ' + (r.enabled ? 'checked' : '') + ' aria-label="Enable ' + esc(r.name) + '" onchange="POLICY.toggleRule(\'' + r.id + '\')">',
+          '<div class="tl-name">' + esc(r.name) + ' ' + TLUI.pill(typeLabel) + '</div><div class="tl-meta">' + esc(r.desc) + '</div>'
+            + '<div class="tl-meta policy-if"><b>If</b> ' + esc(r.trigger) + ' <b>then</b> ' + esc(r.action) + '</div>',
+          String(r.triggered)
+        ]
+      };
+    });
+    var rulesHtml = TLUI.block('Rules', 'Switch a rule on or off. The bar behind each row shows its share of today’s triggers.',
+      TLUI.ledger({
+        label: 'Policy rules', cols: '44px minmax(0,1fr) 72px', min: 0,
+        head: [{label:'On'}, {label:'Rule'}, {label:'Triggers', num:true, sort:true}],
+        rows: ruleRows.map(function(r){ r.cells = r.cells.map(function(c, i){ return i === 1 ? '<div class="wrap-cell">' + c + '</div>' : c; }); return r; })
+      }));
 
-    var builderHtml = '<div class="policy-builder">'
-      + '<h4>🔧 Create Custom Rule</h4>'
-      + '<div class="policy-builder-row"><label>Rule Name</label><input id="pol-name" placeholder="e.g. Competitor Block" style="flex:2"/></div>'
-      + '<div class="policy-builder-row"><label>IF trigger</label>'
-      +   '<select id="pol-trigger">'
-      +     '<option value="context > 50K tokens">Context &gt; 50K tokens</option>'
-      +     '<option value="context > 100K tokens">Context &gt; 100K tokens</option>'
-      +     '<option value="PII pattern detected">PII pattern detected</option>'
-      +     '<option value="user spend > 80% cap">User spend &gt; 80% cap</option>'
-      +     '<option value="user spend > 100% cap">User spend &gt; 100% cap</option>'
-      +     '<option value="competitor keyword match">Competitor keyword match</option>'
-      +     '<option value="output tokens > 2048">Output tokens &gt; 2048</option>'
-      +     '<option value="output tokens > 4096">Output tokens &gt; 4096</option>'
-      +     '<option value="request outside 6am-10pm">Request outside 6am–10pm</option>'
-      +   '</select>'
-      + '</div>'
-      + '<div class="policy-builder-row"><label>THEN action</label>'
-      +   '<select id="pol-action">'
-      +     '<option value="Route to cheapest model">Route to cheapest model</option>'
-      +     '<option value="Route to claude-haiku">Route to claude-haiku</option>'
-      +     '<option value="Route to gemini-flash">Route to gemini-flash</option>'
-      +     '<option value="Block + alert">Block + alert security team</option>'
-      +     '<option value="Block + warn user">Block + warn user</option>'
-      +     '<option value="Cap at 2048 tokens">Cap output at 2048 tokens</option>'
-      +     '<option value="Flag for review">Flag for compliance review</option>'
-      +   '</select>'
-      + '</div>'
-      + '<div class="policy-builder-row"><label>Description</label><input id="pol-desc" placeholder="Explain what this rule does…" style="flex:2"/></div>'
-      + '<button class="policy-save-btn" onclick="POLICY.addRule()">Save Rule</button>'
-      + '</div>';
+    var builderHtml = TLUI.block('Create a custom rule', 'Pick a trigger and an action.',
+      '<div class="tl-form">'
+      + _field('Rule name', '<input class="tl-input" id="pol-name" placeholder="Competitor block">', 'pol-name', true)
+      + _field('If', '<select class="tl-select" id="pol-trigger">'
+        + '<option value="context > 50K tokens">Context over 50K tokens</option>'
+        + '<option value="context > 100K tokens">Context over 100K tokens</option>'
+        + '<option value="PII pattern detected">PII pattern detected</option>'
+        + '<option value="user spend > 80% cap">User spend over 80% of cap</option>'
+        + '<option value="user spend > 100% cap">User spend over 100% of cap</option>'
+        + '<option value="competitor keyword match">Competitor keyword match</option>'
+        + '<option value="output tokens > 2048">Output tokens over 2048</option>'
+        + '<option value="output tokens > 4096">Output tokens over 4096</option>'
+        + '<option value="request outside 6am-10pm">Request outside 6am to 10pm</option></select>', 'pol-trigger')
+      + _field('Then', '<select class="tl-select" id="pol-action">'
+        + '<option value="Route to cheapest model">Route to cheapest model</option>'
+        + '<option value="Route to claude-haiku">Route to claude-haiku</option>'
+        + '<option value="Route to gemini-flash">Route to gemini-flash</option>'
+        + '<option value="Block + alert">Block and alert security team</option>'
+        + '<option value="Block + warn user">Block and warn user</option>'
+        + '<option value="Cap at 2048 tokens">Cap output at 2048 tokens</option>'
+        + '<option value="Flag for review">Flag for compliance review</option></select>', 'pol-action')
+      + _field('Description', '<input class="tl-input" id="pol-desc" placeholder="Explain what this rule does">', 'pol-desc', true)
+      + '</div><div class="tl-actions" style="margin-top:16px"><button type="button" class="tl-btn" onclick="POLICY.addRule()">Save rule</button></div>');
 
-    var logEntries = _log.slice(0,6).map(function(l) {
-      return '<div class="policy-log-entry ' + l.type + '"><span class="policy-log-time">' + l.ts + '</span><span class="policy-log-msg">' + esc(l.msg) + '</span></div>';
-    }).join('');
+    var logRows = _log.slice(0,6).map(function(l) {
+      var tone = l.type === 'block' ? 'negative' : l.type === 'warn' ? 'warning' : '';
+      return { cells: ['<span class="mute">' + l.ts + '</span>', '<span class="tl-name">' + esc(l.msg) + '</span>', TLUI.pill({block:'Block', route:'Route', warn:'Warn'}[l.type] || 'Event', tone)] };
+    });
+    var logHtml = TLUI.block('Enforcement log', 'Most recent events.', TLUI.ledger({
+      label: 'Enforcement log', cols: '56px minmax(0,1fr) 72px', colsSm: '48px minmax(0,1fr) 64px', min: 0,
+      head: [{label:'Time'}, {label:'Event'}, {label:'Type'}], rows: logRows
+    }));
 
-    var logHtml = '<div class="policy-log"><h3>📋 Enforcement Log</h3>' + logEntries + '</div>';
-
-    el.innerHTML = statsHtml + rulesHtml + builderHtml + logHtml;
+    el.innerHTML = '<p class="tl-lede">A preview of how rules would act on prompts. Rules are not applied to prompts in this build.</p>'
+      + statsHtml + rulesHtml + builderHtml + logHtml;
   }
 
   // Hook into sendPrompt to enforce policies
@@ -127,8 +129,8 @@ window.POLICY = (function() {
         var piiRe = /\b\d{3}-\d{2}-\d{4}\b|\b\d{16}\b|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
         if (piiRe.test(promptText)) {
           r.triggered++;
-          if (r.action.indexOf('Block') >= 0) { blocked = true; warnings.push('🚫 PII detected — prompt blocked by policy.'); }
-          else warnings.push('⚠️ PII detected in prompt.');
+          if (r.action.indexOf('Block') >= 0) { blocked = true; warnings.push('PII detected. Prompt blocked by policy.'); }
+          else warnings.push('PII detected in prompt.');
           _log.unshift({ ts:new Date().toTimeString().slice(0,5), type:'block', msg:'PII policy triggered on model ' + modelId });
         }
       }
@@ -139,7 +141,7 @@ window.POLICY = (function() {
           r.triggered++;
           if (r.action.indexOf('haiku') >= 0) routeTo = 'anthropic/claude-haiku-4-5';
           else if (r.action.indexOf('cheapest') >= 0) routeTo = 'cheapest';
-          warnings.push('🔀 Token overflow policy: routing to cheaper model.');
+          warnings.push('Token overflow policy: routing to a cheaper model.');
           _log.unshift({ ts:new Date().toTimeString().slice(0,5), type:'route', msg:'Token overflow rule: ' + estTok + ' tokens, routing away from ' + modelId });
         }
       }

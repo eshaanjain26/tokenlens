@@ -6,6 +6,7 @@ window.FORECAST = (function() {
     var ov = document.getElementById('forecast-overlay');
     if (ov) ov.classList.add('open');
     _render();
+    TLUI.countUp(document.getElementById('forecast-body'));
   }
   function close() {
     var ov = document.getElementById('forecast-overlay');
@@ -13,8 +14,9 @@ window.FORECAST = (function() {
   }
   function setScenario(s) {
     _scenario = s;
-    document.querySelectorAll('.fc2-scenario-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.scenario === s); });
     _render();
+    var b = document.querySelector('.fc2-scenario-btn[data-scenario="' + s + '"]');
+    if (b) b.focus();
   }
 
   function _render() {
@@ -24,7 +26,7 @@ window.FORECAST = (function() {
     var turns = totals.turns || 0;
     var totalCost = totals.cost || 0;
     if (!turns) {
-      el.innerHTML = '<p style="color:var(--text-2);font-size:12px">Run some prompts first — forecast requires at least one session turn.</p>';
+      el.innerHTML = TLUI.empty('Run a prompt first. The forecast needs at least one session turn to read your pace.');
       return;
     }
     var costPerTurn = totalCost / turns;
@@ -41,64 +43,46 @@ window.FORECAST = (function() {
     var breakEvenBudget = BUDGET.getCap ? BUDGET.getCap() : 1;
     var daysToCapExhaust = breakEvenBudget / dailyRate;
 
-    // SVG chart: 30 day projection
-    var W=560, H=180, padL=50, padR=16, padT=16, padB=28;
-    var points = [];
-    for (var d=0; d<=30; d++) {
-      var cumCost = totalCost + dailyRate * d;
-      points.push(cumCost);
-    }
+    var points = [], xs = [];
+    for (var d=0; d<=30; d++) { points.push(totalCost + dailyRate * d); xs.push(d); }
     var maxY = Math.max.apply(null, points);
-    function sx(d) { return padL + (d/30)*(W-padL-padR); }
-    function sy(v) { return padT + (1 - v/maxY)*(H-padT-padB); }
 
-    var path = points.map(function(v,i){ return (i===0?'M':'L')+sx(i).toFixed(1)+','+sy(v).toFixed(1); }).join(' ');
-    // Shade area under curve
-    var areaPath = path + ' L'+sx(30).toFixed(1)+','+(H-padB)+' L'+sx(0).toFixed(1)+','+(H-padB)+' Z';
-    // Budget cap line
-    var capY = sy(breakEvenBudget);
-    var capLine = breakEvenBudget <= maxY
-      ? '<line x1="'+padL+'" y1="'+capY.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+capY.toFixed(1)+'" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="5,3"/><text x="'+(W-padR-2)+'" y="'+(capY-4)+'" text-anchor="end" font-size="9" fill="#EF4444">Budget cap $'+breakEvenBudget.toFixed(2)+'</text>'
-      : '';
-    var yLabels = [0,0.25,0.5,0.75,1].map(function(f){
-      var v=maxY*f, y=sy(v);
-      var lbl = v>=1?'$'+(v).toFixed(2):'$'+(v*100).toFixed(1)+'¢';
-      if (v>=1) lbl='$'+v.toFixed(2);
-      return '<text x="'+(padL-5)+'" y="'+(y+4)+'" text-anchor="end" font-size="9" fill="#888">'+lbl+'</text><line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="#eee" stroke-width="1"/>';
-    }).join('');
-    var xLabels = [0,7,14,21,30].map(function(d){
-      return '<text x="'+sx(d).toFixed(1)+'" y="'+(H-padB+14)+'" text-anchor="middle" font-size="9" fill="#888">Day '+d+'</text>';
-    }).join('');
+    var kpis = TLUI.kpis([
+      ['7-day projection', '$' + projected7.toFixed(4), {money: true}],
+      ['30-day projection', '$' + projected30.toFixed(4), {money: true, tone: projected30 > breakEvenBudget ? 'neg' : ''}],
+      ['Days until cap', isFinite(daysToCapExhaust) ? daysToCapExhaust.toFixed(1) + ' days' : 'No limit', {tone: daysToCapExhaust < 7 ? 'neg' : ''}]
+    ]);
 
-    var chart = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;border-radius:8px;border:1px solid var(--border)">'
-      + yLabels+xLabels+capLine
-      + '<path d="'+areaPath+'" fill="rgba(10,107,60,0.07)"/>'
-      + '<path d="'+path+'" fill="none" stroke="var(--tl)" stroke-width="2"/>'
-      + '<circle cx="'+sx(0).toFixed(1)+'" cy="'+sy(points[0]).toFixed(1)+'" r="3" fill="var(--tl)"/>'
-      + '<circle cx="'+sx(30).toFixed(1)+'" cy="'+sy(points[30]).toFixed(1)+'" r="4" fill="var(--tl)"/>'
-      + '</svg>';
-
-    var kpis = '<div class="fc2-kpis">'
-      + '<div class="fc2-kpi"><div class="fc2-kpi-val">$'+projected7.toFixed(4)+'</div><div class="fc2-kpi-lbl">7-day projection</div></div>'
-      + '<div class="fc2-kpi"><div class="fc2-kpi-val" style="color:'+( projected30 > breakEvenBudget ? '#EF4444':'var(--tl)')+'">$'+projected30.toFixed(4)+'</div><div class="fc2-kpi-lbl">30-day projection</div></div>'
-      + '<div class="fc2-kpi"><div class="fc2-kpi-val" style="color:'+(daysToCapExhaust<7?'#EF4444':daysToCapExhaust<14?'#F59E0B':'var(--tl)')+'">'+( isFinite(daysToCapExhaust) ? daysToCapExhaust.toFixed(1)+' days' : '∞')+'</div><div class="fc2-kpi-lbl">Days until cap</div></div>'
-      + '</div>';
-
-    var scenarios = '<div class="fc2-scenario-row">'
+    var labels = { linear:'Linear', conservative:'Conservative (-30%)', aggressive:'Aggressive (+80%)' };
+    var scenarios = '<div class="tl-seg" role="group" aria-label="Growth scenario">'
       + ['linear','conservative','aggressive'].map(function(s){
-          var labels = { linear:'📈 Linear', conservative:'📉 Conservative (−30%)', aggressive:'🚀 Aggressive (+80%)' };
-          return '<button class="fc2-scenario-btn'+(s===_scenario?' active':'')+'" data-scenario="'+s+'" onclick="FORECAST.setScenario(\''+s+'\')">'+labels[s]+'</button>';
-        }).join('')
-      + '</div>';
+          return '<button type="button" class="fc2-scenario-btn" data-scenario="'+s+'" aria-pressed="'+(s===_scenario)+'" onclick="FORECAST.setScenario(\''+s+'\')">'+labels[s]+'</button>';
+        }).join('') + '</div>';
 
-    var note = '<p style="font-size:10px;color:var(--text-3);margin-top:8px">Based on '+turns+' turns at $'+costPerTurn.toFixed(5)+'/turn avg · '+_scenario+' growth model</p>';
-    el.innerHTML = kpis + scenarios + chart + note;
+    _summary = 'Cost forecast (' + _scenario + '): 7-day $' + projected7.toFixed(4) + ', 30-day $' + projected30.toFixed(4)
+      + ', cap $' + breakEvenBudget.toFixed(2) + (isFinite(daysToCapExhaust) ? ', reached in ' + daysToCapExhaust.toFixed(1) + ' days' : '');
+
+    el.innerHTML = kpis
+      + '<div class="tl-toolbar">' + scenarios + '<button type="button" class="tl-btn secondary sm" onclick="FORECAST.copy()"><span class="ic" data-icon="copy"></span>Copy</button></div>'
+      + '<div id="forecast-chart"></div>'
+      + '<p class="tl-hint" style="margin-top:12px">Based on ' + turns + ' turns at $' + costPerTurn.toFixed(5) + ' per turn on average, with the ' + _scenario + ' growth model.</p>';
+    if (window.TL_HYDRATE_ICONS) TL_HYDRATE_ICONS(el);
+    TLUI.lineChart(document.getElementById('forecast-chart'), {
+      label: 'Projected cumulative cost over 30 days',
+      xs: xs, xTicks: [0, 7, 14, 21, 30],
+      series: [{ name: 'Projected', values: points, tone: 'ink' }],
+      refs: breakEvenBudget <= maxY ? [{ value: breakEvenBudget, label: 'Budget cap $' + breakEvenBudget.toFixed(2), tone: 'neg' }] : [],
+      fmtX: function(i, long) { return 'Day ' + i; },
+      fmtY: function(v) { return v >= 1 ? '$' + v.toFixed(2) : '$' + v.toFixed(4); }
+    });
   }
+  var _summary = '';
+  function copy() { if (_summary) TLUI.copy(_summary, 'Forecast copied.'); }
 
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') { var ov = document.getElementById('forecast-overlay'); if (ov && ov.classList.contains('open')) close(); }
   });
 
-  return { open:open, close:close, setScenario:setScenario };
+  return { open:open, close:close, setScenario:setScenario, copy:copy };
 })();
 
