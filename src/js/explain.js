@@ -45,37 +45,47 @@ window.EXPLAIN = (function() {
 
   function _fmt(n, dec) { return (+n).toFixed(dec !== undefined ? dec : 4); }
 
+  function reduced() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  function icon(name) { return window.TL_ICON ? window.TL_ICON(name) : ''; }
+
   /* ── source citation HTML ── */
-  function _src(icon, title, desc, url) {
-    return '<div class="expl-source-row">'
-      +'<div class="expl-source-icon">'+icon+'</div>'
-      +'<div class="expl-source-body">'
-        +'<strong>'+title+'</strong>'
-        +(url ? '<a href="'+url+'" target="_blank" rel="noopener">'+desc+'</a>' : '<span style="font-size:10px;color:var(--text-2)">'+desc+'</span>')
-      +'</div>'
-    +'</div>';
+  function _src(title, desc, url) {
+    return '<p class="expl-source"><strong>'+title+'</strong> '
+      +(url ? '<a href="'+url+'" target="_blank" rel="noopener">'+desc+'</a>' : desc)
+    +'</p>';
   }
 
-  /* ── kv card HTML ── */
+  /* ── kv HTML ── */
   function _kv(label, val, sub) {
     return '<div class="expl-kv"><div class="expl-kv-label">'+label+'</div><div class="expl-kv-val">'+val+'</div>'+(sub?'<div class="expl-kv-sub">'+sub+'</div>':'')+'</div>';
   }
+  function _kvs(inner) { return '<div class="expl-kvs">'+inner+'</div>'; }
 
-  /* ── equiv row HTML ── */
-  function _eq(icon, text, cls) {
-    return '<div class="expl-equiv-row '+(cls||'')+'">'
-      +'<span style="font-size:18px">'+icon+'</span>'
-      +'<span style="font-weight:600;font-size:12px">'+text+'</span>'
-    +'</div>';
+  /* ── equivalents list ── */
+  function _eqs(items) {
+    return '<ul class="expl-equivs">'+items.map(function(t){ return '<li>'+t+'</li>'; }).join('')+'</ul>';
   }
 
-  /* ── formula line HTML ── */
+  /* ── formula HTML ── */
   function _formula(lines) {
-    return '<div class="expl-formula-box"><div style="font-family:monospace;font-size:11.5px;line-height:2">'+lines+'</div></div>';
+    return '<pre class="expl-formula">'+lines+'</pre>';
   }
+  function _c(t) { return '<span class="hf-comment">'+t+'</span>'; }
+  function _out(t) { return '<span class="hf-out">'+t+'</span>'; }
 
-  function _sectionTitle(emoji, title) {
-    return '<div class="expl-section-title">'+emoji+' '+title+'</div>';
+  var CLOSED_KEY = 'tl_ui_expl_closed';
+  function _closedSet() {
+    try { return JSON.parse(localStorage.getItem(CLOSED_KEY) || '[]'); } catch(e) { return []; }
+  }
+  function _section(key, title, inner) {
+    var closed = _closedSet().indexOf(key) > -1;
+    var id = 'expl-sec-' + key;
+    return '<section class="expl-section fold'+(closed ? '' : ' is-open')+'" data-key="'+key+'">'
+      +'<h3><button type="button" class="fold-btn" aria-expanded="'+(!closed)+'" aria-controls="'+id+'"><span>'+title+'</span><span class="ic">'+icon('chevronDown')+'</span></button></h3>'
+      +'<div class="fold-body" id="'+id+'"'+(closed ? ' inert' : '')+'><div class="fold-inner">'+inner+'</div></div>'
+    +'</section>';
   }
 
   /* ══ MAIN: show per-turn explainer ══ */
@@ -93,7 +103,6 @@ window.EXPLAIN = (function() {
     var outPrice = turnData.priceOut || 0;
     var provPrefix = (modelId||'').split('/')[0];
 
-    // equivalents
     var ceq = _co2Equiv(co2_g);
     var weq = _waterEquiv(water_mL);
     var peq = _powerEquiv(power_Wh);
@@ -101,98 +110,81 @@ window.EXPLAIN = (function() {
     var title = document.getElementById('explain-modal-title');
     var sub   = document.getElementById('explain-modal-sub');
     var body  = document.getElementById('explain-modal-body');
-    title.textContent = '🔬 Turn ' + turnData.turnNum + ' · ' + modelId;
-    sub.textContent   = 'Step-by-step calculation — all values from research anchors and live pricing';
+    title.textContent = 'Turn ' + turnData.turnNum + ' · ' + modelId;
+    sub.textContent   = 'Step-by-step calculation from research anchors and live pricing';
 
     body.innerHTML =
+      '<div class="expl-tools"><button type="button" class="bn-copy" data-expl-copy aria-label="Copy the full breakdown"><span class="ic">'+icon('copy')+'</span><span class="bn-copy-label">Copy breakdown</span></button></div>'
 
-      /* ── Token counting ── */
-      '<div class="expl-section">'
-        +_sectionTitle('📝','Token Counting')
-        +'<div class="expl-grid-2">'
-          +_kv('Input tokens', iT.toLocaleString(), 'from prompt text (BPE approx.)')
+      +_section('tokens', 'Token counting',
+        _kvs(
+          _kv('Input tokens', iT.toLocaleString(), 'from prompt text (BPE approx.)')
           +_kv('Output tokens', oT.toLocaleString(), 'generated response')
           +_kv('Total tokens', total_T.toLocaleString(), 'input + output')
           +_kv('Context total', (turnData.contextTokens||0).toLocaleString(), 'accumulated this turn')
-        +'</div>'
-        +_formula(
-          '<span style="color:#94A3B8;font-size:10px">// BPE ≈ 1 token per 3.8 chars (cl100k_base calibration)</span>\n'
-          +'inputTokens  = '+iT+'\n'
-          +'outputTokens = '+oT+'\n'
         )
-        +_src('📖','OpenAI BPE Tokenizer','platform.openai.com/tokenizer','https://platform.openai.com/tokenizer')
-      +'</div>'
-
-      /* ── Cost ── */
-      +'<div class="expl-section">'
-        +_sectionTitle('💰','Cost Calculation')
         +_formula(
-          '<span style="color:#94A3B8;font-size:10px">// Live pricing from OpenRouter API (USD per 1M tokens)</span>\n'
+          _c('// BPE ≈ 1 token per 3.8 chars (cl100k_base calibration)')+'\n'
+          +'inputTokens  = '+iT+'\n'
+          +'outputTokens = '+oT
+        )
+        +_src('OpenAI BPE tokenizer', 'platform.openai.com/tokenizer', 'https://platform.openai.com/tokenizer'))
+
+      +_section('cost', 'Cost calculation',
+        _formula(
+          _c('// Live pricing from OpenRouter API (USD per 1M tokens)')+'\n'
           +'inputCost  = '+iT+' / 1,000,000 × $'+_fmt(inPrice,4)+'/M  = $'+_fmt(iT/1e6*inPrice,6)+'\n'
           +'outputCost = '+oT+' / 1,000,000 × $'+_fmt(outPrice,4)+'/M = $'+_fmt(oT/1e6*outPrice,6)+'\n'
-          +'<span style="color:#34D399;font-weight:900;font-size:13px">totalCost  = $'+_fmt(cost,6)+'</span>'
+          +_out('totalCost  = $'+_fmt(cost,6))
         )
-        +'<div class="expl-grid-2">'
-          +_kv('Input price', '$'+_fmt(inPrice,4)+'/1M', 'from OpenRouter live API')
+        +_kvs(
+          _kv('Input price', '$'+_fmt(inPrice,4)+'/1M', 'from OpenRouter live API')
           +_kv('Output price', '$'+_fmt(outPrice,4)+'/1M', 'from OpenRouter live API')
           +_kv('Input cost', '$'+_fmt(iT/1e6*inPrice,6), iT+' tokens billed')
           +_kv('Output cost', '$'+_fmt(oT/1e6*outPrice,6), oT+' tokens billed')
-        +'</div>'
-        +_src('🔗','OpenRouter Models API','openrouter.ai/api/v1/models — public, no auth required','https://openrouter.ai/api/v1/models')
-      +'</div>'
+        )
+        +_src('OpenRouter models API', 'openrouter.ai/api/v1/models (public, no auth required)', 'https://openrouter.ai/api/v1/models'))
 
-      /* ── Power ── */
-      +'<div class="expl-section">'
-        +_sectionTitle('⚡','Power Consumption')
-        +_formula(
-          '<span style="color:#94A3B8;font-size:10px">// Anchor: Luccioni et al. 2023, Table 3 — 6B model ≈ 540 Wh/1M tokens</span>\n'
+      +_section('power', 'Power consumption',
+        _formula(
+          _c('// Anchor: Luccioni et al. 2023, Table 3: 6B model ≈ 540 Wh/1M tokens')+'\n'
           +'totalTokens = '+iT+' + '+oT+' = '+total_T+'\n'
-          +'powerRate   = '+_fmt(pRate,0)+' Wh/1M tokens  <span style="color:#64748B;font-size:10px">// model-specific research anchor</span>\n'
-          +'<span style="color:#34D399;font-weight:900;font-size:13px">power_Wh    = '+total_T+' / 1,000,000 × '+_fmt(pRate,0)+' = '+_fmt(power_Wh,4)+' Wh</span>'
+          +'powerRate   = '+_fmt(pRate,0)+' Wh/1M tokens  '+_c('// model-specific research anchor')+'\n'
+          +_out('power_Wh    = '+total_T+' / 1,000,000 × '+_fmt(pRate,0)+' = '+_fmt(power_Wh,4)+' Wh')
         )
-        +_src('📄','Luccioni et al. 2023','arXiv:2311.16863 — "Power Hungry Processing: Watts Driving the Cost of AI Deployment?"','https://arxiv.org/abs/2311.16863')
-        +'<div class="expl-grid-2">'
-          +_kv('Power rate', _fmt(pRate,0)+' Wh/1M', 'research-anchored for this model family')
+        +_kvs(
+          _kv('Power rate', _fmt(pRate,0)+' Wh/1M', 'research-anchored for this model family')
           +_kv('Turn power', _fmt(power_Wh,4)+' Wh', total_T+' tokens processed')
-        +'</div>'
-        +_eq('🔌', peq.charges, 'blue')
-        +_eq('💡', peq.led, 'blue')
-      +'</div>'
-
-      /* ── CO2 ── */
-      +'<div class="expl-section">'
-        +_sectionTitle('🌱','CO₂ Emissions')
-        +_formula(
-          '<span style="color:#94A3B8;font-size:10px">// Provider: '+provPrefix+' → '+prov.host+'  carbon intensity: '+prov.co2+' gCO₂/kWh</span>\n'
-          +'power_kWh = '+_fmt(power_Wh,4)+' Wh ÷ 1000 = '+_fmt(power_Wh/1000,6)+' kWh\n'
-          +'<span style="color:#34D399;font-weight:900;font-size:13px">co2_grams = '+_fmt(power_Wh/1000,6)+' × '+prov.co2+' = '+_fmt(co2_g,4)+' g CO₂</span>'
         )
-        +'<div class="expl-grid-2">'
-          +_kv('Grid intensity', prov.co2+' gCO₂/kWh', prov.host)
-          +_kv('CO₂ this turn', _fmt(co2_g,4)+' g', (co2_g*1000).toFixed(2)+' mg')
-        +'</div>'
-        +_src('🌍','Provider Sustainability Reports','Google/AWS/Azure sustainability disclosures + EPA eGRID 2023','https://www.epa.gov/egrid')
-        +_eq('🚗', ceq.car, 'amber')
-        +_eq('✈️', ceq.fly, 'amber')
-      +'</div>'
+        +_src('Luccioni et al. 2023', 'arXiv:2311.16863, "Power Hungry Processing: Watts Driving the Cost of AI Deployment?"', 'https://arxiv.org/abs/2311.16863')
+        +_eqs([peq.charges, peq.led]))
 
-      /* ── Water ── */
-      +'<div class="expl-section">'
-        +_sectionTitle('💧','Water Consumption')
-        +_formula(
-          '<span style="color:#94A3B8;font-size:10px">// WUE = Water Usage Effectiveness; '+prov.host+' WUE ≈ '+prov.water+' L/kWh</span>\n'
+      +_section('co2', 'CO₂ emissions',
+        _formula(
+          _c('// Provider: '+provPrefix+' → '+prov.host+'  carbon intensity: '+prov.co2+' gCO₂/kWh')+'\n'
+          +'power_kWh = '+_fmt(power_Wh,4)+' Wh ÷ 1000 = '+_fmt(power_Wh/1000,6)+' kWh\n'
+          +_out('co2_grams = '+_fmt(power_Wh/1000,6)+' × '+prov.co2+' = '+_fmt(co2_g,4)+' g CO₂')
+        )
+        +_kvs(
+          _kv('Grid intensity', prov.co2+' gCO₂/kWh', prov.host)
+          +_kv('CO₂ this turn', _fmt(co2_g,4)+' g', (co2_g*1000).toFixed(2)+' mg')
+        )
+        +_src('Provider sustainability reports', 'Google, AWS and Azure disclosures plus EPA eGRID 2023', 'https://www.epa.gov/egrid')
+        +_eqs([ceq.car, ceq.fly]))
+
+      +_section('water', 'Water consumption',
+        _formula(
+          _c('// WUE = Water Usage Effectiveness; '+prov.host+' WUE ≈ '+prov.water+' L/kWh')+'\n'
           +'power_kWh  = '+_fmt(power_Wh/1000,6)+' kWh\n'
           +'water_L    = '+_fmt(power_Wh/1000,6)+' × '+prov.water+' = '+_fmt(power_Wh/1000*prov.water,6)+' L\n'
-          +'<span style="color:#34D399;font-weight:900;font-size:13px">water_mL   = '+_fmt(water_mL,3)+' mL</span>'
+          +_out('water_mL   = '+_fmt(water_mL,3)+' mL')
         )
-        +'<div class="expl-grid-2">'
-          +_kv('WUE', prov.water+' L/kWh', prov.host+' (Li 2023 framework)')
-          +_kv('Water this turn', _fmt(water_mL,3)+' mL', weq.glasses+' drinking glasses')
-        +'</div>'
-        +_src('📄','Li et al. 2023','arXiv:2304.03271 — "Making AI Less Thirsty: Uncovering and Addressing the Secret Water Footprint of AI Models"','https://arxiv.org/abs/2304.03271')
-        +_eq('💧', weq.glasses, 'blue')
-        +_eq('🥄', weq.teaspoons, 'blue')
-      +'</div>';
+        +_kvs(
+          _kv('WUE', prov.water+' L/kWh', prov.host+' (Li 2023 framework)')
+          +_kv('Water this turn', _fmt(water_mL,3)+' mL', weq.glasses)
+        )
+        +_src('Li et al. 2023', 'arXiv:2304.03271, "Making AI Less Thirsty: Uncovering and Addressing the Secret Water Footprint of AI Models"', 'https://arxiv.org/abs/2304.03271')
+        +_eqs([weq.glasses, weq.teaspoons]));
 
     document.getElementById('explain-overlay').classList.add('open');
   }
@@ -207,9 +199,11 @@ window.EXPLAIN = (function() {
     var provKey    = document.getElementById('hiw-provider').value;
     var powerRate  = parseFloat(document.getElementById('hiw-power-rate').value) || 2800;
     var prov       = PROV[provKey] || PROV['_default'];
+    var el = document.getElementById('hiw-result');
+    el._ran = true;
 
     if (!promptText) {
-      document.getElementById('hiw-result').innerHTML = '<div style="color:var(--amber);font-size:12px;padding:8px">Please enter some prompt text above.</div>';
+      el.innerHTML = '<div class="hiw-warn">Enter some prompt text above to see the calculation.</div>';
       return;
     }
 
@@ -223,39 +217,151 @@ window.EXPLAIN = (function() {
     var weq    = _waterEquiv(water);
     var peq    = _powerEquiv(power);
 
-    var el = document.getElementById('hiw-result');
+    function kpi(label, val, sub) {
+      return '<div class="bn-kpi"><div class="bn-kpi-l">'+label+'</div><div class="bn-kpi-v">'+val+'</div><div class="bn-kpi-s">'+sub+'</div></div>';
+    }
     el.innerHTML =
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px">'
-        +'<div class="hiw-result-card" style="background:white;border:1.5px solid var(--tl-border);border-radius:10px;padding:12px">'
-          +'<div style="font-size:10px;color:var(--text-3);margin-bottom:4px">📥 Input tokens</div>'
-          +'<div style="font-size:18px;font-weight:900;color:var(--tl)">'+iT.toLocaleString()+'</div>'
-          +'<div style="font-size:10px;color:var(--text-2)">≈ '+promptText.length+' chars ÷ 3.8</div>'
-        +'</div>'
-        +'<div class="hiw-result-card" style="background:white;border:1.5px solid var(--tl-border);border-radius:10px;padding:12px">'
-          +'<div style="font-size:10px;color:var(--text-3);margin-bottom:4px">📤 Output tokens</div>'
-          +'<div style="font-size:18px;font-weight:900;color:var(--tl)">'+oT.toLocaleString()+'</div>'
-          +'<div style="font-size:10px;color:var(--text-2)">≈ input × 1.8</div>'
-        +'</div>'
-        +'<div class="hiw-result-card" style="background:white;border:1.5px solid var(--tl-border);border-radius:10px;padding:12px">'
-          +'<div style="font-size:10px;color:var(--text-3);margin-bottom:4px">⚡ Power</div>'
-          +'<div style="font-size:18px;font-weight:900;color:var(--amber)">'+power.toFixed(4)+' Wh</div>'
-          +'<div style="font-size:10px;color:var(--text-2)">'+total+' tokens × '+powerRate+' Wh/1M</div>'
-        +'</div>'
-        +'<div class="hiw-result-card" style="background:white;border:1.5px solid var(--tl-border);border-radius:10px;padding:12px">'
-          +'<div style="font-size:10px;color:var(--text-3);margin-bottom:4px">🌱 CO₂</div>'
-          +'<div style="font-size:18px;font-weight:900;color:var(--green)">'+co2.toFixed(4)+' g</div>'
-          +'<div style="font-size:10px;color:var(--text-2)">'+power.toFixed(4)+' Wh ÷ 1000 × '+prov.co2+' gCO₂/kWh</div>'
-        +'</div>'
-        +'<div class="hiw-result-card" style="background:white;border:1.5px solid var(--tl-border);border-radius:10px;padding:12px">'
-          +'<div style="font-size:10px;color:var(--text-3);margin-bottom:4px">💧 Water</div>'
-          +'<div style="font-size:18px;font-weight:900;color:#0369A1">'+water.toFixed(3)+' mL</div>'
-          +'<div style="font-size:10px;color:var(--text-2)">'+power.toFixed(4)+' Wh ÷ 1000 × '+prov.water+' L/kWh × 1000</div>'
-        +'</div>'
+      '<div class="bn-kpis">'
+        +kpi('Input tokens', iT.toLocaleString(), '≈ '+promptText.length+' chars ÷ 3.8')
+        +kpi('Output tokens', oT.toLocaleString(), '≈ input × 1.8')
+        +kpi('Power', power.toFixed(4)+' Wh', total+' tokens × '+powerRate+' Wh/1M')
+        +kpi('CO₂', co2.toFixed(4)+' g', power.toFixed(4)+' Wh ÷ 1000 × '+prov.co2+' gCO₂/kWh')
+        +kpi('Water', water.toFixed(3)+' mL', power.toFixed(4)+' Wh ÷ 1000 × '+prov.water+' L/kWh × 1000')
       +'</div>'
-      +'<div style="font-size:11px;color:var(--text-2);line-height:1.8;background:white;border-radius:8px;padding:10px 14px;border:1px solid var(--border)">'
-        +'<strong>Real-world equivalents:</strong> '
-        +ceq.car+' &nbsp;·&nbsp; '+ceq.fly+' &nbsp;·&nbsp; '+weq.glasses+' &nbsp;·&nbsp; '+peq.charges
-      +'</div>';
+      +'<p class="hiw-eqv">Real-world equivalents: '+ceq.car+', '+ceq.fly+', '+weq.glasses+', '+peq.charges+'.</p>';
+  }
+
+  /* ══ Page behaviour: collapsibles, copy, table of contents ══ */
+  function _toggleFold(btn) {
+    var box = btn.closest('.fold');
+    if (!box) return;
+    var open = !box.classList.contains('is-open');
+    box.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open);
+    var body = box.querySelector('.fold-body');
+    if (body) { if (open) body.removeAttribute('inert'); else body.setAttribute('inert', ''); }
+    var key = box.getAttribute('data-key');
+    if (key) {
+      var set = _closedSet().filter(function(k) { return k !== key; });
+      if (!open) set.push(key);
+      try { localStorage.setItem(CLOSED_KEY, JSON.stringify(set)); } catch(e) {}
+    }
+  }
+
+  function _copy(btn, text, done) {
+    var ui = window.UI_BENCHMARKS;
+    if (!ui) return;
+    ui.copyText(text).then(function(ok) { ui.flashCopied(btn, ok, done); });
+  }
+
+  function citationText() {
+    return 'TokenLens. "How every number is calculated." Methodology for cost, power, CO2 and water estimates. '
+      + location.origin + location.pathname + '. Accessed ' + new Date().toISOString().slice(0, 10) + '.';
+  }
+
+  function initHiw() {
+    var panel = document.getElementById('howitworks-panel');
+    if (!panel || panel._init) return;
+    panel._init = true;
+
+    panel.querySelectorAll('[data-calc="cache-factor"]').forEach(function(n) {
+      if (window.CALC && CALC.CACHE_ENERGY_FACTOR != null) n.textContent = Math.round(CALC.CACHE_ENERGY_FACTOR * 100) + '%';
+    });
+
+    var links = [].slice.call(panel.querySelectorAll('[data-hiw-link]'));
+    var secs = links.map(function(a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    var list = panel.querySelector('.hiw-toc-list');
+    var current = null;
+
+    function setActive(id) {
+      if (current === id) return;
+      current = id;
+      links.forEach(function(a) {
+        var on = a.getAttribute('href') === '#' + id;
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+        if (on && list && list.scrollWidth > list.clientWidth + 2 && getComputedStyle(list).flexDirection === 'row') {
+          list.scrollTo({ left: a.offsetLeft - (list.clientWidth - a.offsetWidth) / 2, behavior: reduced() ? 'auto' : 'smooth' });
+        }
+      });
+    }
+    setActive('hiw-overview');
+
+    if ('IntersectionObserver' in window) {
+      var io = null, rt = null;
+      var observe = function() {
+        if (io) io.disconnect();
+        var line = window.innerWidth < 1100 ? 150 : 100;
+        io = new IntersectionObserver(function(entries) {
+          if (atBottom()) { setActive(secs[secs.length - 1].id); return; }
+          entries.forEach(function(e) { if (e.isIntersecting) setActive(e.target.id); });
+        }, { rootMargin: '-' + line + 'px 0px -' + Math.max(0, window.innerHeight - line - 1) + 'px 0px', threshold: 0 });
+        secs.forEach(function(s) { if (s) io.observe(s); });
+      };
+      var atBottom = function() {
+        var d = document.documentElement;
+        return panel.classList.contains('active') && d.scrollHeight > window.innerHeight + 400 && window.innerHeight + window.scrollY >= d.scrollHeight - 4;
+      };
+      observe();
+      window.addEventListener('scroll', function() {
+        if (atBottom()) setActive(secs[secs.length - 1].id);
+      }, { passive: true });
+      window.addEventListener('resize', function() { clearTimeout(rt); rt = setTimeout(observe, 150); });
+    }
+
+    panel.addEventListener('click', function(e) {
+      var a = e.target.closest('[data-hiw-link]');
+      if (a) {
+        e.preventDefault();
+        var id = a.getAttribute('href').slice(1), t = document.getElementById(id);
+        if (!t) return;
+        setActive(id);
+        t.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+        var h = t.querySelector('h2');
+        if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+        return;
+      }
+      var f = e.target.closest('.fold-btn');
+      if (f) { _toggleFold(f); return; }
+      var c = e.target.closest('[data-hiw-copy]');
+      if (c) { _copy(c, c.closest('.hiw-code').querySelector('pre').textContent.trim(), 'Copied'); return; }
+      var r = e.target.closest('[data-hiw-copy-ref]');
+      if (r) { _copy(r, r.closest('li').querySelector('.bn-cite-body').textContent.replace(/\s+/g, ' ').trim(), 'Copied'); return; }
+      var cb = e.target.closest('[data-hiw-cite]');
+      if (cb) { _copy(cb, citationText(), 'Copied'); }
+    });
+
+    var timer = null;
+    function rerun() {
+      var res = document.getElementById('hiw-result');
+      if (!res || !res._ran) return;
+      clearTimeout(timer);
+      timer = setTimeout(runLiveCalc, 200);
+    }
+    ['hiw-prompt', 'hiw-provider', 'hiw-power-rate'].forEach(function(id) {
+      var n = document.getElementById(id);
+      if (n) n.addEventListener(id === 'hiw-provider' ? 'change' : 'input', rerun);
+    });
+    var ta = document.getElementById('hiw-prompt');
+    if (ta) ta.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); runLiveCalc(); }
+    });
+  }
+
+  function initExplainer() {
+    var body = document.getElementById('explain-modal-body');
+    if (!body || body._init) return;
+    body._init = true;
+    body.addEventListener('click', function(e) {
+      var f = e.target.closest('.fold-btn');
+      if (f) { _toggleFold(f); return; }
+      var c = e.target.closest('[data-expl-copy]');
+      if (c) {
+        var parts = [].slice.call(body.querySelectorAll('.expl-section')).map(function(sec) {
+          return sec.querySelector('h3').textContent.trim() + '\n' + [].slice.call(sec.querySelectorAll('.expl-formula')).map(function(p) { return p.textContent; }).join('\n');
+        });
+        _copy(c, document.getElementById('explain-modal-title').textContent + '\n\n' + parts.join('\n\n'), 'Copied');
+      }
+    });
   }
 
   // Close on overlay click
@@ -264,9 +370,14 @@ window.EXPLAIN = (function() {
   });
   // Close on Escape
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') close();
+    if (e.key === 'Escape') {
+      var ov = document.getElementById('explain-overlay');
+      if (ov && ov.classList.contains('open')) close();
+    }
   });
 
-  return { showTurnExplainer: showTurnExplainer, close: close, runLiveCalc: runLiveCalc };
-})();
+  initHiw();
+  initExplainer();
 
+  return { showTurnExplainer: showTurnExplainer, close: close, runLiveCalc: runLiveCalc, initHiw: initHiw };
+})();

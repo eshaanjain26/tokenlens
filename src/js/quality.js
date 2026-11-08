@@ -28,17 +28,20 @@ window.QUALITY = (function() {
     return { overall: overall, clarity: Math.round(clarity), specificity: Math.round(specificity), conciseness: Math.round(conciseness), injectionRisk: injectionRisk, words: words };
   }
 
-  function _color(v) {
-    if (v >= 75) return '#22C55E';
-    if (v >= 50) return '#F59E0B';
-    return '#EF4444';
+  function _level(v) {
+    if (v >= 75) return 'good';
+    if (v >= 50) return 'mid';
+    return 'low';
   }
 
   function _svgRing(score) {
     var r = 14, circ = 2 * Math.PI * r;
     var dashOffset = circ * (1 - score / 100);
-    var color = _color(score);
-    return '<svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="' + r + '" fill="none" stroke="var(--border)" stroke-width="3"/><circle cx="18" cy="18" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + dashOffset.toFixed(1) + '" stroke-linecap="round" transform="rotate(-90 18 18)"/></svg>';
+    return '<svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><circle class="q-ring-track" cx="18" cy="18" r="' + r + '" fill="none" stroke-width="3"/><circle class="q-ring-fill" cx="18" cy="18" r="' + r + '" fill="none" stroke-width="3" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + dashOffset.toFixed(1) + '" stroke-linecap="round" transform="rotate(-90 18 18)"/></svg>';
+  }
+
+  function _dim(label, v, title) {
+    return '<div class="qdim" title="' + title + '"><span class="qdim-dot ' + _level(v) + '"></span><span class="qdim-label">' + label + '</span><span class="qdim-val">' + v + '</span></div>';
   }
 
   function update() {
@@ -51,13 +54,14 @@ window.QUALITY = (function() {
     if (!s) { bar.classList.remove('visible'); return; }
 
     bar.classList.add('visible');
-    bar.innerHTML = '<div class="qscore-ring">' + _svgRing(s.overall) + '<div class="qscore-num">' + s.overall + '</div></div>'
-      + '<div class="qdim"><div class="qdim-dot" style="background:' + _color(s.clarity) + '"></div><div><div>' + s.clarity + '</div><div class="qdim-label">Clarity</div></div></div>'
-      + '<div class="qdim"><div class="qdim-dot" style="background:' + _color(s.specificity) + '"></div><div><div>' + s.specificity + '</div><div class="qdim-label">Specific</div></div></div>'
-      + '<div class="qdim"><div class="qdim-dot" style="background:' + _color(s.conciseness) + '"></div><div><div>' + s.conciseness + '</div><div class="qdim-label">Concise</div></div></div>'
-      + '<div style="font-size:10px;color:var(--text-3);margin-left:4px">' + s.words + ' words</div>'
-      + (s.injectionRisk ? '<span class="q-injection-warn">⚠️ Injection risk detected</span>' : '')
-      + (s.overall >= 80 ? '<span style="font-size:10px;color:var(--tl);font-weight:700">✓ Strong prompt</span>' : '');
+    bar.innerHTML = '<div class="qscore-ring" title="Overall prompt score out of 100">' + _svgRing(s.overall) + '<div class="qscore-num">' + s.overall + '</div></div>'
+      + '<div class="qscore-title">Prompt quality</div>'
+      + _dim('Clarity', s.clarity, 'Fewer vague words and enough detail score higher')
+      + _dim('Specific', s.specificity, 'Longer, structured prompts and code cues score higher')
+      + _dim('Concise', s.conciseness, 'Filler phrases and very long prompts score lower')
+      + '<div class="qwords">' + s.words + ' words</div>'
+      + (s.injectionRisk ? '<span class="q-injection-warn">' + TL_ICON('alert') + 'Possible prompt injection</span>' : '')
+      + (s.overall >= 80 ? '<span class="q-strong">' + TL_ICON('check') + 'Strong prompt</span>' : '');
   }
 
   // Wire up to textarea input

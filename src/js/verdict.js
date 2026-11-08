@@ -3,7 +3,7 @@
    Session verdict banner — winner per dimension
    ══════════════════════════════════════════════════════════ */
 window.VERDICT = (function() {
-  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function render() {
     var banner = document.getElementById('verdict-banner');
     var grid = document.getElementById('vb-grid');
@@ -31,7 +31,7 @@ window.VERDICT = (function() {
       if (turns > 0) {
         // tokPerDollar: total tokens divided by total cost; guard zero-cost (free/simulated)
         var tokPerDollar = totCost > 0 ? totTok / totCost : totTok * 1000;
-        agg[m.id] = { name: m.name || m.id, cost: totCost, co2: totCo2, water: totWater, power: totPower, tokens: totTok, tokPerDollar: tokPerDollar, turns: turns };
+        agg[m.id] = { id: m.id, name: m.name || m.id, cost: totCost, co2: totCo2, water: totWater, power: totPower, tokens: totTok, tokPerDollar: tokPerDollar, turns: turns };
         totalTurns = Math.max(totalTurns, turns);
       }
     });
@@ -47,11 +47,11 @@ window.VERDICT = (function() {
     }
 
     var dims = [
-      { key: 'cost',        icon: '💰', label: 'Lowest Cost',   better: 'low',  fmt: function(v){ return CALC.fmtCost(v); } },
-      { key: 'co2',         icon: '🌱', label: 'Lowest CO₂',    better: 'low',  fmt: function(v){ return CALC.fmtCO2(v); } },
-      { key: 'water',       icon: '💧', label: 'Least Water',   better: 'low',  fmt: function(v){ return CALC.fmtWater(v); } },
-      { key: 'power',       icon: '⚡', label: 'Lowest Power',  better: 'low',  fmt: function(v){ return CALC.fmtPower(v); } },
-      { key: 'tokPerDollar',icon: '🔤', label: 'Tokens per $',  better: 'high', fmt: function(v){ return v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? Math.round(v/1000)+'K' : Math.round(v)+''; } },
+      { key: 'cost',        label: 'Lowest cost',   better: 'low',  fmt: function(v){ return CALC.fmtCost(v); } },
+      { key: 'co2',         label: 'Lowest CO₂',    better: 'low',  fmt: function(v){ return CALC.fmtCO2(v); } },
+      { key: 'water',       label: 'Least water',   better: 'low',  fmt: function(v){ return CALC.fmtWater(v); } },
+      { key: 'power',       label: 'Lowest power',  better: 'low',  fmt: function(v){ return CALC.fmtPower(v); } },
+      { key: 'tokPerDollar',label: 'Tokens per $',  better: 'high', fmt: function(v){ return v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? Math.round(v/1000)+'K' : Math.round(v)+''; } },
     ];
 
     var html = '';
@@ -66,10 +66,10 @@ window.VERDICT = (function() {
       }
       if (!wid) return;
       w = agg[wid];
-      html += '<div class="vb-card winner">'
-        + '<div class="vb-dim">'+d.icon+' '+d.label+'</div>'
-        + '<div class="vb-val">'+d.fmt(w[d.key])+'</div>'
-        + '<div class="vb-name">'+esc(w.name)+'</div>'
+      html += '<div class="vb-card winner" data-model="'+esc(w.id)+'">'
+        + '<div class="vb-dim">'+d.label+'</div>'
+        + '<div class="vb-val" data-dim="'+d.key+'">'+d.fmt(w[d.key])+'</div>'
+        + '<button type="button" class="vb-name js-model" data-hl="'+esc(w.id)+'" aria-pressed="false" title="Highlight '+esc(w.name)+' across the page">'+esc(w.name)+'</button>'
         + '</div>';
     });
 

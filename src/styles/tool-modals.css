@@ -86,32 +86,7 @@
 .green-prov-bar { flex:2;height:5px;background:var(--border);border-radius:3px;overflow:hidden; }
 .green-prov-fill { height:100%;border-radius:3px;background:var(--tl-light); }
 .green-prov-pct { font-size:0.7857rem;font-weight:800;color:var(--tl);width:28px;text-align:right; }
-.model-item .green-badge { font-size:0.7857rem;font-weight:700;padding:1px 4px;border-radius:4px;margin-left:4px;vertical-align:middle; }
-.model-item .green-badge.high { background:#E3F9EE;color:#0A7A48; }
-.model-item .green-badge.mid { background:#FFF3E8;color:#B85C00; }
-.model-item .green-badge.low { background:#FFEAEA;color:#C82020; }
 
 /* ── Feature 6: Live Benchmarking ───────────────── */
 
-.lb-head { padding:18px 20px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px; }
-.lb-head h2 { flex:1;font-size:1.1429rem;font-weight:800;color:var(--text);margin:0; }
-.lb-updated { font-size:0.7857rem;color:var(--text-3);margin-left:6px; }
-.lb-body { padding:18px 20px; }
-.lb-provider-row { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px; }
-.lb-prov-chip { display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1.5px solid var(--border);font-size:0.7857rem;font-weight:700;color:var(--text); }
-.lb-status-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
-.lb-status-dot.green { background:#22C55E; }
-.lb-status-dot.amber { background:#F59E0B; }
-.lb-status-dot.red { background:#EF4444; }
-.lb-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px; }
-.lb-card { border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--surface-2); }
-.lb-card-name { font-size:0.8571rem;font-weight:800;color:var(--text);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-.lb-metrics { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px; }
-.lb-metric { text-align:center; }
-.lb-metric-val { font-size:1rem;font-weight:900;color:var(--tl); }
-.lb-metric-lbl { font-size:0.7857rem;font-weight:700;color:var(--text-3);text-transform:uppercase; }
-.lb-sparkline { width:100%;overflow:hidden; }
-.lb-avail { display:flex;align-items:center;gap:4px;margin-top:6px;font-size:0.7857rem;color:var(--text-2); }
-.lb-avail-bar { flex:1;height:4px;background:var(--border);border-radius:2px; }
-.lb-avail-fill { height:100%;border-radius:2px;background:#22C55E; }
 
